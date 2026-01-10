@@ -739,3 +739,191 @@ summary { cursor: pointer; color: #888; font-size: 13px; }
     40% { left: 150%; } /* วิ่งผ่านจอ */
     100% { left: 150%; } /* รอเวลานิดนึงก่อนวิ่งใหม่ */
 }
+
+/* =========================================
+   🕉️ SACRED MODULE STYLES (สายมู)
+   ========================================= */
+
+/* Navigation 4 Tabs - ลดขนาดฟอนต์ */
+.nav-4-tabs .segment-btn {
+    font-size: 11px;
+    padding: 10px 5px;
+    gap: 4px;
+}
+
+/* Sacred Mode Toggle */
+.sacred-mode-toggle {
+    display: flex;
+    background: #18181b;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 15px;
+}
+
+.sacred-mode-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #888;
+    padding: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.sacred-mode-btn:hover {
+    background: rgba(255,255,255,0.05);
+    color: #ccc;
+}
+
+.sacred-mode-btn.active[data-mode="blessing"] {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+}
+
+.sacred-mode-btn.active[data-mode="commercial"] {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+}
+
+/* Sacred Detect Box */
+.sacred-detect-box {
+    background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(217,119,6,0.05));
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: 10px;
+    padding: 12px 15px;
+    margin: 10px 0 15px;
+}
+
+.detect-label {
+    font-size: 11px;
+    color: #fbbf24;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.detect-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.detect-desc {
+    font-size: 11px;
+    color: #a3a3a3;
+    margin-top: 4px;
+}
+
+/* Sacred Effects Grid */
+.sacred-effects-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.sacred-effect-card {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 10px 8px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+}
+
+.sacred-effect-card:hover {
+    background: rgba(255,255,255,0.05);
+    border-color: #666;
+}
+
+.sacred-effect-card.active {
+    background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(217,119,6,0.1));
+    border-color: #f59e0b;
+    box-shadow: 0 0 10px rgba(245,158,11,0.3);
+}
+
+.effect-icon {
+    font-size: 20px;
+}
+
+.effect-name {
+    font-size: 10px;
+    color: #aaa;
+    text-align: center;
+}
+
+.sacred-effect-card.active .effect-name {
+    color: #fbbf24;
+    font-weight: 600;
+}
+
+/* Sacred Mood Grid (Video) */
+.sacred-mood-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.sacred-mood-card {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 12px 6px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+}
+
+.sacred-mood-card:hover {
+    background: rgba(255,255,255,0.05);
+    border-color: #666;
+}
+
+.sacred-mood-card.active {
+    background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(109,40,217,0.1));
+    border-color: #8b5cf6;
+    box-shadow: 0 0 10px rgba(139,92,246,0.3);
+}
+
+.mood-icon {
+    font-size: 18px;
+}
+
+.mood-name {
+    font-size: 9px;
+    color: #aaa;
+    text-align: center;
+}
+
+.sacred-mood-card.active .mood-name {
+    color: #c4b5fd;
+    font-weight: 600;
+}
+
+/* Sacred Tabs Active States */
+.segment-btn.active[data-tab="sacred-img"] { 
+    border-color: #f59e0b; 
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.segment-btn.active[data-tab="sacred-video"] { 
+    border-color: #8b5cf6; 
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}

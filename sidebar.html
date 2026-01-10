@@ -20,9 +20,11 @@
     <button id="btn-settings" class="btn-icon">⚙️</button>
   </header>
 
-  <nav class="nav-segment">
+  <nav class="nav-segment nav-4-tabs">
     <button class="segment-btn active" data-tab="banana">✨ Images</button>
     <button class="segment-btn" data-tab="video">🎬 Video</button>
+    <button class="segment-btn" data-tab="sacred-img">🕉️ ภาพสายมู</button>
+    <button class="segment-btn" data-tab="sacred-video">📿 วิดีโอสายมู</button>
   </nav>
 
   <main class="app-body">
@@ -560,6 +562,308 @@
         </div>
       </div>
     </div> 
+
+    <!-- ============================================ -->
+    <!-- TAB: IMAGE สายมู (sacred-img) -->
+    <!-- ============================================ -->
+    <div class="tab-pane" id="tab-content-sacred-img">
+      
+      <div class="section-title">🕉️ ประเภทการใช้งาน</div>
+      
+      <!-- Toggle: อวยพร / จำหน่าย -->
+      <div class="sacred-mode-toggle">
+        <button class="sacred-mode-btn active" data-mode="blessing" id="sacred-mode-blessing">
+          <span>🙏</span> อวยพร
+        </button>
+        <button class="sacred-mode-btn" data-mode="commercial" id="sacred-mode-commercial">
+          <span>💰</span> จำหน่าย(ขาย)
+        </button>
+      </div>
+      
+      <div class="section-title">1. อัปโหลดรูปองค์เทพ/วัตถุมงคล</div>
+      
+      <div class="upload-bar" id="sacred-img-upload-zone">
+        <div class="upload-left">
+          <div class="icon-box" style="background: linear-gradient(135deg, #f59e0b, #d97706);">🕉️</div>
+          <div class="upload-text">อัพโหลดรูปองค์เทพ/วัตถุมงคล</div>
+        </div>
+        <span id="sacred-img-count" class="badge-count">0</span>
+        <button id="sacred-img-clear" class="hidden"></button>
+      </div>
+      <input type="file" id="sacred-img-file-input" multiple accept="image/*" hidden>
+      <div class="preview-strip" id="sacred-img-preview-container"></div>
+
+      <!-- AI Detect Result -->
+      <div id="sacred-img-detect-result" class="sacred-detect-box" style="display:none;">
+        <div class="detect-label">🔍 AI ตรวจพบ:</div>
+        <div id="sacred-img-deity-name" class="detect-value">-</div>
+      </div>
+
+      <div class="section-title">2. Configuration</div>
+
+      <!-- ========== โหมดอวยพร ========== -->
+      <div id="sacred-blessing-config">
+        
+        <div class="input-group">
+          <div class="input-row"><label>📝 ข้อความอวยพร</label></div>
+          <textarea id="sacred-blessing-text" placeholder="เช่น: ใครเห็นแม่ ขอให้โชคดี หลุดพ้นหนี้กรรม..." style="height:60px; padding:10px; border-radius:8px; border:1px solid #3f3f46; background:#27272a; color:#fff;"></textarea>
+        </div>
+
+        <div class="input-group">
+          <div class="input-row"><label>📍 ตำแหน่งข้อความ</label></div>
+          <div class="segment-row">
+            <button class="segment-opt" data-type="text-pos" data-value="top">⬆️ บนสุด</button>
+            <button class="segment-opt active" data-type="text-pos" data-value="bottom">⬇️ ล่างสุด</button>
+          </div>
+          <input type="hidden" id="sacred-text-position" value="bottom">
+        </div>
+
+        <div class="input-group">
+          <div class="input-row"><label>✨ แสง/ฉาก ศักดิ์สิทธิ์</label></div>
+          <div class="sacred-effects-grid">
+            <div class="sacred-effect-card active" data-effect="divine_power">
+              <span class="effect-icon">✨</span>
+              <span class="effect-name">พลังศักดิ์สิทธิ์</span>
+            </div>
+            <div class="sacred-effect-card" data-effect="heavenly_light">
+              <span class="effect-icon">🌅</span>
+              <span class="effect-name">แสงสวรรค์</span>
+            </div>
+            <div class="sacred-effect-card" data-effect="fire_energy">
+              <span class="effect-icon">🔥</span>
+              <span class="effect-name">พลังเพลิง</span>
+            </div>
+            <div class="sacred-effect-card" data-effect="cosmic_mystery">
+              <span class="effect-icon">💫</span>
+              <span class="effect-name">จักรวาลลึกลับ</span>
+            </div>
+            <div class="sacred-effect-card" data-effect="warm_compassion">
+              <span class="effect-icon">🌸</span>
+              <span class="effect-name">อบอุ่นเมตตา</span>
+            </div>
+          </div>
+          <input type="hidden" id="sacred-effect-select" value="divine_power">
+        </div>
+
+      </div>
+
+      <!-- ========== โหมดจำหน่าย ========== -->
+      <div id="sacred-commercial-config" style="display:none;">
+        
+        <div class="input-group">
+          <div class="input-row"><label>📝 แคปชั่น/ข้อความโฆษณา</label></div>
+          <textarea id="sacred-commercial-caption" placeholder="เช่น: เสริมพลังบารมีด้านความสำเร็จ..." style="height:60px; padding:10px; border-radius:8px; border:1px solid #3f3f46; background:#27272a; color:#fff;"></textarea>
+        </div>
+
+        <div class="grid-2">
+          <div class="input-group">
+            <div class="input-row"><label>💰 ราคาเต็ม</label></div>
+            <input type="text" id="sacred-price-full" placeholder="999">
+          </div>
+          <div class="input-group">
+            <div class="input-row"><label>🏷️ ราคาพิเศษ(โปร)</label></div>
+            <input type="text" id="sacred-price-promo" placeholder="599">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-row"><label>🎨 เอฟเฟกต์ภาพ</label></div>
+          <select id="sacred-commercial-effect">
+            <option value="divine_glow">✨ Divine Glow (แสงศักดิ์สิทธิ์)</option>
+            <option value="golden_aura">🌟 Golden Aura (รัศมีทอง)</option>
+            <option value="sacred_smoke">💨 Sacred Smoke (ควันธูป)</option>
+            <option value="lotus_petals">🌸 Lotus Petals (กลีบบัว)</option>
+            <option value="premium_dark">🖤 Premium Dark (พรีเมียมดำ)</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Smart Auto Mode -->
+      <div class="input-group smart-mode-highlight" style="background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(217,119,6,0.1)); border-color: rgba(245,158,11,0.4);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+          <label style="color: #fbbf24; font-weight:800; font-size:15px;">
+            🚀 โหมดอัจฉริยะ (Smart Auto)
+          </label>
+          <label class="switch">
+            <input type="checkbox" id="sacred-img-smart-auto">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div style="font-size: 12px; color: #fcd34d; opacity:0.9; line-height:1.4;">
+          ให้ AI คิดเอฟเฟกต์และข้อความที่เหมาะกับองค์เทพให้อัตโนมัติ
+        </div>
+      </div>
+
+      <!-- Rounds & Downloads -->
+      <div class="grid-2">
+        <div class="input-group">
+          <label style="font-size:12px; color:#aaa;">รอบการสร้าง (Rounds)</label>
+          <input type="hidden" id="sacred-img-round-count" value="1">
+          <div class="segment-row" id="sacred-img-seg-rounds">
+            <button class="segment-opt active" data-type="rounds" data-value="1">1</button>
+            <button class="segment-opt" data-type="rounds" data-value="3">3</button>
+            <button class="segment-opt" data-type="rounds" data-value="5">5</button>
+            <button class="segment-opt" data-type="rounds" data-value="custom">+</button>
+          </div>
+          <input type="number" id="sacred-img-custom-round" class="hidden" style="margin-top:5px;" placeholder="จำนวนรอบ...">
+        </div>
+
+        <div class="input-group">
+          <label style="font-size:12px; color:#aaa;">โหลดภาพ (Download)</label>
+          <input type="hidden" id="sacred-img-download-count" value="1">
+          <div class="segment-row">
+            <button class="segment-opt active" data-type="downloads" data-value="1">1</button>
+            <button class="segment-opt" data-type="downloads" data-value="2">2</button>
+            <button class="segment-opt" data-type="downloads" data-value="3">3</button>
+            <button class="segment-opt" data-type="downloads" data-value="4">4</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logs -->
+      <div style="margin-top:15px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:12px; color:#555; font-weight:bold;">LOGS</span>
+        <button id="sacred-img-log-clear" style="background:none; border:none; color:#555; cursor:pointer;">Clear</button>
+      </div>
+      <div class="log-box" id="sacred-img-log-container"></div>
+
+      <!-- Action Bar -->
+      <div class="action-bar" style="flex-direction: column; gap: 5px;">
+        <div id="sacred-img-status-text" style="font-size: 11px; color: #fbbf24; text-align: center; height: 16px;">Ready</div>
+        <div style="display: flex; gap: 8px; width: 100%;">
+          <button id="sacred-img-btn-automation" class="btn-primary" style="flex: 2; background: linear-gradient(135deg, #f59e0b, #d97706);">🕉️ START GENERATE</button>
+          <button id="sacred-img-btn-stop" class="btn-stop" style="flex: 1;">⛔ STOP</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============================================ -->
+    <!-- TAB: VIDEO สายมู (sacred-video) -->
+    <!-- ============================================ -->
+    <div class="tab-pane" id="tab-content-sacred-video">
+      
+      <div class="section-title">1. อัปโหลดรูปองค์เทพ</div>
+      
+      <div class="upload-bar" id="sacred-video-upload-zone">
+        <div class="upload-left">
+          <div class="icon-box" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">📿</div>
+          <div class="upload-text">อัพโหลดรูปองค์เทพ</div>
+        </div>
+        <span id="sacred-video-count" class="badge-count">0</span>
+        <button id="sacred-video-clear" class="hidden"></button>
+      </div>
+      <input type="file" id="sacred-video-file-input" multiple accept="image/*" hidden>
+      <div class="preview-strip" id="sacred-video-preview-container"></div>
+
+      <!-- AI Detect Result -->
+      <div id="sacred-video-detect-result" class="sacred-detect-box" style="display:none;">
+        <div class="detect-label">🔍 AI ตรวจพบองค์เทพ:</div>
+        <div id="sacred-video-deity-name" class="detect-value">-</div>
+        <div id="sacred-video-deity-desc" class="detect-desc"></div>
+      </div>
+
+      <div class="section-title">2. Configuration</div>
+
+      <div class="input-group">
+        <div class="input-row"><label>😊 อารมณ์/พลังองค์เทพ</label></div>
+        <div class="sacred-mood-grid">
+          <div class="sacred-mood-card" data-mood="fierce">
+            <span class="mood-icon">😤</span>
+            <span class="mood-name">ดุดัน</span>
+          </div>
+          <div class="sacred-mood-card active" data-mood="compassion">
+            <span class="mood-icon">🙏</span>
+            <span class="mood-name">เมตตา</span>
+          </div>
+          <div class="sacred-mood-card" data-mood="mystic">
+            <span class="mood-icon">🔮</span>
+            <span class="mood-name">ขลัง</span>
+          </div>
+          <div class="sacred-mood-card" data-mood="protection">
+            <span class="mood-icon">🛡️</span>
+            <span class="mood-name">ปกป้อง</span>
+          </div>
+          <div class="sacred-mood-card" data-mood="liberation">
+            <span class="mood-icon">💫</span>
+            <span class="mood-name">ปลดกรรม</span>
+          </div>
+        </div>
+        <input type="hidden" id="sacred-video-mood" value="compassion">
+      </div>
+
+      <div class="input-group">
+        <div class="input-row"><label>💬 บทพูดองค์เทพ (Speech)</label></div>
+        <textarea id="sacred-video-speech" placeholder="เช่น: ลูก ๆ จงเชื่อมั่นในตัวเอง แม่จะประทานพรให้..." style="height:80px; padding:10px; border-radius:8px; border:1px solid #3f3f46; background:#27272a; color:#fff;"></textarea>
+        <div style="font-size:10px; color:#666; margin-top:4px;">*องค์เทพจะพูดข้อความนี้ในวิดีโอ</div>
+      </div>
+
+      <div class="input-group">
+        <div class="input-row"><label>📝 คำสั่งเพิ่มเติม (Optional)</label></div>
+        <textarea id="sacred-video-extra" placeholder="เช่น: ให้มีแสงทองลอยรอบ ๆ, ให้มีกลีบดอกบัวลอย..." style="height:50px; padding:10px; border-radius:8px; border:1px solid #3f3f46; background:#27272a; color:#fff;"></textarea>
+      </div>
+
+      <!-- Smart Auto Mode -->
+      <div class="input-group smart-mode-highlight" style="background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(109,40,217,0.1)); border-color: rgba(139,92,246,0.4);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+          <label style="color: #a78bfa; font-weight:800; font-size:15px;">
+            🚀 โหมดอัจฉริยะ (Smart Auto)
+          </label>
+          <label class="switch">
+            <input type="checkbox" id="sacred-video-smart-auto">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div style="font-size: 12px; color: #c4b5fd; opacity:0.9; line-height:1.4;">
+          ให้ AI คิดบทพูดและอารมณ์ที่เหมาะกับองค์เทพให้อัตโนมัติ
+        </div>
+      </div>
+
+      <!-- Rounds -->
+      <div class="grid-2">
+        <div class="input-group">
+          <label style="font-size:12px; color:#aaa;">รอบการสร้าง (Rounds)</label>
+          <input type="hidden" id="sacred-video-round-count" value="1">
+          <div class="segment-row">
+            <button class="segment-opt active" data-type="rounds" data-value="1">1</button>
+            <button class="segment-opt" data-type="rounds" data-value="3">3</button>
+            <button class="segment-opt" data-type="rounds" data-value="5">5</button>
+            <button class="segment-opt" data-type="rounds" data-value="custom">+</button>
+          </div>
+          <input type="number" id="sacred-video-custom-round" class="hidden" style="margin-top:5px;" placeholder="จำนวนรอบ...">
+        </div>
+
+        <div class="input-group">
+          <label style="font-size:12px; color:#aaa;">คลิปต่อรอบ (Clips)</label>
+          <input type="hidden" id="sacred-video-clip-count" value="1">
+          <div class="segment-row">
+            <button class="segment-opt active" data-type="downloads" data-value="1">1</button>
+            <button class="segment-opt" data-type="downloads" data-value="2">2</button>
+            <button class="segment-opt" data-type="downloads" data-value="3">3</button>
+            <button class="segment-opt" data-type="downloads" data-value="4">4</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logs -->
+      <div style="margin-top:15px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:12px; color:#555; font-weight:bold;">LOGS</span>
+        <button id="sacred-video-log-clear" style="background:none; border:none; color:#555; cursor:pointer;">Clear</button>
+      </div>
+      <div class="log-box" id="sacred-video-log-container"></div>
+
+      <!-- Action Bar -->
+      <div class="action-bar" style="flex-direction: column; gap: 5px;">
+        <div id="sacred-video-status-text" style="font-size: 11px; color: #a78bfa; text-align: center; height: 16px;">Ready</div>
+        <div style="display: flex; gap: 8px; width: 100%;">
+          <button id="sacred-video-btn-automation" class="btn-primary" style="flex: 2; background: linear-gradient(135deg, #8b5cf6, #6d28d9);">📿 START VIDEO</button>
+          <button id="sacred-video-btn-stop" class="btn-stop" style="flex: 1;">⛔ STOP</button>
+        </div>
+      </div>
+
+    </div>
+
   </main>
 
   <div id="settings-modal" class="modal-overlay">
@@ -595,6 +899,7 @@
   </div>
 
 <script src="config.js"></script>
-  <script src="sidebar.js"></script>
+<script src="prompts-sacred.js"></script>
+<script src="sidebar.js"></script>
 </body>
 </html>

@@ -4640,3 +4640,1632 @@ document.addEventListener('DOMContentLoaded', () => {
 
     }, 500); // รอ 0.5 วินาที
 });
+
+// ============================================
+// 🕉️ SACRED IMAGE MODULE (ภาพสายมู)
+// ============================================
+
+// Helper function - delay (ใช้ได้ทั้ง Sacred Image และ Sacred Video)
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// DOM Elements (Sacred Image)
+const sacredImgUploadZone = document.getElementById('sacred-img-upload-zone');
+const sacredImgFileInput = document.getElementById('sacred-img-file-input');
+const sacredImgCount = document.getElementById('sacred-img-count');
+const sacredImgClearBtn = document.getElementById('sacred-img-clear');
+const sacredImgPreviewContainer = document.getElementById('sacred-img-preview-container');
+const sacredImgDetectResult = document.getElementById('sacred-img-detect-result');
+const sacredImgDeityName = document.getElementById('sacred-img-deity-name');
+const sacredBlessingConfig = document.getElementById('sacred-blessing-config');
+const sacredCommercialConfig = document.getElementById('sacred-commercial-config');
+const sacredImgBtnAutomation = document.getElementById('sacred-img-btn-automation');
+const sacredImgBtnStop = document.getElementById('sacred-img-btn-stop');
+const sacredImgStatusText = document.getElementById('sacred-img-status-text');
+const sacredImgLogContainer = document.getElementById('sacred-img-log-container');
+const sacredImgLogClear = document.getElementById('sacred-img-log-clear');
+
+// State (Sacred Image)
+let sacredImgUploadedImages = [];
+let sacredImgIsRunning = false;
+let sacredImgShouldStop = false;
+let sacredImgLogs = [];
+let sacredImgCurrentMode = 'blessing'; // 'blessing' or 'commercial'
+let sacredImgDetectedDeity = null;
+
+// Setup Upload Zone (Sacred Image)
+function sacredImgSetupUploadZone() {
+    if (!sacredImgUploadZone) return;
+    
+    sacredImgUploadZone.addEventListener('click', () => {
+        sacredImgFileInput.click();
+    });
+    
+    sacredImgFileInput.addEventListener('change', (e) => {
+        sacredImgHandleFiles(e.target.files);
+    });
+    
+    sacredImgUploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        sacredImgUploadZone.classList.add('dragover');
+    });
+    
+    sacredImgUploadZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        sacredImgUploadZone.classList.remove('dragover');
+    });
+    
+    sacredImgUploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        sacredImgUploadZone.classList.remove('dragover');
+        sacredImgHandleFiles(e.dataTransfer.files);
+    });
+}
+
+// Handle Files (Sacred Image)
+async function sacredImgHandleFiles(files) {
+    const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+    
+    for (const file of imageFiles) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const imageData = {
+                id: Date.now() + Math.random(),
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                dataUrl: e.target.result
+            };
+            sacredImgUploadedImages.push(imageData);
+            sacredImgUpdateUI();
+            
+            // AI Detect Deity
+            if (sacredImgUploadedImages.length === 1) {
+                await sacredImgDetectDeity(imageData.dataUrl);
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    sacredImgFileInput.value = '';
+}
+
+// Update UI (Sacred Image)
+function sacredImgUpdateUI() {
+    if (sacredImgCount) sacredImgCount.textContent = sacredImgUploadedImages.length;
+    
+    if (sacredImgClearBtn) {
+        sacredImgClearBtn.style.display = sacredImgUploadedImages.length > 0 ? 'flex' : 'none';
+    }
+    
+    if (sacredImgPreviewContainer) {
+        sacredImgPreviewContainer.innerHTML = '';
+        sacredImgUploadedImages.forEach((img, index) => {
+            const item = document.createElement('div');
+            item.className = 'preview-item';
+            
+            const imgEl = document.createElement('img');
+            imgEl.src = img.dataUrl;
+            imgEl.title = img.name;
+            
+            const delBtn = document.createElement('button');
+            delBtn.className = 'preview-remove-btn';
+            delBtn.innerHTML = '✕';
+            delBtn.onclick = () => sacredImgRemoveOne(index);
+            
+            item.appendChild(imgEl);
+            item.appendChild(delBtn);
+            sacredImgPreviewContainer.appendChild(item);
+        });
+    }
+}
+
+// Remove One Image (Sacred Image)
+function sacredImgRemoveOne(index) {
+    sacredImgUploadedImages.splice(index, 1);
+    sacredImgUpdateUI();
+    if (sacredImgUploadedImages.length === 0) {
+        sacredImgDetectResult.style.display = 'none';
+        sacredImgDetectedDeity = null;
+    }
+}
+
+// Clear All Images (Sacred Image)
+function sacredImgClearAll() {
+    sacredImgUploadedImages = [];
+    sacredImgUpdateUI();
+    sacredImgDetectResult.style.display = 'none';
+    sacredImgDetectedDeity = null;
+}
+
+// AI Detect Deity (Sacred Image)
+async function sacredImgDetectDeity(imageDataUrl) {
+    const apiKey = getGeminiApiKey();
+    if (!apiKey) {
+        sacredImgAddLog('กรุณาตั้งค่า Gemini API Key ก่อน', 'warning');
+        return;
+    }
+    
+    sacredImgAddLog('🔍 กำลังวิเคราะห์ภาพ...', 'info');
+    
+    try {
+        const base64Data = imageDataUrl.split(',')[1];
+        const mimeType = imageDataUrl.split(';')[0].split(':')[1];
+        
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [
+                        { text: window.DEITY_DETECTION_PROMPT || 'วิเคราะห์ภาพนี้ว่าเป็นองค์เทพหรือวัตถุมงคลใด' },
+                        { inline_data: { mime_type: mimeType, data: base64Data } }
+                    ]
+                }]
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+            let resultText = data.candidates[0].content.parts[0].text;
+            
+            // Try to parse JSON
+            try {
+                const jsonMatch = resultText.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    sacredImgDetectedDeity = JSON.parse(jsonMatch[0]);
+                    sacredImgDeityName.textContent = `${sacredImgDetectedDeity.deity_thai || 'ไม่ทราบ'} (${sacredImgDetectedDeity.deity_id || 'unknown'})`;
+                    sacredImgDetectResult.style.display = 'block';
+                    sacredImgAddLog(`✅ ตรวจพบ: ${sacredImgDetectedDeity.deity_thai}`, 'success');
+                }
+            } catch (e) {
+                sacredImgDeityName.textContent = 'องค์เทพ/วัตถุมงคล';
+                sacredImgDetectResult.style.display = 'block';
+                sacredImgAddLog('⚠️ ไม่สามารถระบุองค์เทพได้ชัดเจน', 'warning');
+            }
+        }
+    } catch (error) {
+        sacredImgAddLog(`❌ Error: ${error.message}`, 'error');
+    }
+}
+
+// Toggle Mode (Sacred Image)
+function sacredImgToggleMode(mode) {
+    sacredImgCurrentMode = mode;
+    
+    // Update buttons
+    document.querySelectorAll('.sacred-mode-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.mode === mode) btn.classList.add('active');
+    });
+    
+    // Toggle configs
+    if (sacredBlessingConfig) sacredBlessingConfig.style.display = mode === 'blessing' ? 'block' : 'none';
+    if (sacredCommercialConfig) sacredCommercialConfig.style.display = mode === 'commercial' ? 'block' : 'none';
+}
+
+// Add Log (Sacred Image)
+function sacredImgAddLog(message, type = 'info') {
+    const timestamp = new Date().toLocaleTimeString('th-TH');
+    sacredImgLogs.push({ time: timestamp, message, type });
+    if (sacredImgLogs.length > 200) sacredImgLogs = sacredImgLogs.slice(-200);
+    sacredImgUpdateLogDisplay();
+}
+
+// Update Log Display (Sacred Image)
+function sacredImgUpdateLogDisplay() {
+    if (!sacredImgLogContainer) return;
+    
+    if (sacredImgLogs.length === 0) {
+        sacredImgLogContainer.innerHTML = '<div class="log-empty">ยังไม่มี log</div>';
+        return;
+    }
+    
+    const logHTML = sacredImgLogs.map(log => {
+        let typeClass = 'log-entry-info';
+        if (log.type === 'error') typeClass = 'log-entry-error';
+        else if (log.type === 'success') typeClass = 'log-entry-success';
+        else if (log.type === 'warning') typeClass = 'log-entry-warning';
+        else if (log.type === 'step') typeClass = 'log-entry-step';
+        
+        return `<div class="log-entry ${typeClass}">
+            <span class="log-entry-time">[${log.time}]</span>
+            <span class="log-entry-message">${log.message}</span>
+        </div>`;
+    }).join('');
+    
+    sacredImgLogContainer.innerHTML = logHTML;
+    sacredImgLogContainer.scrollTop = sacredImgLogContainer.scrollHeight;
+}
+
+// Clear Logs (Sacred Image)
+function sacredImgClearLogs() {
+    sacredImgLogs = [];
+    sacredImgUpdateLogDisplay();
+}
+
+// Generate Prompt (Sacred Image)
+async function sacredImgGeneratePrompt(imageDataUrl) {
+    const apiKey = getGeminiApiKey();
+    if (!apiKey) return null;
+    
+    const isSmartAuto = document.getElementById('sacred-img-smart-auto')?.checked;
+    
+    let systemPrompt, userMessage;
+    
+    if (sacredImgCurrentMode === 'blessing') {
+        systemPrompt = window.SACRED_BLESSING_SYSTEM_PROMPT || '';
+        
+        const blessingText = document.getElementById('sacred-blessing-text')?.value || '';
+        const textPosition = document.getElementById('sacred-text-position')?.value || 'bottom';
+        const selectedEffect = document.getElementById('sacred-effect-select')?.value || 'divine_power';
+        const effectData = window.getSacredEffect ? window.getSacredEffect(selectedEffect) : {};
+        
+        if (isSmartAuto) {
+            userMessage = `สร้าง prompt ภาพอวยพรจากภาพองค์เทพนี้ ให้ AI คิดข้อความอวยพรและเอฟเฟกต์ให้เหมาะกับองค์เทพโดยอัตโนมัติ`;
+        } else {
+            userMessage = `สร้าง prompt ภาพอวยพรจากภาพองค์เทพนี้
+ข้อความอวยพร: ${blessingText || 'ใครเห็นขอให้โชคดี'}
+ตำแหน่งข้อความ: ${textPosition === 'top' ? 'บนสุดของภาพ' : 'ล่างสุดของภาพ'}
+แสง/ฉาก: ${effectData.prompt || 'divine glow, golden aura'}`;
+        }
+    } else {
+        // Commercial mode
+        systemPrompt = window.SACRED_COMMERCIAL_SYSTEM_PROMPT || '';
+        
+        const caption = document.getElementById('sacred-commercial-caption')?.value || '';
+        const priceFull = document.getElementById('sacred-price-full')?.value || '';
+        const pricePromo = document.getElementById('sacred-price-promo')?.value || '';
+        const commercialEffect = document.getElementById('sacred-commercial-effect')?.value || 'divine_glow';
+        
+        if (isSmartAuto) {
+            userMessage = `สร้าง prompt ภาพโฆษณาวัตถุมงคลจากภาพนี้ ให้ AI คิดข้อความโฆษณาให้เหมาะกับวัตถุมงคลโดยอัตโนมัติ`;
+        } else {
+            userMessage = `สร้าง prompt ภาพโฆษณาวัตถุมงคลจากภาพนี้
+แคปชั่น: ${caption || 'วัตถุมงคลศักดิ์สิทธิ์'}
+ราคาบูชาเดิม: ${priceFull || '999'} บาท
+บูชาพิเศษเพียง: ${pricePromo || '599'} บาท
+เอฟเฟกต์: ${commercialEffect}`;
+        }
+    }
+    
+    try {
+        const base64Data = imageDataUrl.split(',')[1];
+        const mimeType = imageDataUrl.split(';')[0].split(':')[1];
+        
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                contents: [{
+                    parts: [
+                        { text: userMessage },
+                        { inline_data: { mime_type: mimeType, data: base64Data } }
+                    ]
+                }]
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+            return data.candidates[0].content.parts[0].text.trim();
+        }
+    } catch (error) {
+        sacredImgAddLog(`❌ Error generating prompt: ${error.message}`, 'error');
+    }
+    
+    return null;
+}
+
+// Main Automation (Sacred Image) - Copy Logic จาก Banana 100%
+async function sacredImgRunAutomation() {
+    // Safety check
+    const isCorrect = await checkCorrectWebsite();
+    if (!isCorrect) return;
+    
+    if (sacredImgUploadedImages.length === 0) {
+        showToast('กรุณาอัพโหลดรูปองค์เทพก่อน', 'error');
+        return;
+    }
+    
+    const roundsPerImage = parseInt(document.getElementById('sacred-img-round-count')?.value) || 1;
+    const maxDownloads = parseInt(document.getElementById('sacred-img-download-count')?.value) || 4;
+    const totalImages = sacredImgUploadedImages.length;
+    const totalRounds = totalImages * roundsPerImage;
+    
+    // Start automation
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    sacredImgIsRunning = true;
+    sacredImgShouldStop = false;
+    sacredImgBtnAutomation.disabled = true;
+    sacredImgBtnAutomation.innerHTML = '<span class="loading"></span> กำลังทำงาน...';
+    if (sacredImgBtnStop) sacredImgBtnStop.style.display = 'flex';
+    await toggleWebPageLock(true);
+    
+    sacredImgClearLogs();
+    sacredImgAddLog('🕉️ เริ่มสร้างภาพสายมู', 'step');
+    
+    let completedRounds = 0;
+    let totalDownloaded = 0;
+    
+    try {
+        for (let imgIndex = 0; imgIndex < totalImages; imgIndex++) {
+            const currentImage = sacredImgUploadedImages[imgIndex];
+            
+            for (let round = 0; round < roundsPerImage; round++) {
+                if (sacredImgShouldStop) throw new Error('STOPPED');
+                
+                completedRounds++;
+                const roundLabel = `[รอบ ${completedRounds}/${totalRounds}]`;
+                sacredImgAddLog(`📸 ${roundLabel}`, 'step');
+                sacredImgStatusText.textContent = `รอบที่ ${completedRounds}/${totalRounds}`;
+                
+                // STEP 1: Generate prompt
+                sacredImgAddLog(`${roundLabel} กำลังสร้าง Prompt...`, 'info');
+                const prompt = await sacredImgGeneratePrompt(currentImage.dataUrl);
+                if (!prompt) {
+                    sacredImgAddLog('❌ ไม่สามารถสร้าง prompt ได้', 'error');
+                    continue;
+                }
+                sacredImgAddLog(`✨ Prompt: ${prompt.substring(0, 60)}...`, 'info');
+                
+                // STEP 2: Upload image to page
+                sacredImgAddLog(`${roundLabel} กำลังอัพโหลดรูป...`, 'info');
+                const uploadSuccess = await sacredImgUploadToPage(currentImage);
+                if (!uploadSuccess) {
+                    sacredImgAddLog('❌ อัพโหลดล้มเหลว', 'error');
+                    continue;
+                }
+                await delay(2000);
+                
+                // STEP 3: Fill prompt
+                sacredImgAddLog(`${roundLabel} กรอก Prompt...`, 'info');
+                await sacredImgFillPrompt(prompt);
+                await delay(1500);
+                
+                // STEP 4: จำรูปเดิมไว้ (เหมือน Banana)
+                const oldImagesResult = await chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    func: () => {
+                        const imgs = Array.from(document.querySelectorAll('img'))
+                            .filter(img => img.width > 200 && img.height > 200);
+                        return imgs.map(img => img.src);
+                    }
+                });
+                const oldImageUrls = new Set(oldImagesResult[0]?.result || []);
+                sacredImgAddLog(`📸 จำรูปเดิมไว้ ${oldImageUrls.size} รูป`, 'info');
+                
+                // STEP 5: กดปุ่มสร้าง (Create) - ใช้ Selector เหมือน Banana
+                sacredImgAddLog(`${roundLabel} กดปุ่มสร้าง...`, 'info');
+                const createResult = await chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    func: (maxRetries, retryDelay) => {
+                        return new Promise((resolve) => {
+                            const createBtnSelector = '#__next > div.sc-c7ee1759-1.crzReP > div > div > div.sc-b0c0bd7-1.kvzLFA > div > div.sc-897c0dbb-0.eHacXb > div.sc-77366d4e-0.eaiEre > div > div > div.sc-408537d4-0.eBSqXt > div.sc-408537d4-1.eiHkev > button';
+                            let attempts = 0;
+                            function tryClick() {
+                                attempts++;
+                                const btn = document.querySelector(createBtnSelector);
+                                if (btn && !btn.disabled) {
+                                    btn.click();
+                                    resolve({ success: true });
+                                } else if (attempts < maxRetries) {
+                                    setTimeout(tryClick, retryDelay);
+                                } else {
+                                    resolve({ success: false });
+                                }
+                            }
+                            tryClick();
+                        });
+                    },
+                    args: [20, 2000]
+                });
+                
+                if (!createResult[0]?.result?.success) {
+                    sacredImgAddLog(`⚠️ กดปุ่มสร้างไม่สำเร็จ`, 'warning');
+                } else {
+                    sacredImgAddLog(`🖱️ กดปุ่มสร้างสำเร็จ!`, 'success');
+                }
+                
+                await delay(3000);
+                
+                // STEP 6: รอรูปใหม่ (เหมือน Banana)
+                sacredImgAddLog(`${roundLabel} รอรูปใหม่...`, 'info');
+                let newImagesFound = false;
+                
+                for (let wait = 0; wait < 60; wait++) {
+                    if (sacredImgShouldStop) throw new Error('STOPPED');
+                    
+                    const checkResult = await chrome.scripting.executeScript({
+                        target: { tabId: tab.id },
+                        func: (oldUrlsArray) => {
+                            const oldSet = new Set(oldUrlsArray);
+                            const currentImgs = Array.from(document.querySelectorAll('img'))
+                                .filter(img => img.width > 200 && img.height > 200);
+                            const hasNew = currentImgs.some(img => !oldSet.has(img.src));
+                            return { total: currentImgs.length, hasNew: hasNew };
+                        },
+                        args: [Array.from(oldImageUrls)]
+                    });
+                    
+                    const status = checkResult[0]?.result;
+                    if (status && (status.hasNew || (wait > 20 && status.total > 0))) {
+                        newImagesFound = true;
+                        sacredImgAddLog(`✨ พบรูปใหม่แล้ว!`, 'success');
+                        break;
+                    }
+                    sacredImgAddLog(`⏳ รอรูปใหม่... (${wait*2}s)`, 'info');
+                    await delay(2000);
+                }
+                
+                if (!newImagesFound) sacredImgAddLog(`⚠️ หมดเวลา (ลองโหลดดู)`, 'warning');
+                else await delay(3000);
+                
+                // STEP 7: ดาวน์โหลด (Logic เหมือน Banana - กด 1K)
+                sacredImgAddLog(`${roundLabel} กำลังดาวน์โหลด...`, 'info');
+                
+                const dlResult = await chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    func: (count) => {
+                        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+                        function heavyClick(element) {
+                            if (!element) return;
+                            const opts = { bubbles: true, cancelable: true, view: window };
+                            element.dispatchEvent(new PointerEvent('pointerdown', opts));
+                            element.dispatchEvent(new MouseEvent('mousedown', opts));
+                            element.dispatchEvent(new PointerEvent('pointerup', opts));
+                            element.dispatchEvent(new MouseEvent('mouseup', opts));
+                            element.click();
+                        }
+                        
+                        return new Promise(async (resolve) => {
+                            let allImgs = Array.from(document.querySelectorAll('img'))
+                                .filter(img => img.width > 200 && img.height > 200);
+                            
+                            allImgs.sort((a, b) => {
+                                const rA = a.getBoundingClientRect();
+                                const rB = b.getBoundingClientRect();
+                                if (Math.abs(rA.top - rB.top) < 50) return rA.left - rB.left;
+                                return rA.top - rB.top;
+                            });
+                            
+                            let downloadedCount = 0;
+                            
+                            for (let i = 0; i < Math.min(count, allImgs.length); i++) {
+                                const img = allImgs[i];
+                                const card = img.closest('div[draggable="true"]') || img.parentElement?.parentElement;
+                                if (!card) continue;
+                                
+                                const mouseEvent = { bubbles: true, cancelable: true, view: window };
+                                card.dispatchEvent(new MouseEvent('mouseenter', mouseEvent));
+                                await sleep(600);
+                                
+                                // หาปุ่มดาวน์โหลดเล็ก
+                                let downloadTrigger = null;
+                                const allBtns = card.querySelectorAll('button, [role="button"]');
+                                for (const b of allBtns) {
+                                    const icon = b.querySelector('svg, i');
+                                    const txt = (b.textContent || '').toLowerCase();
+                                    if (icon || txt.includes('download')) {
+                                        const rect = b.getBoundingClientRect();
+                                        if (rect.width > 0 && rect.width < 60) {
+                                            downloadTrigger = b;
+                                            break;
+                                        }
+                                    }
+                                }
+                                
+                                if (downloadTrigger) {
+                                    heavyClick(downloadTrigger);
+                                    await sleep(800);
+                                    
+                                    // หาเมนู 1K
+                                    let targetMenu = null;
+                                    for (let w = 0; w < 10; w++) {
+                                        const menuItems = document.querySelectorAll('[role="menuitem"], [role="option"]');
+                                        for (const item of menuItems) {
+                                            const t = (item.textContent || '').toLowerCase().trim();
+                                            if (item.offsetParent === null) continue;
+                                            if (t.includes('1k') || t.includes('original')) {
+                                                targetMenu = item;
+                                                break;
+                                            }
+                                        }
+                                        if (targetMenu) break;
+                                        await sleep(200);
+                                    }
+                                    
+                                    if (targetMenu) {
+                                        heavyClick(targetMenu);
+                                        downloadedCount++;
+                                    } else {
+                                        const allMenus = document.querySelectorAll('[role="menuitem"]');
+                                        for (const m of allMenus) {
+                                            if (m.textContent.toLowerCase().includes('download')) {
+                                                heavyClick(m);
+                                                downloadedCount++;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    
+                                    await sleep(500);
+                                    document.body.click();
+                                    card.dispatchEvent(new MouseEvent('mouseleave', mouseEvent));
+                                    await sleep(1000);
+                                }
+                            }
+                            resolve({ success: true, count: downloadedCount });
+                        });
+                    },
+                    args: [maxDownloads]
+                });
+                
+                if (dlResult[0]?.result?.count) {
+                    totalDownloaded += dlResult[0].result.count;
+                    sacredImgAddLog(`📥 ดาวน์โหลดได้ ${dlResult[0].result.count} ภาพ`, 'success');
+                }
+                
+                // พักระหว่างรอบ
+                if (completedRounds < totalRounds) {
+                    sacredImgAddLog(`${roundLabel} เสร็จสิ้น! พัก 10 วินาที...`, 'info');
+                    await delay(10000);
+                }
+            }
+        }
+        
+        sacredImgAddLog(`🎉 เสร็จสิ้น! โหลดได้ ${totalDownloaded} ภาพ`, 'success');
+        showToast('สร้างภาพสายมูเสร็จสิ้น!', 'success');
+        
+    } catch (error) {
+        if (error.message === 'STOPPED') {
+            sacredImgAddLog('🛑 หยุดโดยผู้ใช้', 'warning');
+            showToast('หยุดการทำงานแล้ว', 'warning');
+        } else {
+            sacredImgAddLog(`❌ Error: ${error.message}`, 'error');
+        }
+    } finally {
+        await toggleWebPageLock(false);
+        sacredImgIsRunning = false;
+        sacredImgBtnAutomation.disabled = false;
+        sacredImgBtnAutomation.innerHTML = '🕉️ START GENERATE';
+        if (sacredImgBtnStop) sacredImgBtnStop.style.display = 'none';
+        sacredImgStatusText.textContent = 'Ready';
+    }
+}
+
+// Stop Automation (Sacred Image)
+function sacredImgStopAutomation() {
+    sacredImgShouldStop = true;
+    sacredImgAddLog('⛔ กำลังหยุด...', 'warning');
+}
+
+// Page Interaction Functions (Sacred Image) - Copy Logic จาก Banana Module 100%
+async function sacredImgUploadToPage(imageData) {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    
+    // Get aspect ratio from settings
+    const aspectRatio = localStorage.getItem('veo3_aspect_ratio') || '9:16';
+    
+    // STEP 1: เลือกโหมด Create Image ก่อน (เหมือน Banana)
+    sacredImgAddLog('🔄 เลือกโหมด Create Image...', 'info');
+    
+    await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: async () => {
+            function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+            function heavyClick(element) {
+                if (!element) return;
+                const pOpts = { bubbles: true, cancelable: true, view: window, pointerId: 1, width: 1, height: 1, pressure: 0.5 };
+                element.dispatchEvent(new PointerEvent('pointerdown', pOpts));
+                element.dispatchEvent(new PointerEvent('pointerup', pOpts));
+                element.click();
+            }
+            
+            const keywords = {
+                menuTrigger: ['image', 'video', 'สร้าง', 'เปลี่ยน', 'switch', 'create', 'frames'],
+                targetMode: ['image generation', 'สร้างรูป', 'generate image', 'รูปภาพ', 'create image'],
+                excludeMode: ['scene', 'ฉาก', 'background', 'video', 'frames', 'ingredients']
+            };
+            
+            let dropdownBtn = document.querySelector('button[role="combobox"]');
+            if (!dropdownBtn) {
+                const allButtons = document.querySelectorAll('button');
+                for (const btn of allButtons) {
+                    const txt = (btn.textContent||'').trim().toLowerCase();
+                    if (keywords.menuTrigger.some(k => txt.includes(k))) {
+                        dropdownBtn = btn;
+                        break;
+                    }
+                }
+            }
+            
+            if (dropdownBtn) {
+                const currentText = (dropdownBtn.textContent || "").trim().toLowerCase();
+                if (keywords.targetMode.some(k => currentText.includes(k)) && 
+                    !keywords.excludeMode.some(ex => currentText.includes(ex))) {
+                    return { success: true, message: 'อยู่ในโหมด Create Image แล้ว' };
+                }
+                
+                heavyClick(dropdownBtn);
+                await sleep(1500);
+                
+                const allOptions = document.querySelectorAll('[role="menuitem"], [role="option"], li, button');
+                for (const opt of allOptions) {
+                    const optTxt = (opt.textContent || '').trim().toLowerCase();
+                    if (keywords.targetMode.some(k => optTxt.includes(k)) && 
+                        !keywords.excludeMode.some(ex => optTxt.includes(ex))) {
+                        heavyClick(opt);
+                        break;
+                    }
+                }
+                await sleep(1000);
+                document.body.click();
+            }
+        }
+    });
+    
+    await delay(2000);
+    
+    // STEP 2: Upload รูป (Copy Logic จาก Banana 100%)
+    sacredImgAddLog('📤 กำลังอัพโหลดรูป...', 'info');
+    
+    const uploadResult = await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: (imgData, aspectRatio) => {
+            function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+            function heavyClick(element) {
+                if (!element) return;
+                const opts = { bubbles: true, cancelable: true, view: window };
+                element.dispatchEvent(new PointerEvent('pointerdown', opts));
+                element.dispatchEvent(new MouseEvent('mousedown', opts));
+                element.dispatchEvent(new PointerEvent('pointerup', opts));
+                element.dispatchEvent(new MouseEvent('mouseup', opts));
+                element.click();
+            }
+
+            return new Promise(async (resolve) => {
+                // 1. กดปุ่ม Upload (ใช้ selector เดียวกับ Banana)
+                const uploadBtnSelector = '#__next > div.sc-c7ee1759-1.crzReP > div > div > div.sc-b0c0bd7-1.kvzLFA > div > div.sc-897c0dbb-0.eHacXb > div.sc-77366d4e-0.eaiEre > div > div > div.sc-408537d4-0.eBSqXt > div:nth-child(1) > div > div:nth-child(1) > button';
+                let uploadBtn = document.querySelector(uploadBtnSelector);
+
+                if (!uploadBtn) { 
+                    resolve({ success: false, message: '❌ หาปุ่ม Upload ไม่เจอ' }); 
+                    return; 
+                }
+
+                uploadBtn.click();
+                
+                // 2. รอและใส่ไฟล์ (ใช้ logic เดียวกับ Banana - หา input ตัวสุดท้าย)
+                await sleep(2000);
+                
+                const fileInputs = document.querySelectorAll('input[type="file"]');
+                let targetInput = null;
+                if (fileInputs.length > 0) targetInput = fileInputs[fileInputs.length - 1];
+
+                if (targetInput) {
+                    // แปลง base64 เป็น File (เหมือน Banana)
+                    const dataTransfer = new DataTransfer();
+                    const byteString = atob(imgData.dataUrl.split(',')[1]);
+                    const ab = new ArrayBuffer(byteString.length);
+                    const ia = new Uint8Array(ab);
+                    for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+                    const blob = new Blob([ab], { type: imgData.type });
+                    const file = new File([blob], imgData.name, { type: imgData.type });
+                    dataTransfer.items.add(file);
+                    
+                    targetInput.files = dataTransfer.files;
+                    targetInput.dispatchEvent(new Event('change', { bubbles: true }));
+                    targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    
+                    // 3. รอและจัดการ Popup Aspect Ratio (Copy จาก Banana 100%)
+                    await sleep(3500);
+                    
+                    const isPortrait = aspectRatio === '9:16';
+                    const targetText = isPortrait ? ['Portrait', 'แนวตั้ง'] : ['Landscape', 'แนวนอน'];
+                    const allRatioKeywords = ['Portrait', 'Landscape', 'แนวตั้ง', 'แนวนอน', 'Ratio', 'Crop'];
+                    
+                    // หาปุ่มเมนู Orientation
+                    let orientationBtn = null;
+                    const allButtons = document.querySelectorAll('button');
+                    for (const btn of allButtons) {
+                        const text = (btn.textContent || '').trim();
+                        const icon = btn.querySelector('i');
+                        const iconText = icon ? (icon.textContent || icon.className || '') : '';
+                        const hasKeyword = allRatioKeywords.some(kw => text.includes(kw));
+                        const hasCropIcon = iconText.includes('crop') || text.includes('crop');
+                        if ((hasKeyword || hasCropIcon) && btn.getAttribute('role') !== 'menuitem') {
+                            orientationBtn = btn; 
+                            break;
+                        }
+                    }
+                    
+                    if (orientationBtn) {
+                        heavyClick(orientationBtn);
+                        await sleep(1000);
+                        
+                        // หาตัวเลือก
+                        let targetOption = null;
+                        for (let attempt = 0; attempt < 15; attempt++) {
+                            const candidates = document.querySelectorAll('div, span, p, li, button');
+                            for (const el of candidates) {
+                                const t = (el.textContent || '').trim();
+                                if (!targetText.some(kw => t === kw || (t.includes(kw) && t.length < 20))) continue;
+                                if (el === orientationBtn || orientationBtn.contains(el)) continue;
+                                if (el.offsetParent === null) continue;
+                                targetOption = el;
+                                break;
+                            }
+                            if (targetOption) break;
+                            await sleep(200);
+                        }
+                        
+                        if (targetOption) {
+                            heavyClick(targetOption);
+                            if (targetOption.parentElement) heavyClick(targetOption.parentElement);
+                        }
+                        await sleep(1500);
+                    }
+                    
+                    // 4. กดปุ่ม Confirm/Save
+                    let confirmBtn = null;
+                    const confirmSelectors = ['button.sc-19de2353-7.jcyPCc', 'button.sc-5983bb27-7.csgOts'];
+                    for (const sel of confirmSelectors) {
+                        const btn = document.querySelector(sel);
+                        if (btn) { confirmBtn = btn; break; }
+                    }
+                    if (!confirmBtn) {
+                        const allBtns = document.querySelectorAll('button');
+                        for (const btn of allBtns) {
+                            const t = (btn.textContent || '').trim();
+                            if (t.includes('Save') || t.includes('Crop') || t.includes('บันทึก') || t.includes('ยืนยัน') || t.includes('เสร็จ') || t.includes('ต่อไป')) {
+                                confirmBtn = btn; 
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (confirmBtn) {
+                        heavyClick(confirmBtn);
+                        
+                        // รอให้รูปโหลดเสร็จ
+                        for (let w = 0; w < 60; w++) {
+                            await sleep(500);
+                            const textArea = document.querySelector('textarea') || document.querySelector('#PINHOLE_TEXT_AREA_ELEMENT_ID');
+                            if (textArea) {
+                                let p = textArea.parentElement;
+                                for (let level = 0; level < 4; level++) {
+                                    if (!p) break;
+                                    const thumbs = p.querySelectorAll('img');
+                                    const loaded = Array.from(thumbs).some(i => i.width > 20 && i.width < 150);
+                                    if (loaded) {
+                                        resolve({ success: true, message: '✅ อัพโหลดเสร็จสิ้น' });
+                                        return;
+                                    }
+                                    p = p.parentElement;
+                                }
+                            }
+                        }
+                        resolve({ success: true, message: '✅ (Timeout) อัพโหลดเสร็จ' });
+                    } else {
+                        resolve({ success: false, message: '⚠️ หาปุ่ม Save ไม่เจอ' });
+                    }
+                } else {
+                    resolve({ success: false, message: '❌ หา input file ไม่เจอ' });
+                }
+            });
+        },
+        args: [imageData, aspectRatio]
+    });
+
+    if (uploadResult[0]?.result?.message) {
+        sacredImgAddLog(uploadResult[0].result.message, uploadResult[0].result.success ? 'success' : 'error');
+    }
+    
+    return uploadResult[0]?.result?.success;
+}
+
+async function sacredImgFillPrompt(prompt) {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    
+    await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: (text) => {
+            // ใช้ ID ของ Flow
+            const el = document.getElementById('PINHOLE_TEXT_AREA_ELEMENT_ID');
+            if (el) {
+                el.value = '';
+                el.focus();
+                
+                // ใส่ทีละตัวอักษร (เหมือน Banana)
+                for (let i = 0; i < text.length; i++) {
+                    el.value += text[i];
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+                return { success: true };
+            }
+            
+            // Fallback: หา textarea อื่นๆ
+            const textarea = document.querySelector('textarea');
+            if (textarea) {
+                textarea.value = text;
+                textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                return { success: true };
+            }
+            
+            return { success: false };
+        },
+        args: [prompt]
+    });
+}
+
+async function sacredImgClickGenerate() {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    
+    await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: () => {
+            function heavyClick(element) {
+                if (!element) return;
+                const pOpts = { bubbles: true, cancelable: true, view: window, pointerId: 1, width: 1, height: 1, pressure: 0.5 };
+                element.dispatchEvent(new PointerEvent('pointerdown', pOpts));
+                element.dispatchEvent(new PointerEvent('pointerup', pOpts));
+                element.click();
+            }
+            
+            // หาปุ่ม Generate ของ Flow
+            const generateKeywords = ['generate', 'create', 'สร้าง', 'submit'];
+            const allButtons = document.querySelectorAll('button');
+            
+            for (const btn of allButtons) {
+                const txt = (btn.textContent || '').toLowerCase().trim();
+                if (generateKeywords.some(k => txt.includes(k))) {
+                    // ต้องไม่ใช่ปุ่ม disabled
+                    if (!btn.disabled) {
+                        heavyClick(btn);
+                        return { success: true };
+                    }
+                }
+            }
+            
+            // Fallback: กดปุ่ม submit
+            const submitBtn = document.querySelector('button[type="submit"]');
+            if (submitBtn && !submitBtn.disabled) {
+                heavyClick(submitBtn);
+                return { success: true };
+            }
+            
+            return { success: false };
+        }
+    });
+}
+
+async function sacredImgWaitForGeneration() {
+    sacredImgAddLog('⏳ รอสร้างภาพ...', 'info');
+    
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    
+    // รอจนกว่าจะมีภาพใหม่
+    for (let i = 0; i < 120; i++) { // รอสูงสุด 2 นาที
+        await delay(1000);
+        
+        if (sacredImgShouldStop) break;
+        
+        const checkResult = await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: () => {
+                // เช็คว่ามีรูปผลลัพธ์หรือยัง
+                const images = document.querySelectorAll('img[src*="generated"], img[src*="output"], img[data-generated="true"]');
+                const downloadBtns = document.querySelectorAll('button[aria-label*="download"], button[aria-label*="Download"]');
+                return images.length > 0 || downloadBtns.length > 0;
+            }
+        });
+        
+        if (checkResult[0]?.result) {
+            sacredImgAddLog('✅ สร้างภาพเสร็จแล้ว', 'success');
+            await delay(2000); // รอให้โหลดเสร็จ
+            return;
+        }
+    }
+    
+    sacredImgAddLog('⚠️ หมดเวลารอ', 'warning');
+}
+
+async function sacredImgDownloadImage(index) {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    
+    await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: (idx) => {
+            function heavyClick(element) {
+                if (!element) return;
+                const pOpts = { bubbles: true, cancelable: true, view: window };
+                element.dispatchEvent(new PointerEvent('pointerdown', pOpts));
+                element.dispatchEvent(new PointerEvent('pointerup', pOpts));
+                element.click();
+            }
+            
+            // หาปุ่ม Download
+            const downloadBtns = document.querySelectorAll('button[aria-label*="download"], button[aria-label*="Download"], a[download]');
+            if (downloadBtns[idx]) {
+                heavyClick(downloadBtns[idx]);
+                return { success: true };
+            }
+            
+            // Fallback: หาปุ่มที่มีไอคอน download
+            const allBtns = document.querySelectorAll('button');
+            let foundIdx = 0;
+            for (const btn of allBtns) {
+                const svg = btn.querySelector('svg');
+                const txt = (btn.textContent || '').toLowerCase();
+                if (txt.includes('download') || txt.includes('ดาวน์โหลด') || (svg && svg.innerHTML.includes('download'))) {
+                    if (foundIdx === idx) {
+                        heavyClick(btn);
+                        return { success: true };
+                    }
+                    foundIdx++;
+                }
+            }
+            
+            return { success: false };
+        },
+        args: [index]
+    });
+}
+
+// Setup Event Listeners (Sacred Image)
+function sacredImgSetupEventListeners() {
+    // Mode Toggle
+    document.querySelectorAll('.sacred-mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            sacredImgToggleMode(btn.dataset.mode);
+        });
+    });
+    
+    // Effect Cards
+    document.querySelectorAll('.sacred-effect-card').forEach(card => {
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.sacred-effect-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            const effectInput = document.getElementById('sacred-effect-select');
+            if (effectInput) effectInput.value = card.dataset.effect;
+        });
+    });
+    
+    // Clear button
+    if (sacredImgClearBtn) sacredImgClearBtn.addEventListener('click', sacredImgClearAll);
+    
+    // Automation buttons
+    if (sacredImgBtnAutomation) sacredImgBtnAutomation.addEventListener('click', sacredImgRunAutomation);
+    if (sacredImgBtnStop) sacredImgBtnStop.addEventListener('click', sacredImgStopAutomation);
+    
+    // Log clear
+    if (sacredImgLogClear) sacredImgLogClear.addEventListener('click', sacredImgClearLogs);
+}
+
+// ============================================
+// 📿 SACRED VIDEO MODULE (วิดีโอสายมู)
+// ============================================
+
+// DOM Elements (Sacred Video)
+const sacredVideoUploadZone = document.getElementById('sacred-video-upload-zone');
+const sacredVideoFileInput = document.getElementById('sacred-video-file-input');
+const sacredVideoCount = document.getElementById('sacred-video-count');
+const sacredVideoClearBtn = document.getElementById('sacred-video-clear');
+const sacredVideoPreviewContainer = document.getElementById('sacred-video-preview-container');
+const sacredVideoDetectResult = document.getElementById('sacred-video-detect-result');
+const sacredVideoDeityName = document.getElementById('sacred-video-deity-name');
+const sacredVideoDeityDesc = document.getElementById('sacred-video-deity-desc');
+const sacredVideoBtnAutomation = document.getElementById('sacred-video-btn-automation');
+const sacredVideoBtnStop = document.getElementById('sacred-video-btn-stop');
+const sacredVideoStatusText = document.getElementById('sacred-video-status-text');
+const sacredVideoLogContainer = document.getElementById('sacred-video-log-container');
+const sacredVideoLogClear = document.getElementById('sacred-video-log-clear');
+
+// State (Sacred Video)
+let sacredVideoUploadedImages = [];
+let sacredVideoIsRunning = false;
+let sacredVideoShouldStop = false;
+let sacredVideoLogs = [];
+let sacredVideoDetectedDeity = null;
+
+// Setup Upload Zone (Sacred Video)
+function sacredVideoSetupUploadZone() {
+    if (!sacredVideoUploadZone) return;
+    
+    sacredVideoUploadZone.addEventListener('click', () => {
+        sacredVideoFileInput.click();
+    });
+    
+    sacredVideoFileInput.addEventListener('change', (e) => {
+        sacredVideoHandleFiles(e.target.files);
+    });
+    
+    sacredVideoUploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        sacredVideoUploadZone.classList.add('dragover');
+    });
+    
+    sacredVideoUploadZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        sacredVideoUploadZone.classList.remove('dragover');
+    });
+    
+    sacredVideoUploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        sacredVideoUploadZone.classList.remove('dragover');
+        sacredVideoHandleFiles(e.dataTransfer.files);
+    });
+}
+
+// Handle Files (Sacred Video)
+async function sacredVideoHandleFiles(files) {
+    const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+    
+    for (const file of imageFiles) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const imageData = {
+                id: Date.now() + Math.random(),
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                dataUrl: e.target.result
+            };
+            sacredVideoUploadedImages.push(imageData);
+            sacredVideoUpdateUI();
+            
+            // AI Detect Deity
+            if (sacredVideoUploadedImages.length === 1) {
+                await sacredVideoDetectDeity(imageData.dataUrl);
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    sacredVideoFileInput.value = '';
+}
+
+// Update UI (Sacred Video)
+function sacredVideoUpdateUI() {
+    if (sacredVideoCount) sacredVideoCount.textContent = sacredVideoUploadedImages.length;
+    
+    if (sacredVideoClearBtn) {
+        sacredVideoClearBtn.style.display = sacredVideoUploadedImages.length > 0 ? 'flex' : 'none';
+    }
+    
+    if (sacredVideoPreviewContainer) {
+        sacredVideoPreviewContainer.innerHTML = '';
+        sacredVideoUploadedImages.forEach((img, index) => {
+            const item = document.createElement('div');
+            item.className = 'preview-item';
+            
+            const imgEl = document.createElement('img');
+            imgEl.src = img.dataUrl;
+            imgEl.title = img.name;
+            
+            const delBtn = document.createElement('button');
+            delBtn.className = 'preview-remove-btn';
+            delBtn.innerHTML = '✕';
+            delBtn.onclick = () => sacredVideoRemoveOne(index);
+            
+            item.appendChild(imgEl);
+            item.appendChild(delBtn);
+            sacredVideoPreviewContainer.appendChild(item);
+        });
+    }
+}
+
+// Remove One Image (Sacred Video)
+function sacredVideoRemoveOne(index) {
+    sacredVideoUploadedImages.splice(index, 1);
+    sacredVideoUpdateUI();
+    if (sacredVideoUploadedImages.length === 0) {
+        sacredVideoDetectResult.style.display = 'none';
+        sacredVideoDetectedDeity = null;
+    }
+}
+
+// Clear All Images (Sacred Video)
+function sacredVideoClearAll() {
+    sacredVideoUploadedImages = [];
+    sacredVideoUpdateUI();
+    sacredVideoDetectResult.style.display = 'none';
+    sacredVideoDetectedDeity = null;
+}
+
+// AI Detect Deity (Sacred Video)
+async function sacredVideoDetectDeity(imageDataUrl) {
+    const apiKey = getGeminiApiKey();
+    if (!apiKey) {
+        sacredVideoAddLog('กรุณาตั้งค่า Gemini API Key ก่อน', 'warning');
+        return;
+    }
+    
+    sacredVideoAddLog('🔍 กำลังวิเคราะห์ภาพองค์เทพ...', 'info');
+    
+    try {
+        const base64Data = imageDataUrl.split(',')[1];
+        const mimeType = imageDataUrl.split(';')[0].split(':')[1];
+        
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [
+                        { text: window.DEITY_DETECTION_PROMPT || 'วิเคราะห์ภาพนี้ว่าเป็นองค์เทพใด' },
+                        { inline_data: { mime_type: mimeType, data: base64Data } }
+                    ]
+                }]
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+            let resultText = data.candidates[0].content.parts[0].text;
+            
+            try {
+                const jsonMatch = resultText.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    sacredVideoDetectedDeity = JSON.parse(jsonMatch[0]);
+                    sacredVideoDeityName.textContent = sacredVideoDetectedDeity.deity_thai || 'องค์เทพ';
+                    sacredVideoDeityDesc.textContent = sacredVideoDetectedDeity.description || '';
+                    sacredVideoDetectResult.style.display = 'block';
+                    sacredVideoAddLog(`✅ ตรวจพบ: ${sacredVideoDetectedDeity.deity_thai}`, 'success');
+                }
+            } catch (e) {
+                sacredVideoDeityName.textContent = 'องค์เทพ';
+                sacredVideoDetectResult.style.display = 'block';
+            }
+        }
+    } catch (error) {
+        sacredVideoAddLog(`❌ Error: ${error.message}`, 'error');
+    }
+}
+
+// Add Log (Sacred Video)
+function sacredVideoAddLog(message, type = 'info') {
+    const timestamp = new Date().toLocaleTimeString('th-TH');
+    sacredVideoLogs.push({ time: timestamp, message, type });
+    if (sacredVideoLogs.length > 200) sacredVideoLogs = sacredVideoLogs.slice(-200);
+    sacredVideoUpdateLogDisplay();
+}
+
+// Update Log Display (Sacred Video)
+function sacredVideoUpdateLogDisplay() {
+    if (!sacredVideoLogContainer) return;
+    
+    if (sacredVideoLogs.length === 0) {
+        sacredVideoLogContainer.innerHTML = '<div class="log-empty">ยังไม่มี log</div>';
+        return;
+    }
+    
+    const logHTML = sacredVideoLogs.map(log => {
+        let typeClass = 'log-entry-info';
+        if (log.type === 'error') typeClass = 'log-entry-error';
+        else if (log.type === 'success') typeClass = 'log-entry-success';
+        else if (log.type === 'warning') typeClass = 'log-entry-warning';
+        else if (log.type === 'step') typeClass = 'log-entry-step';
+        
+        return `<div class="log-entry ${typeClass}">
+            <span class="log-entry-time">[${log.time}]</span>
+            <span class="log-entry-message">${log.message}</span>
+        </div>`;
+    }).join('');
+    
+    sacredVideoLogContainer.innerHTML = logHTML;
+    sacredVideoLogContainer.scrollTop = sacredVideoLogContainer.scrollHeight;
+}
+
+// Clear Logs (Sacred Video)
+function sacredVideoClearLogs() {
+    sacredVideoLogs = [];
+    sacredVideoUpdateLogDisplay();
+}
+
+// Generate Video Prompt (Sacred Video)
+async function sacredVideoGeneratePrompt(imageDataUrl) {
+    const apiKey = getGeminiApiKey();
+    if (!apiKey) return null;
+    
+    const isSmartAuto = document.getElementById('sacred-video-smart-auto')?.checked;
+    const speech = document.getElementById('sacred-video-speech')?.value || '';
+    const extraInstructions = document.getElementById('sacred-video-extra')?.value || '';
+    const selectedMood = document.getElementById('sacred-video-mood')?.value || 'compassion';
+    const moodData = window.getDeityMood ? window.getDeityMood(selectedMood) : {};
+    
+    const systemPrompt = window.SACRED_VIDEO_SYSTEM_PROMPT || '';
+    
+    let userMessage;
+    if (isSmartAuto) {
+        userMessage = `สร้าง prompt วิดีโอองค์เทพพูดจากภาพนี้ ให้ AI คิดบทพูดและอารมณ์ให้เหมาะกับองค์เทพโดยอัตโนมัติ`;
+    } else {
+        userMessage = `สร้าง prompt วิดีโอองค์เทพพูดจากภาพนี้
+บทพูดองค์เทพ: "${speech || 'ลูก ๆ จงเชื่อมั่นในตัวเอง'}"
+อารมณ์/พลัง: ${moodData.name || 'เมตตา'} - ${moodData.prompt || ''}
+คำสั่งเพิ่มเติม: ${extraInstructions}`;
+    }
+    
+    try {
+        const base64Data = imageDataUrl.split(',')[1];
+        const mimeType = imageDataUrl.split(';')[0].split(':')[1];
+        
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                contents: [{
+                    parts: [
+                        { text: userMessage },
+                        { inline_data: { mime_type: mimeType, data: base64Data } }
+                    ]
+                }]
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+            return data.candidates[0].content.parts[0].text.trim();
+        }
+    } catch (error) {
+        sacredVideoAddLog(`❌ Error generating prompt: ${error.message}`, 'error');
+    }
+    
+    return null;
+}
+
+// Main Automation (Sacred Video) - ใช้ Logic เหมือน Video Module
+async function sacredVideoRunAutomation() {
+    // Helper function - sacredSleep
+    const sacredSleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+    
+    const isCorrect = await checkCorrectWebsite();
+    if (!isCorrect) return;
+    
+    if (sacredVideoUploadedImages.length === 0) {
+        showToast('กรุณาอัพโหลดรูปองค์เทพก่อน', 'error');
+        return;
+    }
+    
+    const roundsPerImage = parseInt(document.getElementById('sacred-video-round-count')?.value) || 1;
+    const clipsPerRound = parseInt(document.getElementById('sacred-video-clip-count')?.value) || 1;
+    const totalImages = sacredVideoUploadedImages.length;
+    const totalRounds = totalImages * roundsPerImage;
+    
+    // Start automation
+    sacredVideoIsRunning = true;
+    sacredVideoShouldStop = false;
+    sacredVideoBtnAutomation.disabled = true;
+    sacredVideoBtnAutomation.innerHTML = '<span class="loading"></span> กำลังทำงาน...';
+    if (sacredVideoBtnStop) sacredVideoBtnStop.style.display = 'flex';
+    await toggleWebPageLock(true);
+    
+    sacredVideoClearLogs();
+    sacredVideoAddLog('📿 เริ่มสร้างวิดีโอสายมู', 'step');
+    
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    let completedRounds = 0;
+    
+    try {
+        for (let imgIndex = 0; imgIndex < totalImages; imgIndex++) {
+            const currentImage = sacredVideoUploadedImages[imgIndex];
+            
+            for (let round = 0; round < roundsPerImage; round++) {
+                if (sacredVideoShouldStop) {
+                    sacredVideoAddLog('⛔ หยุดทำงานแล้ว', 'warning');
+                    throw new Error('STOPPED');
+                }
+                
+                completedRounds++;
+                const roundLabel = `[รอบ ${completedRounds}/${totalRounds}]`;
+                sacredVideoAddLog(`🎬 ${roundLabel} เริ่มดำเนินการ...`, 'step');
+                sacredVideoStatusText.textContent = `รอบที่ ${completedRounds}/${totalRounds}`;
+                
+                // STEP 1: Select "Frames to Video" mode
+                sacredVideoAddLog(`${roundLabel} เลือกโหมด Frames to Video...`, 'info');
+                
+                await chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    func: () => {
+                        return new Promise((resolve) => {
+                            function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+                            function heavyClick(element) {
+                                if (!element) return;
+                                const pOpts = { bubbles: true, cancelable: true, view: window, pointerId: 1, width: 1, height: 1, pressure: 0.5 };
+                                element.dispatchEvent(new PointerEvent('pointerdown', pOpts));
+                                element.dispatchEvent(new PointerEvent('pointerup', pOpts));
+                                element.click();
+                            }
+                            
+                            let dropdownBtn = document.querySelector('button[role="combobox"]');
+                            if (!dropdownBtn) {
+                                const allButtons = document.querySelectorAll('button');
+                                for (const btn of allButtons) {
+                                    const txt = (btn.textContent||'').trim().toLowerCase();
+                                    if (txt.includes('video') || txt.includes('image') || txt.includes('frames')) {
+                                        dropdownBtn = btn;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if (dropdownBtn) {
+                                const currentText = (dropdownBtn.textContent || "").trim().toLowerCase();
+                                const isVideoMode = currentText.includes('frames') || currentText.includes('video');
+                                
+                                if (isVideoMode) {
+                                    resolve({ success: true, message: 'อยู่ในโหมด Video แล้ว' });
+                                    return;
+                                }
+                                
+                                heavyClick(dropdownBtn);
+                                setTimeout(() => {
+                                    const allOptions = document.querySelectorAll('[role="menuitem"], [role="option"], li');
+                                    for (const opt of allOptions) {
+                                        const txt = (opt.textContent || '').toLowerCase();
+                                        if (txt.includes('frames') || txt.includes('video') || txt.includes('เปลี่ยนเฟรม')) {
+                                            heavyClick(opt);
+                                            break;
+                                        }
+                                    }
+                                    setTimeout(() => {
+                                        document.body.click();
+                                        resolve({ success: true, message: 'เปลี่ยนโหมดสำเร็จ' });
+                                    }, 1500);
+                                }, 1500);
+                            } else {
+                                resolve({ success: false, message: 'หาปุ่มเมนูไม่เจอ' });
+                            }
+                        });
+                    }
+                });
+                
+                await sacredSleep(2000);
+                
+                // STEP 2: Generate prompt
+                sacredVideoAddLog(`${roundLabel} กำลังสร้าง Prompt...`, 'info');
+                const prompt = await sacredVideoGeneratePrompt(currentImage.dataUrl);
+                if (!prompt) {
+                    sacredVideoAddLog('❌ ไม่สามารถสร้าง prompt ได้', 'error');
+                    continue;
+                }
+                sacredVideoAddLog(`✨ Prompt: ${prompt.substring(0, 60)}...`, 'info');
+                
+                // STEP 3: Upload image
+                sacredVideoAddLog(`${roundLabel} กำลังอัปโหลดรูป...`, 'info');
+                const aspectRatio = localStorage.getItem('veo3_aspect_ratio') || '9:16';
+                
+                await chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    func: async (imgData, aspectRatio) => {
+                        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+                        function heavyClick(element) {
+                            if (!element) return;
+                            const pOpts = { bubbles: true, cancelable: true, view: window, pointerId: 1, width: 1, height: 1, pressure: 0.5 };
+                            element.dispatchEvent(new PointerEvent('pointerdown', pOpts));
+                            element.dispatchEvent(new PointerEvent('pointerup', pOpts));
+                            element.click();
+                        }
+                        
+                        // หาปุ่ม Upload
+                        const uploadBtnSelector = '#__next > div.sc-c7ee1759-1.crzReP > div > div > div.sc-b0c0bd7-1.kvzLFA > div > div.sc-897c0dbb-0.eHacXb > div.sc-77366d4e-0.eaiEre > div > div > div.sc-408537d4-0.eBSqXt > div:nth-child(1) > div > div:nth-child(1) > button';
+                        let uploadBtn = document.querySelector(uploadBtnSelector);
+                        if (!uploadBtn) {
+                            const allButtons = document.querySelectorAll('button');
+                            for (const btn of allButtons) {
+                                const txt = (btn.textContent || '').toLowerCase();
+                                if (txt.includes('add') || txt.includes('upload') || btn.querySelector('input[type="file"]')) {
+                                    uploadBtn = btn;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if (uploadBtn) {
+                            heavyClick(uploadBtn);
+                            await sleep(1500);
+                            
+                            // หา Input File (ใช้ logic เหมือน Banana - เอาตัวสุดท้าย)
+                            const fileInputs = document.querySelectorAll('input[type="file"]');
+                            let fileInput = null;
+                            if (fileInputs.length > 0) fileInput = fileInputs[fileInputs.length - 1];
+                            
+                            if (fileInput) {
+                                const base64Data = imgData.dataUrl.split(',')[1];
+                                const byteCharacters = atob(base64Data);
+                                const byteNumbers = new Array(byteCharacters.length);
+                                for (let i = 0; i < byteCharacters.length; i++) {
+                                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                                }
+                                const byteArray = new Uint8Array(byteNumbers);
+                                const blob = new Blob([byteArray], { type: imgData.type });
+                                const file = new File([blob], imgData.name, { type: imgData.type });
+                                
+                                const dt = new DataTransfer();
+                                dt.items.add(file);
+                                fileInput.files = dt.files;
+                                fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+                                fileInput.dispatchEvent(new Event('input', { bubbles: true }));
+                                
+                                await sleep(3000);
+                                
+                                // กดปุ่ม Confirm
+                                const allBtns = document.querySelectorAll('button');
+                                for (const btn of allBtns) {
+                                    const t = (btn.textContent || '').trim().toLowerCase();
+                                    if (t.includes('save') || t.includes('crop') || t.includes('done') || t.includes('confirm') || t.includes('ยืนยัน')) {
+                                        heavyClick(btn);
+                                        break;
+                                    }
+                                }
+                                
+                                await sleep(3000);
+                            }
+                        }
+                    },
+                    args: [currentImage, aspectRatio]
+                });
+                
+                await sacredSleep(3000);
+                
+                // STEP 4: Fill prompt
+                sacredVideoAddLog(`${roundLabel} กรอก Prompt...`, 'info');
+                await chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    func: (text) => {
+                        const el = document.getElementById('PINHOLE_TEXT_AREA_ELEMENT_ID') || document.querySelector('textarea');
+                        if (el) {
+                            el.value = '';
+                            el.focus();
+                            for (let i = 0; i < text.length; i++) {
+                                el.value += text[i];
+                                el.dispatchEvent(new Event('input', { bubbles: true }));
+                            }
+                            el.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    },
+                    args: [prompt]
+                });
+                
+                await sacredSleep(1500);
+                
+                // STEP 5: Click Generate
+                sacredVideoAddLog(`${roundLabel} กดปุ่ม Generate...`, 'info');
+                await chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    func: () => {
+                        function heavyClick(element) {
+                            if (!element) return;
+                            const pOpts = { bubbles: true, cancelable: true, view: window, pointerId: 1, width: 1, height: 1, pressure: 0.5 };
+                            element.dispatchEvent(new PointerEvent('pointerdown', pOpts));
+                            element.dispatchEvent(new PointerEvent('pointerup', pOpts));
+                            element.click();
+                        }
+                        
+                        const generateKeywords = ['generate', 'create', 'สร้าง'];
+                        const allButtons = document.querySelectorAll('button');
+                        for (const btn of allButtons) {
+                            const txt = (btn.textContent || '').toLowerCase();
+                            if (generateKeywords.some(k => txt.includes(k)) && !btn.disabled) {
+                                heavyClick(btn);
+                                return;
+                            }
+                        }
+                    }
+                });
+                
+                // STEP 6: Wait for video generation
+                sacredVideoAddLog(`${roundLabel} รอสร้างวิดีโอ...`, 'info');
+                
+                // รอ 2-5 นาทีสำหรับวิดีโอ
+                for (let waitTime = 0; waitTime < 300; waitTime++) {
+                    await sacredSleep(1000);
+                    
+                    if (sacredVideoShouldStop) throw new Error('STOPPED');
+                    
+                    // เช็คทุก 10 วินาที
+                    if (waitTime % 10 === 0) {
+                        const checkResult = await chrome.scripting.executeScript({
+                            target: { tabId: tab.id },
+                            func: () => {
+                                // เช็คว่ามีวิดีโอหรือปุ่ม download หรือยัง
+                                const videos = document.querySelectorAll('video');
+                                const downloadBtns = document.querySelectorAll('button[aria-label*="download"], a[download]');
+                                const progressBar = document.querySelector('[role="progressbar"]');
+                                
+                                // ถ้ายังมี progress bar แปลว่ายังโหลดอยู่
+                                if (progressBar) return { done: false, progress: true };
+                                
+                                // ถ้ามี video หรือ download button แปลว่าเสร็จแล้ว
+                                if (videos.length > 0 || downloadBtns.length > 0) return { done: true };
+                                
+                                return { done: false };
+                            }
+                        });
+                        
+                        if (checkResult[0]?.result?.done) {
+                            sacredVideoAddLog(`✅ สร้างวิดีโอเสร็จแล้ว!`, 'success');
+                            await sacredSleep(3000);
+                            break;
+                        }
+                        
+                        sacredVideoAddLog(`⏳ รอ... (${waitTime}s)`, 'info');
+                    }
+                }
+                
+                sacredVideoAddLog(`${roundLabel} เสร็จสิ้น`, 'success');
+            }
+            
+            if (sacredVideoShouldStop) throw new Error('STOPPED');
+        }
+    } catch (error) {
+        if (error.message !== 'STOPPED') {
+            sacredVideoAddLog(`❌ Error: ${error.message}`, 'error');
+        }
+    }
+    
+    // End automation
+    await toggleWebPageLock(false);
+    sacredVideoIsRunning = false;
+    sacredVideoBtnAutomation.disabled = false;
+    sacredVideoBtnAutomation.innerHTML = '📿 START VIDEO';
+    if (sacredVideoBtnStop) sacredVideoBtnStop.style.display = 'none';
+    sacredVideoStatusText.textContent = 'Ready';
+    sacredVideoAddLog('✅ เสร็จสิ้นทั้งหมด!', 'success');
+    showToast('สร้างวิดีโอสายมูเสร็จสิ้น!', 'success');
+}
+
+// Stop Automation (Sacred Video)
+function sacredVideoStopAutomation() {
+    sacredVideoShouldStop = true;
+    sacredVideoAddLog('⛔ กำลังหยุด...', 'warning');
+}
+
+// Setup Event Listeners (Sacred Video)
+function sacredVideoSetupEventListeners() {
+    // Mood Cards
+    document.querySelectorAll('.sacred-mood-card').forEach(card => {
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.sacred-mood-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            const moodInput = document.getElementById('sacred-video-mood');
+            if (moodInput) moodInput.value = card.dataset.mood;
+        });
+    });
+    
+    // Clear button
+    if (sacredVideoClearBtn) sacredVideoClearBtn.addEventListener('click', sacredVideoClearAll);
+    
+    // Automation buttons
+    if (sacredVideoBtnAutomation) sacredVideoBtnAutomation.addEventListener('click', sacredVideoRunAutomation);
+    if (sacredVideoBtnStop) sacredVideoBtnStop.addEventListener('click', sacredVideoStopAutomation);
+    
+    // Log clear
+    if (sacredVideoLogClear) sacredVideoLogClear.addEventListener('click', sacredVideoClearLogs);
+}
+
+// ============================================
+// 🕉️ SACRED MODULES INITIALIZATION
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+    // Setup Sacred Image Module
+    if (document.getElementById('sacred-img-upload-zone')) {
+        sacredImgSetupUploadZone();
+        sacredImgSetupEventListeners();
+    }
+    
+    // Setup Sacred Video Module
+    if (document.getElementById('sacred-video-upload-zone')) {
+        sacredVideoSetupUploadZone();
+        sacredVideoSetupEventListeners();
+    }
+    
+    console.log('🕉️ Sacred Modules Loaded');
+});
