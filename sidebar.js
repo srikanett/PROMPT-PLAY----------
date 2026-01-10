@@ -5969,30 +5969,37 @@ async function sacredVideoRunAutomation() {
                 // STEP 1: เลือกโหมด Frames to Video (Copy จาก Video module 100%)
                 sacredVideoAddLog(`${roundLabel} เลือกโหมด Frames to Video...`, 'info');
                 
-                const selectMenuResult = await chrome.scripting.executeScript({
-                    target: { tabId: tab.id },
-                    func: () => {
-                        return new Promise((resolve) => {
-                            function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-                            
-                            // หา dropdown button
-                            let dropdownBtn = document.querySelector('button[role="combobox"]');
-                            if (!dropdownBtn) dropdownBtn = document.querySelector("div[class*='bHqejI']");
-                            
-                            if (!dropdownBtn) {
-                                const allButtons = document.querySelectorAll('button');
-                                for (const btn of allButtons) {
-                                    const txt = (btn.textContent||'').trim().toLowerCase();
-                                    if (txt.includes('สร้าง') || txt.includes('เปลี่ยน') || txt.includes('video') || txt.includes('image')) {
-                                        dropdownBtn = btn;
-                                        break;
+                // พยายามเลือกโหมด Frames to Video สูงสุด 3 ครั้ง
+                let modeSelected = false;
+                for (let modeAttempt = 0; modeAttempt < 3 && !modeSelected; modeAttempt++) {
+                    const selectMenuResult = await chrome.scripting.executeScript({
+                        target: { tabId: tab.id },
+                        func: () => {
+                            return new Promise((resolve) => {
+                                function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+                                
+                                // หา dropdown button (ลำดับความสำคัญ)
+                                let dropdownBtn = document.querySelector('button[role="combobox"]');
+                                if (!dropdownBtn) dropdownBtn = document.querySelector("div[class*='bHqejI']");
+                                
+                                if (!dropdownBtn) {
+                                    const allButtons = document.querySelectorAll('button');
+                                    for (const btn of allButtons) {
+                                        const txt = (btn.textContent||'').trim().toLowerCase();
+                                        if (txt.includes('สร้าง') || txt.includes('เปลี่ยน') || txt.includes('video') || txt.includes('image') || txt.includes('frames')) {
+                                            dropdownBtn = btn;
+                                            break;
+                                        }
                                     }
                                 }
-                            }
-                            
-                            if (dropdownBtn) {
+                                
+                                if (!dropdownBtn) {
+                                    resolve({ success: false, message: 'หาปุ่มเมนูไม่เจอ' });
+                                    return;
+                                }
+                                
                                 const currentText = (dropdownBtn.textContent || "").trim();
-                                // เช็คว่าอยู่โหมด Video แล้วหรือยัง (ภาษาไทย/อังกฤษ)
+                                // เช็คว่าอยู่โหมด Video แล้วหรือยัง
                                 const isVideoMode = currentText.includes('เปลี่ยนเฟรม') || currentText.includes('Frames to Video') || currentText.includes('เปลี่ยนภาพ');
                                 
                                 if (isVideoMode) {
@@ -6000,18 +6007,23 @@ async function sacredVideoRunAutomation() {
                                     return;
                                 }
                                 
-                                // กดเปิด dropdown
+                                // บังคับกดเปิด dropdown
+                                console.log("🔘 กดเปิดเมนู...");
+                                const pOpts = { bubbles: true, cancelable: true, view: window, pointerId: 1, width: 1, height: 1, pressure: 0.5 };
+                                dropdownBtn.dispatchEvent(new PointerEvent('pointerdown', pOpts));
+                                dropdownBtn.dispatchEvent(new PointerEvent('pointerup', pOpts));
                                 dropdownBtn.click();
                                 
                                 setTimeout(() => {
-                                    // ใช้ XPath หา "เปลี่ยนเฟรม" หรือ "Frames to Video" (เหมือน Video module)
+                                    // ใช้ XPath หา "เปลี่ยนเฟรม" หรือ "Frames to Video"
                                     let targetOption = null;
-                                    const xpath = "//*[contains(text(), 'เปลี่ยนเฟรม') or contains(text(), 'Frames to Video') or contains(text(), 'เปลี่ยนภาพ')]";
+                                    const xpath = "//*[contains(text(), 'เปลี่ยนเฟรม') or contains(text(), 'Frames to Video') or contains(text(), 'เปลี่ยนภาพ') or contains(text(), 'Frames to')]";
                                     const result = document.evaluate(xpath, document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+                                    
+                                    console.log(`🔍 พบ ${result.snapshotLength} ตัวเลือก`);
                                     
                                     for (let i = 0; i < result.snapshotLength; i++) {
                                         const node = result.snapshotItem(i);
-                                        // ต้องไม่ใช่ปุ่ม dropdown เดิม และต้องมองเห็น
                                         if (!dropdownBtn.contains(node) && node.offsetParent !== null) {
                                             // หา parent ที่เป็น menuitem
                                             let p = node;
@@ -6028,29 +6040,42 @@ async function sacredVideoRunAutomation() {
                                     }
                                     
                                     if (targetOption) {
-                                        // กดเลือก option
-                                        const pOpts = { bubbles: true, cancelable: true, view: window, pointerId: 1, width: 1, height: 1, pressure: 0.5 };
-                                        targetOption.dispatchEvent(new PointerEvent('pointerdown', pOpts));
-                                        targetOption.dispatchEvent(new PointerEvent('pointerup', pOpts));
+                                        console.log("✅ เจอตัวเลือก กด...");
+                                        const pOpts2 = { bubbles: true, cancelable: true, view: window, pointerId: 1, width: 1, height: 1, pressure: 0.5 };
+                                        targetOption.dispatchEvent(new PointerEvent('pointerdown', pOpts2));
+                                        targetOption.dispatchEvent(new PointerEvent('pointerup', pOpts2));
                                         targetOption.click();
                                         
                                         setTimeout(() => {
                                             document.body.click();
-                                            resolve({ success: true, message: 'เปลี่ยนเป็นโหมด Frames to Video สำเร็จ' });
+                                            resolve({ success: true, message: '🎬 เปลี่ยนเป็นโหมด Frames to Video สำเร็จ' });
                                         }, 2000);
                                     } else {
-                                        resolve({ success: false, message: 'หาตัวเลือก Frames to Video ไม่เจอ' });
+                                        // ปิดเมนู
+                                        document.body.click();
+                                        resolve({ success: false, message: '❌ หาตัวเลือก Frames to Video ไม่เจอ' });
                                     }
                                 }, 1500);
-                            } else {
-                                resolve({ success: false, message: 'หาปุ่มเมนูไม่เจอ' });
-                            }
-                        });
+                            });
+                        }
+                    });
+                    
+                    const result = selectMenuResult[0]?.result;
+                    if (result?.message) {
+                        sacredVideoAddLog(result.message, result.success ? 'success' : 'warning');
                     }
-                });
+                    
+                    if (result?.success) {
+                        modeSelected = true;
+                    } else {
+                        sacredVideoAddLog(`⏳ ลองใหม่ครั้งที่ ${modeAttempt + 2}...`, 'info');
+                        await sacredSleep(2000);
+                    }
+                }
                 
-                if (selectMenuResult[0]?.result?.message) {
-                    sacredVideoAddLog(selectMenuResult[0].result.message, selectMenuResult[0].result.success ? 'success' : 'warning');
+                if (!modeSelected) {
+                    sacredVideoAddLog('⚠️ ไม่สามารถเลือกโหมด Frames to Video ได้ ข้ามรอบนี้...', 'warning');
+                    continue;
                 }
                 
                 await sacredSleep(2000);
