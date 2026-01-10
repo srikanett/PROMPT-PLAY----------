@@ -5921,9 +5921,9 @@ async function sacredVideoGeneratePrompt(imageDataUrl) {
     return null;
 }
 
-// Main Automation (Sacred Video) - ใช้ Logic เหมือน Video Module
+// Main Automation (Sacred Video) - Copy Logic จาก Video Module 100%
 async function sacredVideoRunAutomation() {
-    // Helper function - sacredSleep
+    // Helper function
     const sacredSleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     
     const isCorrect = await checkCorrectWebsite();
@@ -5940,6 +5940,7 @@ async function sacredVideoRunAutomation() {
     const totalRounds = totalImages * roundsPerImage;
     
     // Start automation
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     sacredVideoIsRunning = true;
     sacredVideoShouldStop = false;
     sacredVideoBtnAutomation.disabled = true;
@@ -5950,46 +5951,39 @@ async function sacredVideoRunAutomation() {
     sacredVideoClearLogs();
     sacredVideoAddLog('📿 เริ่มสร้างวิดีโอสายมู', 'step');
     
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     let completedRounds = 0;
+    let totalDownloaded = 0;
     
     try {
         for (let imgIndex = 0; imgIndex < totalImages; imgIndex++) {
             const currentImage = sacredVideoUploadedImages[imgIndex];
             
             for (let round = 0; round < roundsPerImage; round++) {
-                if (sacredVideoShouldStop) {
-                    sacredVideoAddLog('⛔ หยุดทำงานแล้ว', 'warning');
-                    throw new Error('STOPPED');
-                }
+                if (sacredVideoShouldStop) throw new Error('STOPPED');
                 
                 completedRounds++;
                 const roundLabel = `[รอบ ${completedRounds}/${totalRounds}]`;
                 sacredVideoAddLog(`🎬 ${roundLabel} เริ่มดำเนินการ...`, 'step');
                 sacredVideoStatusText.textContent = `รอบที่ ${completedRounds}/${totalRounds}`;
                 
-                // STEP 1: Select "Frames to Video" mode
+                // STEP 1: เลือกโหมด Frames to Video (Copy จาก Video module 100%)
                 sacredVideoAddLog(`${roundLabel} เลือกโหมด Frames to Video...`, 'info');
                 
-                await chrome.scripting.executeScript({
+                const selectMenuResult = await chrome.scripting.executeScript({
                     target: { tabId: tab.id },
                     func: () => {
                         return new Promise((resolve) => {
                             function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-                            function heavyClick(element) {
-                                if (!element) return;
-                                const pOpts = { bubbles: true, cancelable: true, view: window, pointerId: 1, width: 1, height: 1, pressure: 0.5 };
-                                element.dispatchEvent(new PointerEvent('pointerdown', pOpts));
-                                element.dispatchEvent(new PointerEvent('pointerup', pOpts));
-                                element.click();
-                            }
                             
+                            // หา dropdown button
                             let dropdownBtn = document.querySelector('button[role="combobox"]');
+                            if (!dropdownBtn) dropdownBtn = document.querySelector("div[class*='bHqejI']");
+                            
                             if (!dropdownBtn) {
                                 const allButtons = document.querySelectorAll('button');
                                 for (const btn of allButtons) {
                                     const txt = (btn.textContent||'').trim().toLowerCase();
-                                    if (txt.includes('video') || txt.includes('image') || txt.includes('frames')) {
+                                    if (txt.includes('สร้าง') || txt.includes('เปลี่ยน') || txt.includes('video') || txt.includes('image')) {
                                         dropdownBtn = btn;
                                         break;
                                     }
@@ -5997,28 +5991,56 @@ async function sacredVideoRunAutomation() {
                             }
                             
                             if (dropdownBtn) {
-                                const currentText = (dropdownBtn.textContent || "").trim().toLowerCase();
-                                const isVideoMode = currentText.includes('frames') || currentText.includes('video');
+                                const currentText = (dropdownBtn.textContent || "").trim();
+                                // เช็คว่าอยู่โหมด Video แล้วหรือยัง (ภาษาไทย/อังกฤษ)
+                                const isVideoMode = currentText.includes('เปลี่ยนเฟรม') || currentText.includes('Frames to Video') || currentText.includes('เปลี่ยนภาพ');
                                 
                                 if (isVideoMode) {
-                                    resolve({ success: true, message: 'อยู่ในโหมด Video แล้ว' });
+                                    resolve({ success: true, message: 'อยู่ในโหมด Frames to Video แล้ว' });
                                     return;
                                 }
                                 
-                                heavyClick(dropdownBtn);
+                                // กดเปิด dropdown
+                                dropdownBtn.click();
+                                
                                 setTimeout(() => {
-                                    const allOptions = document.querySelectorAll('[role="menuitem"], [role="option"], li');
-                                    for (const opt of allOptions) {
-                                        const txt = (opt.textContent || '').toLowerCase();
-                                        if (txt.includes('frames') || txt.includes('video') || txt.includes('เปลี่ยนเฟรม')) {
-                                            heavyClick(opt);
+                                    // ใช้ XPath หา "เปลี่ยนเฟรม" หรือ "Frames to Video" (เหมือน Video module)
+                                    let targetOption = null;
+                                    const xpath = "//*[contains(text(), 'เปลี่ยนเฟรม') or contains(text(), 'Frames to Video') or contains(text(), 'เปลี่ยนภาพ')]";
+                                    const result = document.evaluate(xpath, document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+                                    
+                                    for (let i = 0; i < result.snapshotLength; i++) {
+                                        const node = result.snapshotItem(i);
+                                        // ต้องไม่ใช่ปุ่ม dropdown เดิม และต้องมองเห็น
+                                        if (!dropdownBtn.contains(node) && node.offsetParent !== null) {
+                                            // หา parent ที่เป็น menuitem
+                                            let p = node;
+                                            while(p && p !== document.body) {
+                                                if(p.getAttribute('role') === 'menuitem' || p.getAttribute('role') === 'option') {
+                                                    targetOption = p;
+                                                    break;
+                                                }
+                                                p = p.parentElement;
+                                            }
+                                            if (!targetOption) targetOption = node.parentElement;
                                             break;
                                         }
                                     }
-                                    setTimeout(() => {
-                                        document.body.click();
-                                        resolve({ success: true, message: 'เปลี่ยนโหมดสำเร็จ' });
-                                    }, 1500);
+                                    
+                                    if (targetOption) {
+                                        // กดเลือก option
+                                        const pOpts = { bubbles: true, cancelable: true, view: window, pointerId: 1, width: 1, height: 1, pressure: 0.5 };
+                                        targetOption.dispatchEvent(new PointerEvent('pointerdown', pOpts));
+                                        targetOption.dispatchEvent(new PointerEvent('pointerup', pOpts));
+                                        targetOption.click();
+                                        
+                                        setTimeout(() => {
+                                            document.body.click();
+                                            resolve({ success: true, message: 'เปลี่ยนเป็นโหมด Frames to Video สำเร็จ' });
+                                        }, 2000);
+                                    } else {
+                                        resolve({ success: false, message: 'หาตัวเลือก Frames to Video ไม่เจอ' });
+                                    }
                                 }, 1500);
                             } else {
                                 resolve({ success: false, message: 'หาปุ่มเมนูไม่เจอ' });
@@ -6027,9 +6049,13 @@ async function sacredVideoRunAutomation() {
                     }
                 });
                 
+                if (selectMenuResult[0]?.result?.message) {
+                    sacredVideoAddLog(selectMenuResult[0].result.message, selectMenuResult[0].result.success ? 'success' : 'warning');
+                }
+                
                 await sacredSleep(2000);
                 
-                // STEP 2: Generate prompt
+                // STEP 2: Generate Prompt
                 sacredVideoAddLog(`${roundLabel} กำลังสร้าง Prompt...`, 'info');
                 const prompt = await sacredVideoGeneratePrompt(currentImage.dataUrl);
                 if (!prompt) {
@@ -6038,188 +6064,390 @@ async function sacredVideoRunAutomation() {
                 }
                 sacredVideoAddLog(`✨ Prompt: ${prompt.substring(0, 60)}...`, 'info');
                 
-                // STEP 3: Upload image
+                // STEP 3: Upload รูป (ใช้ Logic เหมือน Video module ต้นฉบับ)
                 sacredVideoAddLog(`${roundLabel} กำลังอัปโหลดรูป...`, 'info');
                 const aspectRatio = localStorage.getItem('veo3_aspect_ratio') || '9:16';
+                const singleImageData = [{
+                    name: currentImage.name, type: currentImage.type, dataUrl: currentImage.dataUrl
+                }];
                 
-                await chrome.scripting.executeScript({
+                const uploadResult = await chrome.scripting.executeScript({
                     target: { tabId: tab.id },
-                    func: async (imgData, aspectRatio) => {
+                    func: (images, aspectRatio) => {
                         function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
                         function heavyClick(element) {
                             if (!element) return;
-                            const pOpts = { bubbles: true, cancelable: true, view: window, pointerId: 1, width: 1, height: 1, pressure: 0.5 };
-                            element.dispatchEvent(new PointerEvent('pointerdown', pOpts));
-                            element.dispatchEvent(new PointerEvent('pointerup', pOpts));
+                            const opts = { bubbles: true, cancelable: true, view: window };
+                            element.dispatchEvent(new PointerEvent('pointerdown', opts));
+                            element.dispatchEvent(new MouseEvent('mousedown', opts));
+                            element.dispatchEvent(new PointerEvent('pointerup', opts));
+                            element.dispatchEvent(new MouseEvent('mouseup', opts));
                             element.click();
                         }
                         
-                        // หาปุ่ม Upload
-                        const uploadBtnSelector = '#__next > div.sc-c7ee1759-1.crzReP > div > div > div.sc-b0c0bd7-1.kvzLFA > div > div.sc-897c0dbb-0.eHacXb > div.sc-77366d4e-0.eaiEre > div > div > div.sc-408537d4-0.eBSqXt > div:nth-child(1) > div > div:nth-child(1) > button';
-                        let uploadBtn = document.querySelector(uploadBtnSelector);
-                        if (!uploadBtn) {
-                            const allButtons = document.querySelectorAll('button');
-                            for (const btn of allButtons) {
-                                const txt = (btn.textContent || '').toLowerCase();
-                                if (txt.includes('add') || txt.includes('upload') || btn.querySelector('input[type="file"]')) {
-                                    uploadBtn = btn;
-                                    break;
-                                }
-                            }
-                        }
-                        
-                        if (uploadBtn) {
-                            heavyClick(uploadBtn);
-                            await sleep(1500);
-                            
-                            // หา Input File (ใช้ logic เหมือน Banana - เอาตัวสุดท้าย)
-                            const fileInputs = document.querySelectorAll('input[type="file"]');
-                            let fileInput = null;
-                            if (fileInputs.length > 0) fileInput = fileInputs[fileInputs.length - 1];
-                            
-                            if (fileInput) {
-                                const base64Data = imgData.dataUrl.split(',')[1];
-                                const byteCharacters = atob(base64Data);
-                                const byteNumbers = new Array(byteCharacters.length);
-                                for (let i = 0; i < byteCharacters.length; i++) {
-                                    byteNumbers[i] = byteCharacters.charCodeAt(i);
-                                }
-                                const byteArray = new Uint8Array(byteNumbers);
-                                const blob = new Blob([byteArray], { type: imgData.type });
-                                const file = new File([blob], imgData.name, { type: imgData.type });
-                                
-                                const dt = new DataTransfer();
-                                dt.items.add(file);
-                                fileInput.files = dt.files;
-                                fileInput.dispatchEvent(new Event('change', { bubbles: true }));
-                                fileInput.dispatchEvent(new Event('input', { bubbles: true }));
-                                
-                                await sleep(3000);
-                                
-                                // กดปุ่ม Confirm
+                        return new Promise((resolve) => {
+                            // 1. กดปุ่ม Upload
+                            const uploadBtnSelector = '#__next > div.sc-c7ee1759-1.crzReP > div > div > div.sc-b0c0bd7-1.kvzLFA > div > div.sc-897c0dbb-0.eHacXb > div.sc-77366d4e-0.eaiEre > div > div > div.sc-408537d4-0.eBSqXt > div:nth-child(1) > div > div:nth-child(1) > button';
+                            let uploadBtn = document.querySelector(uploadBtnSelector);
+                            if (!uploadBtn) {
                                 const allBtns = document.querySelectorAll('button');
-                                for (const btn of allBtns) {
-                                    const t = (btn.textContent || '').trim().toLowerCase();
-                                    if (t.includes('save') || t.includes('crop') || t.includes('done') || t.includes('confirm') || t.includes('ยืนยัน')) {
-                                        heavyClick(btn);
-                                        break;
+                                for(const b of allBtns) {
+                                    if(b.querySelector('input[type="file"]')) continue;
+                                    const icon = b.querySelector('i');
+                                    if(icon && (icon.textContent.includes('image') || icon.textContent.includes('add'))) {
+                                        uploadBtn = b; break;
                                     }
                                 }
-                                
-                                await sleep(3000);
                             }
-                        }
+                            if (!uploadBtn) { 
+                                resolve({ success: false, message: '❌ หาปุ่ม Upload ไม่เจอ' }); 
+                                return; 
+                            }
+                            
+                            uploadBtn.click();
+                            
+                            // 2. ใส่ไฟล์ (ใช้ setTimeout เหมือน Video module)
+                            setTimeout(() => {
+                                const fileInputs = document.querySelectorAll('input[type="file"]');
+                                let targetInput = null;
+                                if (fileInputs.length > 0) targetInput = fileInputs[fileInputs.length - 1];
+                                
+                                if (targetInput) {
+                                    const dataTransfer = new DataTransfer();
+                                    images.forEach((img) => {
+                                        const byteString = atob(img.dataUrl.split(',')[1]);
+                                        const ab = new ArrayBuffer(byteString.length);
+                                        const ia = new Uint8Array(ab);
+                                        for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+                                        const blob = new Blob([ab], { type: img.type });
+                                        const file = new File([blob], img.name, { type: img.type });
+                                        dataTransfer.items.add(file);
+                                    });
+                                    targetInput.files = dataTransfer.files;
+                                    targetInput.dispatchEvent(new Event('change', { bubbles: true }));
+                                    targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+                                    
+                                    // 3. รอและจัดการ Popup
+                                    setTimeout(async () => {
+                                        const isPortrait = aspectRatio === '9:16';
+                                        const targetText = isPortrait ? ['Portrait', 'แนวตั้ง'] : ['Landscape', 'แนวนอน'];
+                                        const allRatioKeywords = ['Portrait', 'Landscape', 'แนวตั้ง', 'แนวนอน', 'Ratio', 'Crop'];
+                                        
+                                        // หาปุ่มเมนู
+                                        let orientationBtn = null;
+                                        const allButtons = document.querySelectorAll('button');
+                                        for (const btn of allButtons) {
+                                            const text = (btn.textContent || '').trim();
+                                            const hasKeyword = allRatioKeywords.some(kw => text.includes(kw));
+                                            if (hasKeyword && btn.getAttribute('role') !== 'menuitem') {
+                                                orientationBtn = btn; break;
+                                            }
+                                        }
+                                        
+                                        if (orientationBtn) {
+                                            heavyClick(orientationBtn);
+                                            await sleep(1000);
+                                            
+                                            let targetOption = null;
+                                            for(let attempt=0; attempt<15; attempt++) {
+                                                const candidates = document.querySelectorAll('div, span, p, li, button');
+                                                for(const el of candidates) {
+                                                    const t = (el.textContent || '').trim();
+                                                    if(!targetText.some(kw => t === kw || (t.includes(kw) && t.length < 20))) continue;
+                                                    if (el === orientationBtn || orientationBtn.contains(el)) continue;
+                                                    if (el.offsetParent === null) continue;
+                                                    targetOption = el;
+                                                    break;
+                                                }
+                                                if(targetOption) break;
+                                                await sleep(200);
+                                            }
+                                            
+                                            if (targetOption) {
+                                                heavyClick(targetOption);
+                                                if(targetOption.parentElement) heavyClick(targetOption.parentElement);
+                                            }
+                                            await sleep(1500);
+                                        }
+                                        
+                                        // กดปุ่ม Save
+                                        let confirmBtn = null;
+                                        const confirmSelectors = ['button.sc-19de2353-7.jcyPCc', 'button.sc-5983bb27-7.csgOts'];
+                                        for(const sel of confirmSelectors) {
+                                            const btn = document.querySelector(sel);
+                                            if(btn) { confirmBtn = btn; break; }
+                                        }
+                                        if(!confirmBtn) {
+                                            const allBtns = document.querySelectorAll('button');
+                                            for(const btn of allBtns) {
+                                                const t = (btn.textContent || '').trim();
+                                                if(t.includes('Save') || t.includes('Crop') || t.includes('บันทึก') || t.includes('ยืนยัน')) {
+                                                    confirmBtn = btn; break;
+                                                }
+                                            }
+                                        }
+                                        
+                                        if (confirmBtn) {
+                                            heavyClick(confirmBtn);
+                                            for(let w=0; w < 60; w++) {
+                                                await sleep(500);
+                                                const textArea = document.querySelector('textarea') || document.querySelector('#PINHOLE_TEXT_AREA_ELEMENT_ID');
+                                                if (textArea) {
+                                                    let p = textArea.parentElement;
+                                                    for(let level=0; level<4; level++) {
+                                                        if(!p) break;
+                                                        const thumbs = p.querySelectorAll('img');
+                                                        const loaded = Array.from(thumbs).some(i => i.width > 20 && i.width < 150);
+                                                        if(loaded) return resolve({ success: true, message: '✅ อัพโหลดเสร็จสิ้น' });
+                                                        p = p.parentElement;
+                                                    }
+                                                }
+                                            }
+                                            resolve({ success: true, message: '✅ (Timeout) อัพโหลดเสร็จ' });
+                                        } else {
+                                            resolve({ success: false, message: '⚠️ หาปุ่ม Save ไม่เจอ' });
+                                        }
+                                    }, 3500);
+                                } else {
+                                    resolve({ success: false, message: '❌ หา input file ไม่เจอ' });
+                                }
+                            }, 2000);
+                        });
                     },
-                    args: [currentImage, aspectRatio]
+                    args: [singleImageData, aspectRatio]
                 });
                 
-                await sacredSleep(3000);
+                if (uploadResult[0]?.result?.message) {
+                    sacredVideoAddLog(uploadResult[0].result.message, uploadResult[0].result.success ? 'success' : 'error');
+                }
                 
-                // STEP 4: Fill prompt
+                if (!uploadResult[0]?.result?.success) {
+                    sacredVideoAddLog('❌ อัพโหลดล้มเหลว', 'error');
+                    continue;
+                }
+                
+                await sacredSleep(2000);
+                
+                // STEP 4: จำทุกอย่างที่มีอยู่เดิม (Snapshot)
+                const preCreateResult = await chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    func: () => {
+                        const vids = Array.from(document.querySelectorAll('video')).map(v => v.src || v.currentSrc);
+                        const imgs = Array.from(document.querySelectorAll('img')).filter(img => img.width > 200).map(i => i.src);
+                        return [...vids, ...imgs];
+                    }
+                });
+                const oldUrls = new Set(preCreateResult[0]?.result || []);
+                sacredVideoAddLog(`📸 จำไฟล์เดิมไว้ ${oldUrls.size} ไฟล์`, 'info');
+                
+                // STEP 5: ใส่ Prompt
                 sacredVideoAddLog(`${roundLabel} กรอก Prompt...`, 'info');
                 await chrome.scripting.executeScript({
                     target: { tabId: tab.id },
-                    func: (text) => {
-                        const el = document.getElementById('PINHOLE_TEXT_AREA_ELEMENT_ID') || document.querySelector('textarea');
-                        if (el) {
-                            el.value = '';
-                            el.focus();
-                            for (let i = 0; i < text.length; i++) {
-                                el.value += text[i];
-                                el.dispatchEvent(new Event('input', { bubbles: true }));
-                            }
-                            el.dispatchEvent(new Event('change', { bubbles: true }));
+                    func: (txt) => {
+                        const el = document.getElementById('PINHOLE_TEXT_AREA_ELEMENT_ID');
+                        if(el) { 
+                            el.value = txt; 
+                            el.dispatchEvent(new Event('input', {bubbles:true})); 
+                        } else {
+                            const ta = document.querySelector('textarea');
+                            if(ta) { ta.value = txt; ta.dispatchEvent(new Event('input', {bubbles:true})); }
                         }
                     },
                     args: [prompt]
                 });
-                
                 await sacredSleep(1500);
                 
-                // STEP 5: Click Generate
-                sacredVideoAddLog(`${roundLabel} กดปุ่ม Generate...`, 'info');
-                await chrome.scripting.executeScript({
+                // STEP 6: กด Create
+                sacredVideoAddLog(`${roundLabel} กดปุ่มสร้าง...`, 'info');
+                const createResult = await chrome.scripting.executeScript({
                     target: { tabId: tab.id },
                     func: () => {
-                        function heavyClick(element) {
-                            if (!element) return;
-                            const pOpts = { bubbles: true, cancelable: true, view: window, pointerId: 1, width: 1, height: 1, pressure: 0.5 };
-                            element.dispatchEvent(new PointerEvent('pointerdown', pOpts));
-                            element.dispatchEvent(new PointerEvent('pointerup', pOpts));
-                            element.click();
-                        }
-                        
-                        const generateKeywords = ['generate', 'create', 'สร้าง'];
-                        const allButtons = document.querySelectorAll('button');
-                        for (const btn of allButtons) {
-                            const txt = (btn.textContent || '').toLowerCase();
-                            if (generateKeywords.some(k => txt.includes(k)) && !btn.disabled) {
-                                heavyClick(btn);
-                                return;
+                        return new Promise((resolve) => {
+                            const btn = document.querySelector('#__next > div.sc-c7ee1759-1.crzReP > div > div > div.sc-b0c0bd7-1.kvzLFA > div > div.sc-897c0dbb-0.eHacXb > div.sc-77366d4e-0.eaiEre > div > div > div.sc-408537d4-0.eBSqXt > div.sc-408537d4-1.eiHkev > button');
+                            if (btn && !btn.disabled) {
+                                btn.click();
+                                resolve({ success: true });
+                            } else {
+                                resolve({ success: false, message: 'ปุ่มยังเทาอยู่' });
                             }
-                        }
+                        });
                     }
                 });
                 
-                // STEP 6: Wait for video generation
-                sacredVideoAddLog(`${roundLabel} รอสร้างวิดีโอ...`, 'info');
+                if (!createResult[0]?.result?.success) {
+                    sacredVideoAddLog('⚠️ กดปุ่มสร้างไม่ได้ (ปุ่มเทา)', 'warning');
+                    continue;
+                }
+                sacredVideoAddLog('🖱️ กดปุ่มสร้างสำเร็จ!', 'success');
                 
-                // รอ 2-5 นาทีสำหรับวิดีโอ
-                for (let waitTime = 0; waitTime < 300; waitTime++) {
-                    await sacredSleep(1000);
-                    
+                // STEP 7: รอวิดีโอใหม่ (รอสูงสุด 4 นาที)
+                sacredVideoAddLog(`${roundLabel} รอสร้างวิดีโอ...`, 'info');
+                let foundVideo = false;
+                let detectedCount = 0;
+                
+                for(let w=0; w<120; w++) {
                     if (sacredVideoShouldStop) throw new Error('STOPPED');
                     
-                    // เช็คทุก 10 วินาที
-                    if (waitTime % 10 === 0) {
-                        const checkResult = await chrome.scripting.executeScript({
-                            target: { tabId: tab.id },
-                            func: () => {
-                                // เช็คว่ามีวิดีโอหรือปุ่ม download หรือยัง
-                                const videos = document.querySelectorAll('video');
-                                const downloadBtns = document.querySelectorAll('button[aria-label*="download"], a[download]');
-                                const progressBar = document.querySelector('[role="progressbar"]');
-                                
-                                // ถ้ายังมี progress bar แปลว่ายังโหลดอยู่
-                                if (progressBar) return { done: false, progress: true };
-                                
-                                // ถ้ามี video หรือ download button แปลว่าเสร็จแล้ว
-                                if (videos.length > 0 || downloadBtns.length > 0) return { done: true };
-                                
-                                return { done: false };
-                            }
-                        });
+                    const check = await chrome.scripting.executeScript({
+                        target: { tabId: tab.id },
+                        func: (old) => {
+                            const oldSet = new Set(old);
+                            const elements = Array.from(document.querySelectorAll('video, img'));
+                            const newItems = elements.filter(el => {
+                                const rect = el.getBoundingClientRect();
+                                if(rect.width < 200) return false;
+                                const src = el.src || el.currentSrc;
+                                return src && !oldSet.has(src);
+                            });
+                            return { hasNew: newItems.length > 0, count: newItems.length };
+                        },
+                        args: [Array.from(oldUrls)]
+                    });
+                    
+                    if(check[0]?.result?.hasNew) {
+                        foundVideo = true;
+                        detectedCount = check[0]?.result?.count || 0;
                         
-                        if (checkResult[0]?.result?.done) {
-                            sacredVideoAddLog(`✅ สร้างวิดีโอเสร็จแล้ว!`, 'success');
-                            await sacredSleep(3000);
+                        if (detectedCount >= clipsPerRound) {
+                            sacredVideoAddLog(`✅ เจอครบ ${detectedCount}/${clipsPerRound} คลิปแล้ว!`, 'success');
                             break;
+                        } else {
+                            sacredVideoAddLog(`⏳ เจอแล้ว ${detectedCount}/${clipsPerRound} คลิป... (${w*2}s)`, 'info');
                         }
-                        
-                        sacredVideoAddLog(`⏳ รอ... (${waitTime}s)`, 'info');
+                    } else if (w % 10 === 0) {
+                        sacredVideoAddLog(`⏳ รอ... (${w*2}s)`, 'info');
                     }
+                    
+                    await sacredSleep(2000);
                 }
                 
-                sacredVideoAddLog(`${roundLabel} เสร็จสิ้น`, 'success');
+                if (foundVideo) {
+                    const finalCount = detectedCount > 0 ? detectedCount : clipsPerRound;
+                    sacredVideoAddLog(`⏳ รอ 15 วินาทีให้โหลดสมบูรณ์...`, 'info');
+                    await sacredSleep(15000);
+                    
+                    // STEP 8: ดาวน์โหลดวิดีโอ
+                    sacredVideoAddLog(`${roundLabel} เริ่มดาวน์โหลด ${finalCount} คลิป...`, 'info');
+                    
+                    for (let i = 0; i < finalCount; i++) {
+                        if (sacredVideoShouldStop) throw new Error('STOPPED');
+                        
+                        sacredVideoAddLog(`กำลังโหลดคลิปที่ ${i + 1}/${finalCount}...`, 'info');
+                        
+                        const dl = await chrome.scripting.executeScript({
+                            target: { tabId: tab.id },
+                            func: (targetIndex) => {
+                                function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+                                function heavyClick(element) {
+                                    if(!element) return;
+                                    const opts = { bubbles: true, cancelable: true, view: window };
+                                    element.dispatchEvent(new PointerEvent('pointerdown', opts));
+                                    element.dispatchEvent(new PointerEvent('mousedown', opts));
+                                    element.dispatchEvent(new PointerEvent('pointerup', opts));
+                                    element.dispatchEvent(new PointerEvent('mouseup', opts));
+                                    element.click();
+                                }
+                                
+                                return new Promise(async (resolve) => {
+                                    const allCards = [];
+                                    document.querySelectorAll('img, video').forEach(el => {
+                                        if(el.getBoundingClientRect().width > 200) allCards.push(el);
+                                    });
+                                    
+                                    if (targetIndex >= allCards.length) return resolve({ success: false, message: 'ไม่เจอคลิปลำดับนี้' });
+                                    
+                                    const target = allCards[targetIndex];
+                                    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    await sleep(500);
+                                    
+                                    let card = target.parentElement;
+                                    let foundBtn = false;
+                                    
+                                    for(let k=0; k<6; k++) {
+                                        if(!card) break;
+                                        
+                                        card.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+                                        card.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+                                        
+                                        const btns = card.querySelectorAll('button');
+                                        let dlBtn = null;
+                                        for(const b of btns) {
+                                            const txt = (b.textContent || '').toLowerCase();
+                                            const icon = b.querySelector('i');
+                                            const iconTxt = icon ? (icon.textContent || icon.className) : '';
+                                            if(txt.includes('download') || txt.includes('ดาวน์โหลด') || 
+                                               iconTxt.includes('download') || iconTxt.includes('get_app')) {
+                                                dlBtn = b; break;
+                                            }
+                                        }
+                                        
+                                        if(dlBtn) {
+                                            heavyClick(dlBtn);
+                                            foundBtn = true;
+                                            break;
+                                        }
+                                        card = card.parentElement;
+                                    }
+                                    
+                                    if(foundBtn) {
+                                        await sleep(1500);
+                                        const menus = document.querySelectorAll('[role="menuitem"], li');
+                                        for(const m of menus) {
+                                            if(m.offsetParent === null) continue;
+                                            const t = (m.textContent || '').toLowerCase();
+                                            if(t.includes('original') || t.includes('ขนาดเดิม') || t.includes('720p') || t.includes('download')) {
+                                                heavyClick(m);
+                                                break;
+                                            }
+                                        }
+                                        await sleep(1000);
+                                        document.body.click();
+                                        resolve({ success: true });
+                                    } else {
+                                        resolve({ success: false, message: 'ไม่เจอปุ่มโหลด' });
+                                    }
+                                });
+                            },
+                            args: [i]
+                        });
+                        
+                        if(dl[0]?.result?.success) {
+                            sacredVideoAddLog(`⬇️ โหลดคลิปที่ ${i+1} สำเร็จ`, 'success');
+                            totalDownloaded++;
+                        } else {
+                            sacredVideoAddLog(`⚠️ โหลดคลิปที่ ${i+1} ไม่สำเร็จ`, 'warning');
+                        }
+                        
+                        await sacredSleep(3000);
+                    }
+                } else {
+                    sacredVideoAddLog('⚠️ สร้างไม่สำเร็จ (หมดเวลา)', 'warning');
+                }
+                
+                await sacredSleep(5000);
+                sacredVideoAddLog(`${roundLabel} เสร็จสิ้น!`, 'success');
             }
-            
-            if (sacredVideoShouldStop) throw new Error('STOPPED');
         }
+        
+        sacredVideoAddLog(`🎉 เสร็จสิ้น! โหลดได้ ${totalDownloaded} คลิป`, 'success');
+        showToast('สร้างวิดีโอสายมูเสร็จสิ้น!', 'success');
+        
     } catch (error) {
-        if (error.message !== 'STOPPED') {
+        if (error.message === 'STOPPED') {
+            sacredVideoAddLog('🛑 หยุดโดยผู้ใช้', 'warning');
+            showToast('หยุดการทำงานแล้ว', 'warning');
+        } else {
             sacredVideoAddLog(`❌ Error: ${error.message}`, 'error');
         }
+    } finally {
+        await toggleWebPageLock(false);
+        sacredVideoIsRunning = false;
+        sacredVideoBtnAutomation.disabled = false;
+        sacredVideoBtnAutomation.innerHTML = '📿 START VIDEO';
+        if (sacredVideoBtnStop) sacredVideoBtnStop.style.display = 'none';
+        sacredVideoStatusText.textContent = 'Ready';
     }
-    
-    // End automation
-    await toggleWebPageLock(false);
-    sacredVideoIsRunning = false;
-    sacredVideoBtnAutomation.disabled = false;
-    sacredVideoBtnAutomation.innerHTML = '📿 START VIDEO';
-    if (sacredVideoBtnStop) sacredVideoBtnStop.style.display = 'none';
-    sacredVideoStatusText.textContent = 'Ready';
-    sacredVideoAddLog('✅ เสร็จสิ้นทั้งหมด!', 'success');
-    showToast('สร้างวิดีโอสายมูเสร็จสิ้น!', 'success');
 }
 
 // Stop Automation (Sacred Video)
