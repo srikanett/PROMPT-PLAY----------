@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Generate Icons for Prompt & Play Ai (Cyber Theme)</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 40px;
+      background: #0f0f12; /* พื้นหลังเข้ม */
+      color: #eee;
+      text-align: center;
+    }
+    h1 { 
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .icons-container {
+      display: flex;
+      gap: 25px;
+      justify-content: center;
+      margin: 40px 0;
+    }
+    .icon-box {
+      background: #1c1c1f;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #333;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    .icon-box p {
+      margin: 0 0 15px 0;
+      font-weight: 600;
+      color: #aaa;
+    }
+    canvas { display: block; margin: 0 auto; }
+    
+    .download-all-btn {
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      color: white;
+      border: none;
+      padding: 15px 35px;
+      border-radius: 30px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+      transition: transform 0.2s;
+    }
+    .download-all-btn:hover { transform: scale(1.05); }
+  </style>
+</head>
+<body>
+  <h1>Icon Generator - Prompt & Play Ai (Cyber)</h1>
+  <p>คลิกปุ่มด้านล่างเพื่อดาวน์โหลดไอคอนชุดใหม่ (สีม่วง-ฟ้า)</p>
+
+  <div class="icons-container">
+    <div class="icon-box"><p>16x16</p><canvas id="icon16" width="16" height="16"></canvas></div>
+    <div class="icon-box"><p>32x32</p><canvas id="icon32" width="32" height="32"></canvas></div>
+    <div class="icon-box"><p>48x48</p><canvas id="icon48" width="48" height="48"></canvas></div>
+    <div class="icon-box"><p>128x128</p><canvas id="icon128" width="128" height="128"></canvas></div>
+  </div>
+
+  <button class="download-all-btn" onclick="downloadAllIcons()">Download All Icons 📥</button>
+
+  <script>
+    function drawIcon(canvasId, size) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+
+      // 1. สร้าง Gradient สีม่วง-ฟ้า (Cyber Theme)
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, '#6366f1'); // Indigo
+      gradient.addColorStop(1, '#a855f7'); // Purple
+
+      // 2. วาดสี่เหลี่ยมมุมมน
+      const radius = size * 0.2;
+      ctx.beginPath();
+      ctx.roundRect(0, 0, size, size, radius);
+      ctx.fillStyle = gradient;
+      ctx.fill();
+
+      // 3. วาดตัว P สีขาว
+      ctx.fillStyle = 'white'; // เปลี่ยนตัวหนังสือเป็นสีขาว
+      ctx.font = `900 ${size * 0.75}px Arial`; // ตัวหนาพิเศษ
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      // เพิ่มเงาให้ตัวหนังสือเล็กน้อย
+      ctx.shadowColor = "rgba(0,0,0,0.3)";
+      ctx.shadowBlur = size * 0.05;
+      ctx.shadowOffsetY = size * 0.02;
+
+      ctx.fillText('P', size / 2, size / 2 + (size * 0.04));
+    }
+
+    function downloadIcon(canvasId, filename) {
+      const canvas = document.getElementById(canvasId);
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    function downloadAllIcons() {
+      const icons = [
+        { id: 'icon16', name: 'icon16.png' },
+        { id: 'icon32', name: 'icon32.png' },
+        { id: 'icon48', name: 'icon48.png' },
+        { id: 'icon128', name: 'icon128.png' }
+      ];
+
+      icons.forEach((icon, index) => {
+        setTimeout(() => {
+          downloadIcon(icon.id, icon.name);
+        }, index * 200);
+      });
+    }
+
+    // วาดไอคอนทันทีที่เปิดไฟล์
+    drawIcon('icon16', 16);
+    drawIcon('icon32', 32);
+    drawIcon('icon48', 48);
+    drawIcon('icon128', 128);
+  </script>
+</body>
+</html>

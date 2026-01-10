@@ -1,0 +1,741 @@
+/* =========================================
+   THEME: CYBER V3.5 (FINAL FIXED)
+   ========================================= */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg-app: #0f0f12;
+  --bg-card: #1c1c1f;
+  --bg-input: #27272a;
+  --border: #3f3f46;
+  
+  --primary: #6366f1;   /* Indigo */
+  --accent: #a855f7;    /* Purple */
+  --video: #f43f5e;     /* Rose */
+  
+  --text-main: #f4f4f5;
+  --text-dim: #a1a1aa;
+  
+  --radius: 8px;
+}
+
+* { box-sizing: border-box; outline: none; }
+body {
+  margin: 0; padding: 0;
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  font-family: 'Sarabun', 'Inter', sans-serif;
+  font-size: 14px; /* 🟢 ขยายตัวหนังสือให้อ่านง่ายขึ้น */
+  overflow-x: hidden;
+}
+
+/* =========================================
+   HEADER (BIG & BOLD VERSION)
+   ========================================= */
+.app-header {
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center;
+  padding: 20px 16px; /* เพิ่มพื้นที่แนวตั้ง */
+  background: linear-gradient(180deg, #1e1e24 0%, #0f0f12 100%);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.6);
+}
+
+.brand-box { 
+  display: flex; 
+  align-items: center; 
+  gap: 14px; /* ห่างกันมากขึ้น */
+}
+
+.brand-logo {
+  width: 48px;  /* 🟢 ใหญ่ขึ้น (เดิม 32px) */
+  height: 48px; /* 🟢 ใหญ่ขึ้น */
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: #fff; 
+  font-weight: 900; 
+  font-size: 28px; /* 🟢 ตัว P ใหญ่สะใจ */
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  border-radius: 12px; 
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.6); /* แสงเรืองรอง */
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.brand-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.brand-info h1 {
+  margin: 0; 
+  font-size: 18px; /* 🟢 ตัวหนังสือใหญ่ขึ้น */
+  font-weight: 800; 
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  /* ทำสีตัวหนังสือไล่เฉด */
+  background: linear-gradient(90deg, #ffffff, #c7d2fe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.2;
+}
+
+.brand-version {
+  font-size: 11px; 
+  color: #a855f7; /* สีม่วงนีออน */
+  font-weight: 700;
+  background: rgba(168, 85, 247, 0.1);
+  padding: 2px 8px; 
+  border-radius: 4px; 
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  display: inline-block; 
+  margin-top: 4px;
+  width: fit-content;
+}
+
+.btn-icon { 
+  background: rgba(255,255,255,0.05); 
+  border: 1px solid rgba(255,255,255,0.1); 
+  color: #aaa; 
+  width: 40px; 
+  height: 40px; 
+  border-radius: 10px;
+  font-size: 20px; 
+  cursor: pointer; 
+  transition:0.2s; 
+  display: flex; align-items: center; justify-content: center;
+}
+.btn-icon:hover { 
+  background: rgba(255,255,255,0.1);
+  color: #fff; 
+  transform: rotate(90deg); 
+  border-color: #fff;
+}
+
+
+/* === TABS === */
+.nav-segment {
+  display: flex; padding: 16px 16px 0; gap: 10px;
+}
+.segment-btn {
+  flex: 1; background: var(--bg-card); border: 1px solid var(--border);
+  color: var(--text-dim); padding: 12px; border-radius: var(--radius);
+  font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.segment-btn:hover { border-color: #fff; color: #fff; }
+.segment-btn.active {
+  background: var(--bg-input); border-color: var(--primary); color: #fff;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+.segment-btn.active[data-tab="video"] { border-color: var(--video); }
+
+/* === BODY === */
+.app-body { padding: 16px 16px 80px; }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; animation: fadeUp 0.3s ease; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+/* === SECTION === */
+.section-title {
+  font-size: 12px; font-weight: 700; color: #71717a; margin: 20px 0 10px;
+  text-transform: uppercase; letter-spacing: 1px;
+  border-bottom: 1px solid #333; padding-bottom: 5px; display: flex; align-items: center; gap: 5px;
+}
+
+/* === UPLOAD BAR === */
+.upload-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px 14px; cursor: pointer;
+  transition: 0.2s; margin-bottom: 10px;
+}
+.upload-bar:hover { border-color: #aaa; background: #27272a; }
+
+.upload-left { display: flex; align-items: center; gap: 12px; }
+.icon-box { font-size: 20px; }
+.upload-text { font-size: 14px; font-weight: 600; color: #eee; }
+.badge-count {
+  background: var(--primary); color: #fff; padding: 2px 8px;
+  border-radius: 6px; font-size: 12px; font-weight: 700;
+}
+.video-theme .badge-count { background: var(--video); }
+
+/* 🔥🔥 PREVIEW GRID (บังคับขนาดรูป) 🔥🔥 */
+.preview-strip {
+  display: flex; 
+  flex-wrap: wrap;        /* ให้รูปขึ้นบรรทัดใหม่ */
+  gap: 8px;               
+  padding-bottom: 10px;
+  width: 100%;
+}
+
+.preview-item {
+  position: relative;
+  width: 50px !important;  /* 🟢 ล็อกกว้าง 50px */
+  height: 50px !important; /* 🟢 ล็อกสูง 50px */
+  border-radius: 8px; 
+  border: 2px solid #333; 
+  overflow: hidden; 
+  background: #000;
+  flex-shrink: 0;          
+  transition: transform 0.2s;
+}
+.preview-item:hover { transform: scale(1.1); border-color: #fff; z-index: 10; }
+
+.preview-item img { 
+  width: 100%; height: 100%; 
+  object-fit: cover;       
+  display: block;
+}
+
+.preview-remove-btn {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.6); color: #fff;
+  border: none; opacity: 0; cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+.preview-item:hover .preview-remove-btn { opacity: 1; }
+
+/* === INPUTS === */
+.input-group { margin-bottom: 14px; }
+.input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.input-row label { font-size: 13px; color: #aaa; font-weight: 500; }
+
+.toggle-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #27272a; padding: 4px 10px; border-radius: 20px;
+  cursor: pointer; border: 1px solid #3f3f46; transition: 0.2s;
+}
+.toggle-pill input { display: none; }
+.toggle-pill span { font-size: 12px; color: #888; font-weight: 600; }
+.toggle-pill input:checked + span { color: #fff; }
+.toggle-pill input:checked { background: var(--primary); }
+.toggle-pill.checked { background: var(--primary); } 
+input:checked + span::before { content: '● '; color: #fff; margin-right: 4px; }
+
+input[type="text"], input[type="number"], select {
+  width: 100%; background: var(--bg-input); border: 1px solid var(--border);
+  color: #fff; padding: 10px; border-radius: var(--radius);
+  font-size: 14px; height: 42px; /* เพิ่มความสูงให้กดง่าย */
+}
+input:focus, select:focus { border-color: var(--primary); }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* Special Toggle */
+.special-box {
+  background: #1c1c1f; border: 1px solid #333; padding: 14px;
+  border-radius: var(--radius); display: flex; justify-content: space-between; align-items: center;
+  margin-top: 15px;
+}
+.switch { position: relative; width: 40px; height: 22px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute; inset: 0; background-color: #3f3f46; border-radius: 20px; transition: .3s;
+}
+.slider:before {
+  content: ""; position: absolute; height: 18px; width: 18px;
+  left: 2px; bottom: 2px; background: white; border-radius: 50%; transition: .3s;
+}
+input:checked + .slider { background-color: var(--accent); }
+input:checked + .slider:before { transform: translateX(18px); }
+
+/* === ACTION BAR === */
+.action-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: rgba(15,15,18,0.95); border-top: 1px solid var(--border);
+  padding: 16px; display: flex; gap: 10px; z-index: 100;
+}
+.btn-primary {
+  flex: 1; background: var(--primary); color: #fff; border: none;
+  border-radius: var(--radius); height: 48px; font-weight: 700; font-size: 15px;
+  cursor: pointer; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+  transition: 0.2s; letter-spacing: 0.5px;
+  
+  /* 🟢 เพิ่ม 3 บรรทัดนี้ เพื่อจัดกึ่งกลางเสมอ */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* ระยะห่างระหว่างไอคอนกับตัวหนังสือ */
+}
+
+.btn-primary:hover { transform: translateY(-2px); filter: brightness(1.1); }
+.btn-video { 
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); /* ฟ้าไล่ไปม่วง */
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); 
+}
+.btn-video:hover {
+  filter: brightness(1.2);
+  transform: translateY(-2px);
+}
+
+/* =========================================
+   🔴 ปุ่ม STOP แบบใหม่ (แดง เด่น ชัด)
+   ========================================= */
+.btn-stop {
+  /* ลบ width เดิมออกเพื่อให้ยืดหดตามตัวหนังสือ */
+  min-width: 80px; 
+  background: #ef4444;       /* สีพื้นหลังแดง */
+  color: #ffffff;            /* ตัวหนังสือสีขาว */
+  border: 1px solid #dc2626; /* ขอบแดงเข้ม */
+  border-radius: var(--radius); 
+  cursor: pointer; 
+  font-weight: 800;          /* ตัวหนา */
+  font-size: 13px;
+  display: none;             /* ซ่อนไว้ก่อน (JS จะสั่งโชว์เมื่อกดรัน) */
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4); /* เงาสีแดง */
+}
+
+.btn-stop:hover {
+  background: #dc2626;       /* แดงเข้มขึ้นเมื่อเอาเมาส์ชี้ */
+  transform: translateY(-1px);
+}
+
+.btn-stop:active {
+  transform: scale(0.95);
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999;
+  display: none; align-items: center; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal-content {
+  background: #18181b; width: 320px; padding: 20px; border-radius: 12px;
+  border: 1px solid #333; box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+}
+.modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+.modal-header h3 { margin: 0; color: #fff; font-size: 16px; }
+
+/* Utilities */
+.hidden { display: none; }
+textarea { width: 100%; height: 70px; background: #000; color: #0f0; border: 1px solid #333; margin-top: 5px; font-family: monospace; font-size: 12px; }
+details { background: #111; padding: 12px; border-radius: 8px; margin-top: 15px; }
+summary { cursor: pointer; color: #888; font-size: 13px; }
+.log-box { height: 100px; overflow-y: auto; background: #000; padding: 8px; font-family: monospace; font-size: 11px; color: #666; border: 1px solid #222; margin-top: 5px; }
+
+/* =========================================
+   UI เลือกคาแรคเตอร์แบบใหม่ (Grid)
+   ========================================= */
+.char-selection-container {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px;
+    max-height: 250px; /* จำกัดความสูงแล้วให้ Scroll ได้ถ้าเยอะเกิน */
+    overflow-y: auto;
+}
+
+.char-category-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 700;
+    margin: 12px 0 6px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 2px;
+}
+
+.char-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* แบ่งเป็น 2 คอลัมน์ */
+    gap: 6px;
+}
+
+.char-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 12px;
+    color: #ccc;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.char-card:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: #888;
+    color: #fff;
+}
+
+/* สถานะเมื่อถูกเลือก (Active) */
+.char-card.active {
+    background: rgba(99, 102, 241, 0.2); /* สีม่วงใสๆ */
+    border-color: var(--primary);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+    font-weight: 600;
+}
+
+.char-icon {
+    font-size: 14px;
+}
+
+/* Custom Scrollbar ให้ดูเนียนตา */
+.char-selection-container::-webkit-scrollbar {
+    width: 4px;
+}
+.char-selection-container::-webkit-scrollbar-track {
+    background: #111;
+}
+.char-selection-container::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 4px;
+}
+
+/* =========================================
+   UI คาแรคเตอร์แบบแท็บ (Tabbed UI)
+   ========================================= */
+.char-tab-container {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px;
+    overflow: hidden;
+}
+
+/* แถบเมนูแท็บด้านบน */
+.char-tabs {
+    display: flex;
+    flex-wrap: wrap;       /* 🟢 สั่งให้ปัดลงบรรทัดใหม่ถ้าที่เต็ม */
+    gap: 5px;              /* ระยะห่างระหว่างปุ่ม */
+    margin-bottom: 10px;
+    padding-bottom: 2px;
+    justify-content: flex-start; /* จัดเรียงชิดซ้าย */
+}
+
+.char-tabs::-webkit-scrollbar { height: 0px; } /* ซ่อน Scrollbar */
+
+.char-tab-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: #888;
+    padding: 6px 8px;      /* 🟢 ลดขอบซ้ายขวานิดนึงให้จุได้เยอะขึ้น */
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: all 0.2s;
+    flex-grow: 1;          /* 🟢 สั่งให้ปุ่มยืดขยายให้เต็มช่องว่างสวยๆ */
+    text-align: center;    /* จัดตัวหนังสือกลางปุ่ม */
+}
+
+.char-tab-btn:hover {
+    background: rgba(255,255,255,0.05);
+    color: #ccc;
+}
+
+/* สถานะแท็บที่เลือกอยู่ */
+.char-tab-btn.active {
+    background: #3f3f46;
+    color: #fff;
+    border-color: #555;
+}
+
+/* พื้นที่ Grid ด้านใน */
+.char-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2 แถวแนวตั้ง */
+    gap: 8px;
+}
+
+.char-card {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 12px;
+    color: #aaa;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.char-card:hover {
+    background: rgba(255,255,255,0.05);
+    border-color: #666;
+    color: #fff;
+}
+
+/* 🔥 สถานะ Selected (เลือกแล้วต้องเด่น!) 🔥 */
+.char-card.active {
+    background: rgba(99, 102, 241, 0.15); /* สีม่วงจางๆ */
+    border: 1px solid var(--primary);      /* ขอบสีม่วงสว่าง */
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 0 8px rgba(99, 102, 241, 0.3); /* เงาเรืองแสง */
+    position: relative;
+}
+
+/* เพิ่มจุดเขียวเล็กๆ บอกว่า Active */
+.char-card.active::after {
+    content: '●';
+    color: #4ade80; /* สีเขียว */
+    position: absolute;
+    right: 8px;
+    font-size: 10px;
+}
+
+.char-icon {
+    font-size: 16px;
+}
+
+/* =========================================
+   UI CONFIGURATION แบบใหม่ (Visual Config)
+   ========================================= */
+
+/* 1. ปุ่มเลือกจำนวนแบบเรียงแถว (Segmented Control) */
+.segment-row {
+    display: flex;
+    background: #18181b;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px;
+    gap: 4px;
+    margin-top: 5px;
+}
+
+.segment-opt {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #888;
+    padding: 8px 0;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.segment-opt:hover { background: rgba(255,255,255,0.05); color: #ccc; }
+
+.segment-opt.active {
+    background: #3f3f46;
+    color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* 2. หัวข้อแบบพับได้ (Accordion Header) */
+.config-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-input);
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    margin-bottom: 5px;
+    transition: 0.2s;
+}
+.config-header:hover { border-color: #666; }
+
+.config-selected-text {
+    font-size: 13px; font-weight: 600; color: #fff;
+    display: flex; align-items: center; gap: 8px;
+}
+.config-arrow { font-size: 10px; color: #666; transition: 0.3s; }
+.config-header.open .config-arrow { transform: rotate(180deg); }
+
+/* 3. กล่องตัวเลือกที่ซ่อนอยู่ (Dropdown Content) */
+.config-content {
+    display: none; /* ซ่อนไว้ก่อน */
+    background: #18181b;
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 10px;
+    margin-top: -6px;
+    margin-bottom: 10px;
+    animation: slideDown 0.2s ease;
+}
+.config-content.show { display: block; }
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ปรับ Grid ให้เล็กกว่า Character นิดหน่อย */
+.mini-grid {
+    display: grid; 
+    grid-template-columns: repeat(2, 1fr); /* 2 คอลัมน์ */
+    gap: 6px;
+}
+
+.mini-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 11px;
+    color: #aaa;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    transition: 0.2s;
+}
+.mini-card:hover { border-color: #666; color: #fff; }
+.mini-card.active {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: var(--primary);
+    color: #fff;
+}
+/* =========================================
+   🔔 TOAST NOTIFICATION (แบบ Pop-up กลางจอ ใหญ่สะใจ)
+   ========================================= */
+.toast {
+    position: fixed;
+    top: 50%;                /* 🟢 ดันลงมาตรงกลาง 50% ของหน้าจอ */
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9); /* จัดกึ่งกลางเป๊ะๆ และย่อรอไว้ */
+    
+    background: rgba(24, 24, 27, 0.95); /* สีพื้นเข้ม โปร่งแสงนิดๆ */
+    backdrop-filter: blur(5px);         /* เบลอฉากหลัง */
+    color: #fff;
+    
+    padding: 25px 40px;      /* 🟢 เพิ่มพื้นที่ขอบให้ดูใหญ่ขึ้น */
+    border-radius: 16px;     /* ขอบมนสวยๆ */
+    border: 2px solid #333;  /* เส้นขอบหนาขึ้นนิดนึง */
+    
+    font-size: 18px;         /* 🟢 ตัวหนังสือใหญ่ขึ้น อ่านง่าย */
+    font-weight: 700;        /* ตัวหนา */
+    text-align: center;      /* จัดตัวหนังสือกลาง */
+    
+    z-index: 999999;
+    box-shadow: 0 0 0 100vw rgba(0,0,0,0.5), /* 🟢 เพิ่มฉากหลังมืดๆ ให้ตัวเตือนเด่นขึ้น */
+                0 20px 50px rgba(0,0,0,0.8); 
+    
+    opacity: 0;
+    visibility: hidden;      /* ซ่อนไว้ไม่ให้กดโดน */
+    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* เอฟเฟกต์เด้งดึ๋ง */
+    
+    display: flex;
+    flex-direction: column;  /* เรียงไอคอนกับข้อความแนวตั้ง */
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    min-width: 320px;        /* ความกว้างขั้นต่ำ */
+}
+
+/* ตอนแสดงผล */
+.toast.show {
+    transform: translate(-50%, -50%) scale(1); /* เด้งขยายขึ้นมา */
+    opacity: 1;
+    visibility: visible;
+}
+
+/* --- สีและไอคอนตามประเภท --- */
+
+/* ✅ สำเร็จ (สีเขียว) */
+.toast.success { border-color: #10b981; color: #fff; }
+.toast.success::before { 
+    content: '✅'; 
+    font-size: 40px; 
+    margin-bottom: 5px; 
+}
+
+/* ❌ แจ้งเตือน/ผิดพลาด (สีแดง) */
+.toast.error { border-color: #ef4444; color: #fff; }
+.toast.error::before { 
+    content: '❌'; 
+    font-size: 40px; 
+    margin-bottom: 5px; 
+}
+
+/* ⚠️ เตือนทั่วไป (สีเหลือง) */
+.toast.warning { border-color: #f59e0b; color: #fff; }
+.toast.warning::before { 
+    content: '⚠️'; 
+    font-size: 40px; 
+    margin-bottom: 5px; 
+}
+
+/* สถานะเมื่อถูกปิดการใช้งาน (Disabled) */
+.disabled-section {
+    opacity: 0.4;
+    pointer-events: none; /* ห้ามคลิก */
+    filter: grayscale(1); /* ทำให้เป็นสีเทา */
+    transition: all 0.3s;
+}
+
+/* ============================================
+   🎨 SMART AUTO: 3D POP-OUT EFFECT (V.Final)
+   ============================================ */
+.smart-mode-highlight {
+    /* 1. พื้นหลังไล่เฉดสีเข้ม ดูมีมิติ */
+    background: linear-gradient(135deg, #1e1e24 0%, #2d2d3a 100%) !important;
+    
+    /* 2. เส้นขอบสีม่วงสว่าง เรืองแสง */
+    border: 2px solid #6366f1 !important;
+    border-top: 2px solid #818cf8 !important; /* ขอบบนสว่างกว่า ให้ดูเหมือนแสงตกกระทบ */
+    
+    /* 3. เงา 3 ชั้น ให้ดูลอยออกมาจากจอ (นูน) */
+    box-shadow: 
+        0 10px 25px rgba(0, 0, 0, 0.6),      /* เงาลึกด้านล่าง */
+        0 0 20px rgba(99, 102, 241, 0.25),   /* เงาเรืองแสงสีม่วง */
+        inset 0 1px 0 rgba(255, 255, 255, 0.1); /* ไฮไลท์ขอบใน */
+
+    /* 4. การจัดวาง */
+    border-radius: 12px !important;
+    padding: 16px !important;
+    margin-bottom: 25px !important; /* เว้นระยะห่างด้านล่างเยอะหน่อย */
+    position: relative;
+    overflow: hidden; /* บังแสงวิบวับส่วนเกิน */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transform: translateY(0);
+    z-index: 10;
+}
+
+/* เอฟเฟกต์ตอนเอาเมาส์ไปชี้ (Hover) -> ลอยขึ้นอีกนิด */
+.smart-mode-highlight:hover {
+    transform: translateY(-4px) scale(1.02); /* ยกตัวขึ้นและขยาย */
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.7),
+        0 0 30px rgba(99, 102, 241, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    border-color: #a5b4fc !important;
+    cursor: pointer;
+}
+
+/* เอฟเฟกต์แสงวิบวับวิ่งผ่าน (Shimmer Animation) */
+.smart-mode-highlight::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transform: skewX(-25deg);
+    animation: shimmer 4s infinite; /* แสงวิ่งทุก 4 วินาที */
+    pointer-events: none;
+}
+
+@keyframes shimmer {
+    0% { left: -150%; }
+    40% { left: 150%; } /* วิ่งผ่านจอ */
+    100% { left: 150%; } /* รอเวลานิดนึงก่อนวิ่งใหม่ */
+}
