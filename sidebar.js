@@ -717,12 +717,131 @@ function videoSetupEventListeners() {
 // ============================================
 // Video: Generate Prompt Only (ไม่รัน Automation)
 // ============================================
+// ============================================
+// Shared Video Prompt Generation Logic
+// ============================================
+async function videoGeneratePrompt(imageDataUrl, productName, options = {}) {
+    const apiKey = getGeminiApiKey();
+    const isSmartAuto = options.isSmartAuto || false;
+    const styleId = options.styleId || 'auto';
+    const voiceStyle = options.voiceStyle || 'central';
+    const customScript = options.customScript || '';
+    
+    // Safety & rules
+    const tiktokSafetyRules = `
+IMPORTANT VISUAL RULES:
+1. PRESERVE TEXT: Keep ALL existing text in the image (Label, Title) 100% STATIC and SHARP. Do NOT blur or distort existing text.
+2. NO NEW TEXT: Do NOT add ANY NEW subtitles, floating text, or watermarks.
+3. STATIC TEXT: Text overlays must be FROZEN in place.
+
+IMPORTANT POLICY: 
+1. STRICTLY DO NOT mention any specific prices.
+2. STRICTLY DO NOT make medical claims.
+`;
+
+    if (isSmartAuto) {
+        if (!apiKey) throw new Error('ต้องระบุ API Key สำหรับโหมดอัจฉริยะ');
+        
+        // Smart Auto: Use Gemini
+        const base64Data = imageDataUrl.split(',')[1];
+        const mimeType = imageDataUrl.split(';')[0].split(':')[1];
+        
+        const systemPrompt = `Role: Professional Video Director.
+Task: Create a prompt for a short commercial video (Frames to Video) based on the product image.
+Product Name: ${productName || "Unknown Product"}
+Goal: High engagement, viral potential.
+
+Instructions:
+1. Analyze the product and determine the best video style (Review, Promo, Fun, etc.).
+2. Write a detailed prompt describing the video content, camera movement, and character action.
+3. GENERATE A SCRIPT for the character to speak in Thai.
+   - Tone: ${voiceStyle === 'isan' ? 'Isan Dialect, Fun' : (voiceStyle === 'northern' ? 'Northern Dialect, Gentle' : 'Standard Thai, Professional')}
+   - If user provided custom script: "${customScript}", USE IT EXACTLY.
+   - If no custom script, write a natural, catchy script.
+   
+4. Output Format:
+   "[Video Description]... The character speaks in Thai: '[Script]'. (Masterpiece, High Quality) ${tiktokSafetyRules}"
+`;
+
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [
+                            { text: systemPrompt },
+                            { inline_data: { mime_type: mimeType, data: base64Data } }
+                        ]
+                    }]
+                })
+            });
+            const data = await response.json();
+            if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+                return data.candidates[0].content.parts[0].text.trim();
+            } else {
+                throw new Error('AI Response empty');
+            }
+        } catch (e) {
+            console.error("Smart Auto Error:", e);
+            // Fallback to template if AI fails
+            return videoGenerateTemplatePrompt(productName, styleId, voiceStyle, customScript, tiktokSafetyRules);
+        }
+    } else {
+        // Template Mode
+        return videoGenerateTemplatePrompt(productName, styleId, voiceStyle, customScript, tiktokSafetyRules);
+    }
+}
+
+function videoGenerateTemplatePrompt(productName, styleId, voiceStyle, customScript, safetyRules) {
+    const videoTemplates = {
+        '1': "High energy presenter, extremely excited, hyping up [product], speaking in Thai, fast movement, all text on screen is 100% static. " + safetyRules,
+        '2': "Realistic product demonstration, character actively using [product], explaining usage, speaking in Thai, active hands, all text on screen is 100% static. " + safetyRules,
+        '3': "Professional salesperson, confident sales pitch, holding [product], persuasive eye contact, speaking in Thai. " + safetyRules,
+        '4': "Emotional testimonial, wow face, amazed expression, holding [product] close to heart, nodding, speaking in Thai. " + safetyRules,
+        '5': "Casual friend-to-friend recommendation, leaning towards camera, whispering secret about [product], speaking in Thai. " + safetyRules,
+        '6': "Informative review, listing benefits, counting on fingers, pointing to [product] details, speaking in Thai. " + safetyRules,
+        '7': "Satisfaction review, thumbs up gesture, OK hand sign, happy expression, holding [product], speaking in Thai. " + safetyRules,
+        '8': "Comparison review, weighing options gestures, choosing [product] as winner, analytical look, speaking in Thai. " + safetyRules,
+        '9': "Sincere recommendation, sharing a secret discovery about [product], trustworthy look, gentle gestures, speaking in Thai. " + safetyRules,
+        '10': "Urgency, must-have vibe, holding [product] possessively, excited eyes, persuasive look, speaking in Thai. " + safetyRules,
+        '11': "Acting out a problem then finding a solution, facial expression shifting from worried to relieved, pointing to [product], speaking in Thai. " + safetyRules,
+        '12': "Stand-up comedy style, sitcom vibe, telling a hilarious story with a plot twist about [product], laughing, speaking in Thai. " + safetyRules,
+        '13': "Deadpan humor, saying something ridiculous or funny about [product] but keeping a serious straight face, speaking in Thai. " + safetyRules,
+        '14': "Sassy and witty character, complaining or making funny sarcastic comments before praising [product], speaking in Thai. " + safetyRules,
+        '15': "Sassy character, complaining funny comments, perfect comedic timing, rolling eyes playfully then praising [product], speaking in Thai. " + safetyRules,
+        '16': "Authentic user-generated content (UGC) review of [product]. The character feels like a real person sharing honest feedback, natural vibe. Speaking in Thai. " + safetyRules
+    };
+
+    let selectedId = styleId;
+    if (selectedId === 'auto') {
+        const keys = Object.keys(videoTemplates);
+        selectedId = keys[Math.floor(Math.random() * keys.length)];
+    }
+    
+    let finalPrompt = videoTemplates[selectedId] || videoTemplates['1'];
+    
+    // Product Name
+    const pName = productName || 'the product';
+    finalPrompt = finalPrompt.replace(/\[product\]/g, pName);
+
+    // Voice / Dialect
+    let dialectPhrase = "speaking in Thai";
+    if (voiceStyle === 'isan') dialectPhrase = "speaking in Isan Thai dialect, fun and lively vibe";
+    else if (voiceStyle === 'northern') dialectPhrase = "speaking in Northern Thai dialect, gentle and polite vibe";
+    else dialectPhrase = "speaking in standard Thai, clear and professional";
+
+    // Script
+    if (customScript) finalPrompt += ` The character is talking to the camera, saying exactly: "${customScript}".`;
+
+    if (finalPrompt.includes('speaking in Thai')) finalPrompt = finalPrompt.replace('speaking in Thai', dialectPhrase);
+    else finalPrompt += `, ${dialectPhrase}`;
+
+    return finalPrompt;
+}
+
 async function videoGeneratePromptOnly() {
   const apiKey = getGeminiApiKey();
-  if (!apiKey) {
-    showToast('กรุณาตั้งค่า Gemini API Key ก่อน', 'error');
-    return;
-  }
   
   if (videoUploadedImages.length === 0) {
     showToast('กรุณาอัพโหลดภาพก่อน', 'error');
@@ -735,89 +854,28 @@ async function videoGeneratePromptOnly() {
     const imageData = videoUploadedImages[0];
     const productName = videoProductNameInput?.value?.trim() || '';
     const isSmartAuto = document.getElementById('video-smart-auto-checkbox')?.checked || false;
+    const styleId = document.getElementById('video-style-select')?.value || 'auto';
+    const voiceStyle = document.getElementById('video-voice-style-select')?.value || 'central';
+    const customScript = document.getElementById('video-custom-script')?.value?.trim() || '';
     
-    let userMessage = '';
-    const noText = document.getElementById('video-no-text')?.checked || false;
-    const textEffectValue = document.getElementById('video-text-effect')?.value || 'none';
-    const textEffectData = window.getTextEffect ? window.getTextEffect(textEffectValue) : { prompt: '' };
-    
-    let textInstruction = '';
-    if (noText) {
-      textInstruction = '\n⚠️ สำคัญ: ห้ามใส่ข้อความใดๆ ลงบนวีดีโอ (no text overlay)';
-    } else if (textEffectValue !== 'none') {
-      textInstruction = `\nเอฟเฟกต์ข้อความ: ${textEffectData.prompt}`;
-    }
-    
-    // No Character mode - CRITICAL: Must exclude all character/model instructions from prompt
-    const noCharacter = document.getElementById('video-no-character')?.checked || false;
-    const presentationValue = document.getElementById('video-presentation-style')?.value || 'product_present';
-    const presentationData = window.getVideoPresentationStyle ? window.getVideoPresentationStyle(presentationValue) : { prompt: '' };
-    
-    let characterInstruction = '';
-    if (noCharacter) {
-      // CRITICAL: Strong instructions to absolutely exclude any person/model/character
-      characterInstruction = `
-
-⚠️⚠️⚠️ CRITICAL INSTRUCTION - ABSOLUTELY NO PEOPLE ⚠️⚠️⚠️
-- DO NOT include ANY person, model, character, human, man, woman, or any part of human body in the video
-- NO hands holding product (unless "ซูมสินค้า" is selected)
-- NO face, NO body parts
-- PRODUCT ONLY - The product must be the ONLY subject in the video
-- 8 seconds video length
-- If I see ANY human in the video, it is a FAILURE
-
-Presentation Style: ${presentationData.prompt}`;
-    }
-    
-    if (isSmartAuto) {
-      if (noCharacter) {
-        userMessage = `Create a product-only video from this photo. NO HUMAN. NO MODEL. NO PERSON. Product only focus. 8 seconds.${productName ? ` Product name: ${productName}` : ''}${textInstruction}${characterInstruction}`;
-      } else {
-        userMessage = `สร้าง prompt สำหรับวิดีโอจากภาพนี้ ให้ AI คิดสไตล์การเคลื่อนไหวและบรรยากาศที่เหมาะสม${productName ? ` ชื่อ: ${productName}` : ''}${textInstruction}`;
-      }
-    } else {
-      if (noCharacter) {
-        userMessage = `Create a product-only video. NO HUMAN. NO MODEL. NO PERSON. 8 seconds.
-Product name: ${productName || 'Product'}${textInstruction}${characterInstruction}`;
-      } else {
-        userMessage = `สร้าง prompt สำหรับวิดีโอจากภาพนี้
-${productName ? `ชื่อ: ${productName}` : ''}
-สไตล์: วิดีโอโฆษณาสินค้า${textInstruction}`;
-      }
-    }
-    
-    const base64Data = imageData.dataUrl.split(',')[1];
-    const mimeType = imageData.dataUrl.split(';')[0].split(':')[1];
-    
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          parts: [
-            { text: userMessage },
-            { inline_data: { mime_type: mimeType, data: base64Data } }
-          ]
-        }]
-      })
+    const prompt = await videoGeneratePrompt(imageData.dataUrl, productName, {
+        isSmartAuto, styleId, voiceStyle, customScript
     });
     
-    const data = await response.json();
+    // Text handling NOT implemented in Video yet (based on HTML), assuming Video Prompt handles speech primarily.
+    // Use the result
+    const resultArea = document.getElementById('video-prompt-result');
+    const container = document.getElementById('video-prompt-result-container');
     
-    if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
-      const generatedPrompt = data.candidates[0].content.parts[0].text;
-      
-      // Display the prompt
-      if (videoPromptResultContainer) videoPromptResultContainer.style.display = 'block';
-      if (videoPromptResult) videoPromptResult.textContent = generatedPrompt;
-      
-      showToast('สร้าง Prompt สำเร็จ!', 'success');
-    } else {
-      throw new Error('ไม่สามารถสร้าง Prompt ได้');
-    }
+    if (resultArea) resultArea.value = prompt; // textarea
+    else if (container) container.textContent = prompt;
+    
+    if (container) container.style.display = 'block';
+    
+    showToast('สร้าง Prompt สำเร็จ!', 'success');
   } catch (error) {
-    console.error('Generate Prompt Error:', error);
-    showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
+      console.error(error);
+      showToast('ผิดพลาด: ' + error.message, 'error');
   }
 }
 
@@ -3366,11 +3424,56 @@ function bananaSetupEventListeners() {
   if (bananaBtnGeneratePrompt) {
     bananaBtnGeneratePrompt.addEventListener('click', bananaGeneratePromptOnly);
   }
+  
+  // No Text Checkbox Logic - Disable Price & Text Effects
+  const bananaNoTextCheckbox = document.getElementById('banana-no-text');
+  if (bananaNoTextCheckbox) {
+      bananaNoTextCheckbox.addEventListener('change', (e) => {
+          const isNoText = e.target.checked;
+          
+          // Elements to control
+          const priceTagToggle = document.getElementById('banana-price-tag-toggle');
+          const textEffectSelect = document.getElementById('banana-text-effect');
+          const productPriceInput = document.getElementById('banana-product-price');
+          const productDetailsInput = document.getElementById('banana-product-details');
+          const priceStyleSelect = document.getElementById('banana-price-tag-style');
+          const priceColorSelect = document.getElementById('banana-price-tag-color');
+          
+          const textInputs = [priceTagToggle, textEffectSelect, productPriceInput, productDetailsInput, priceStyleSelect, priceColorSelect];
+          
+          textInputs.forEach(input => {
+              if (input) {
+                  input.disabled = isNoText;
+                  // Optional: Clear value or uncheck if disabled?
+                  // if (isNoText && input.type === 'checkbox') input.checked = false;
+              }
+          });
+          
+          // Visual Feedback for Price & Details Section (assuming container IDs exist or targeting parent)
+          const priceContainer = document.getElementById('config-content-price'); 
+          if (priceContainer) priceContainer.style.opacity = isNoText ? '0.4' : '1';
+          if (priceContainer) priceContainer.style.pointerEvents = isNoText ? 'none' : 'auto';
+          
+           // Visual Feedback for Text Options
+           if (textEffectSelect) {
+               const textGroup = textEffectSelect.closest('.input-group');
+               if (textGroup) {
+                   textGroup.style.opacity = isNoText ? '0.4' : '1';
+                   textGroup.style.pointerEvents = isNoText ? 'none' : 'auto';
+               }
+           }
+      });
+      // Trigger on load
+      bananaNoTextCheckbox.dispatchEvent(new Event('change'));
+  }
 }
 
 
 
 
+// ============================================
+// Banana: Generate Prompt Only (ไม่รัน Automation)
+// ============================================
 // ============================================
 // Banana: Generate Prompt Only (ไม่รัน Automation)
 // ============================================
@@ -3393,7 +3496,7 @@ async function bananaGeneratePromptOnly() {
     const productName = bananaProductNameInput?.value?.trim() || '';
     const isSmartAuto = document.getElementById('banana-smart-auto-checkbox')?.checked || false;
     
-    // Build prompt request
+    // 1. TEXT HANDLING
     let userMessage = '';
     const noText = document.getElementById('banana-no-text')?.checked || false;
     const textEffectValue = document.getElementById('banana-text-effect')?.value || 'none';
@@ -3401,71 +3504,104 @@ async function bananaGeneratePromptOnly() {
     
     let textInstruction = '';
     if (noText) {
-      textInstruction = '\n⚠️ สำคัญ: ห้ามใส่ข้อความใดๆ ลงบนภาพ (no text overlay)';
-    } else if (textEffectValue !== 'none') {
-      textInstruction = `\nเอฟเฟกต์ข้อความ: ${textEffectData.prompt}`;
-    }
-    
-    // Price & Details Logic
-    const showPriceTag = document.getElementById('banana-price-tag-toggle')?.checked || false;
-    if (showPriceTag && !noText) { // Only add if enabled and Text Disabled is OFF
-        const priceText = document.getElementById('banana-product-price')?.value?.trim() || '';
-        const detailText = document.getElementById('banana-product-detail')?.value?.trim() || '';
-        const priceStyleValue = document.getElementById('banana-price-style')?.value || 'auto';
-        const priceStyleData = window.getPriceTagStyle ? window.getPriceTagStyle(priceStyleValue) : { prompt: '' };
+      // STRICT NO TEXT
+      textInstruction = `
+\n⚠️⚠️⚠️ STRICT NEGATIVE PROMPT: TEXT / WATERMARK / LABELS ⚠️⚠️⚠️
+- DO NOT generate any text, letters, words, typography, watermark, logo, or price tag in this image.
+- The image must be clean of any written content.
+- Negative Prompt: text, watermark, username, signature, price tag, label, typography, writing.
+`;
+    } else {
+        // Text is allowed
+        if (textEffectValue !== 'none') {
+            textInstruction = `\nTypography/Text Style: ${textEffectData.prompt}`;
+        }
+        
+        // Price & Details Logic
+        const showPriceTag = document.getElementById('banana-price-tag-toggle')?.checked || false;
+        if (showPriceTag) {
+            const priceText = document.getElementById('banana-product-price')?.value?.trim() || '';
+            const detailText = document.getElementById('banana-product-detail')?.value?.trim() || '';
+            const priceStyleValue = document.getElementById('banana-price-style')?.value || 'auto';
+            const priceStyleData = window.getPriceTagStyle ? window.getPriceTagStyle(priceStyleValue) : { prompt: '' };
 
-        if (priceText || detailText) {
-            textInstruction += `\n\n📌 PRICE & DETAILS OVERLAY:
+            if (priceText || detailText) {
+                textInstruction += `\n\n📌 PRICE & DETAILS OVERLAY:
 - Display Price: "${priceText}"
 - Display Details: "${detailText}"
 - Tag Style: ${priceStyleData.prompt}
 - Ensure the text is clearly visible, stylish, and suitable for commercial advertisement.
-- Use appropriate currency symbol if provided.`;
+- Use appropriate currency symbol.
+- Integrated naturally but prominently.`;
+            }
         }
     }
     
-    // No Character mode - CRITICAL: Must exclude all character/model instructions from prompt
+    // 2. CHARACTER & FACE LOCK HANDLING
     const noCharacter = document.getElementById('banana-no-character')?.checked || false;
+    const hasPersonModel = bananaUploadedImages.some(img => img.name.toLowerCase().includes('model') || img.name.toLowerCase().includes('person')); // Rough check, relying on user intent mostly
+    
     const presentationValue = document.getElementById('banana-presentation-style')?.value || 'product_only';
     const presentationData = window.getImagePresentationStyle ? window.getImagePresentationStyle(presentationValue) : { prompt: '' };
     
     let characterInstruction = '';
+    
     if (noCharacter) {
-      // CRITICAL: Strong instructions to absolutely exclude any person/model/character
+      // PRODUCT ONLY
       characterInstruction = `
-
-⚠️⚠️⚠️ CRITICAL INSTRUCTION - ABSOLUTELY NO PEOPLE ⚠️⚠️⚠️
-- DO NOT include ANY person, model, character, human, man, woman, or any part of human body in the image
-- NO hands holding product (unless "เสนอเพียงสินค้า" is selected)
-- NO face, NO body parts
-- PRODUCT ONLY - The product must be the ONLY subject in the image
-- If I see ANY human in the image, it is a FAILURE
-
+\n⚠️⚠️⚠️ CRITICAL INSTRUCTION - PRODUCT ONLY - NO PEOPLE ⚠️⚠️⚠️
+- This is a product-only shot.
+- DO NOT include ANY person, model, character, human, man, woman, or any part of human body.
+- NO hands holding product (unless using "Hand Holding" presentation explicitly).
+- NO face, NO body parts.
+- The product is the SOLITARY HERO.
 Presentation Style: ${presentationData.prompt}`;
+
+    } else {
+        // MODEL / CHARACTER INCLUDED
+        // Check if we are uploading a model image (assuming 2nd image is model if present, or just general instruction)
+        // Note: In automation, we might upload a specific model file. Here we just instruct the prompt.
+        
+        characterInstruction = `
+\n👤 MODEL & FACE LOCK INSTRUCTION:
+- If a person/model is visible in the reference image, YOU MUST KEEP THEIR FACE EXACTLY AS IS.
+- FACE LOCK: 100%. Identity preservation is CRITICAL.
+- Do not alter facial features.
+- If generating a new character, ensure they are photorealistic and high quality.
+`;
     }
     
+    // 3. SMART AUTO / PRODUCT IDENTIFICATION
+    let productDesc = '';
+    if (!productName) {
+        productDesc = "Analyze the image to identify the product. The prompt must describe this product accurately (color, shape, material, type).";
+    } else {
+        productDesc = `Product Name/Type: ${productName}`;
+    }
+
     if (isSmartAuto) {
-      // When no-character is on, DO NOT include any character selection in prompt
-      if (noCharacter) {
-        userMessage = `Create a product-only advertising image from this photo. NO HUMAN. NO MODEL. NO PERSON. Product only focus.${productName ? ` Product name: ${productName}` : ''}${textInstruction}${characterInstruction}`;
-      } else {
-        userMessage = `สร้าง prompt สำหรับภาพโฆษณาสินค้าจากภาพนี้ ให้ AI คิดสไตล์และฉากหลังที่เหมาะสมเอง${productName ? ` ชื่อสินค้า: ${productName}` : ''}${textInstruction}`;
-      }
+        userMessage = `Role: Professional Advertising Creative Director.
+Task: Create a high-converting commercial image prompt based on the uploaded reference.
+${productDesc}
+${textInstruction}
+${characterInstruction}
+
+Auto-Analysis:
+- Analyze the product's vibe (Luxury, Fun, Minimal, Eco, etc.) and choose a matching Background and Lighting.
+- If the product implies a specific setting (e.g., surfboard -> beach), use it.
+- Output: A highly detailed, photorealistic prompt.`;
+
     } else {
       const selectedStyle = bananaStyleSelect?.value || 'studio';
       const selectedBg = bananaBgSelect?.value || 'white';
       
-      if (noCharacter) {
-        // DO NOT include style/character when no-character mode is on
-        userMessage = `Create a product-only advertising image. NO HUMAN. NO MODEL. NO PERSON.
-Product name: ${productName || 'Product'}
-Background: ${selectedBg}${textInstruction}${characterInstruction}`;
-      } else {
-        userMessage = `สร้าง prompt สำหรับภาพโฆษณาสินค้าจากภาพนี้
-${productName ? `ชื่อสินค้า: ${productName}` : ''}
-สไตล์: ${selectedStyle}
-ฉากหลัง: ${selectedBg}${textInstruction}`;
-      }
+      userMessage = `Role: Advertising Image Generator.
+Task: Create an image based on these constraints.
+${productDesc}
+Style: ${selectedStyle}
+Background: ${selectedBg}
+${textInstruction}
+${characterInstruction}`;
     }
     
     const base64Data = imageData.dataUrl.split(',')[1];
@@ -5055,28 +5191,86 @@ async function analyzeSaiMooImage(file) {
   const resultArea = document.getElementById('sacred-analysis-result');
   const contentArea = document.getElementById('sacred-analysis-content');
   const promptInput = document.getElementById('sacred-analysis-prompt');
+  
+  if (!resultArea || !contentArea) return;
 
   // Show loading state
   resultArea.style.display = 'block';
-  contentArea.innerHTML = '<span class="loading-pulse">🔮 กำลังเพ่งจิตวิเคราะห์...</span>';
+  contentArea.innerHTML = '<span class="loading-pulse">🔮 กำลังเพ่งจิตวิเคราะห์ (AI Scanning)...</span>';
   
-  // Simulate AI Analysis (In reality, this would call Gemini Vision API)
-  // For now, we simulate detection based on filename or just generic 'Holy Object'
-  setTimeout(() => {
-    // Mock Result
-    const mockResult = `
-      <b>Detected:</b> Sacred Object / Deity Figure<br>
-      <b>Atmosphere:</b> Mystical, Golden Light, Ancient<br>
-      <b>Suggestion:</b> Use 'Ancient Stone' or 'Gold Emboss' text effect.
-    `;
-    const mockPrompt = "A highly detailed sacred image of a Thai deity, emitting golden aura, ancient temple background, mystical atmosphere, 8k resolution, photorealistic.";
-    
-    contentArea.innerHTML = mockResult;
-    promptInput.value = mockPrompt;
-    
-    // Auto-select effect if smart mode is on (Logic for future)
-    
-  }, 2000);
+  const apiKey = getGeminiApiKey();
+  if (!apiKey) {
+      contentArea.innerHTML = '<span style="color:#ef4444;">⚠️ ไม่พบ API Key</span>';
+      return;
+  }
+
+  try {
+      // Convert file to base64
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+          const base64Data = e.target.result.split(',')[1];
+          const mimeType = file.type;
+
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  contents: [{
+                      parts: [
+                          { text: "Analyze this image specifically for Thai Sacred/Spiritual context (Sai Moo). 1. Identify the Deity, Amulet, or Sacred Object. 2. Describe the atmosphere/aura (e.g., Mystical, Golden, Fearsome, Benevolent). 3. Suggest a suitable art style (e.g., Ancient Mural, 3D Gold, glowing aura). Output in JSON format: { detected: '', atmosphere: '', suggestion: '', prompt: '...description...' }" },
+                          { inline_data: { mime_type: mimeType, data: base64Data } }
+                      ]
+                  }]
+              })
+          });
+
+          const data = await response.json();
+          if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+             let text = data.candidates[0].content.parts[0].text;
+             // Clean code blocks if present
+             text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+             
+             let result = {};
+             try {
+                result = JSON.parse(text);
+             } catch (e) {
+                // Fallback parsing if not valid JSON
+                result = { detected: 'Sacred Object', atmosphere: 'Mystical', suggestion: 'Gold effect', prompt: text };
+             }
+
+             const displayHtml = `
+               <div style="font-size:11px; line-height:1.4;">
+               <b style="color:#fbbf24;">Detected:</b> ${result.detected}<br>
+               <b style="color:#fbbf24;">Aura:</b> ${result.atmosphere}<br>
+               <b style="color:#fbbf24;">Suggestion:</b> ${result.suggestion}
+               </div>
+             `;
+             contentArea.innerHTML = displayHtml;
+             
+             if (promptInput && result.prompt) {
+                 promptInput.value = result.prompt;
+             }
+             
+             // Auto-select effect based on suggestion (Simple heuristic)
+             const effectSelect = document.getElementById('sacred-text-effect');
+             if (effectSelect) {
+                 const lower = (result.suggestion + result.atmosphere).toLowerCase();
+                 if (lower.includes('gold')) effectSelect.value = 'gold_emboss';
+                 else if (lower.includes('ancient') || lower.includes('stone')) effectSelect.value = 'ancient_stone';
+                 else if (lower.includes('neon') || lower.includes('light')) effectSelect.value = 'neon_halo';
+                 else if (lower.includes('love') || lower.includes('pink')) effectSelect.value = 'love_charm';
+             }
+
+          } else {
+             throw new Error('API Response invalid');
+          }
+      };
+      reader.readAsDataURL(file);
+
+  } catch (error) {
+     console.error('Analysis Error:', error);
+     contentArea.innerHTML = `<span style="color:#ef4444;">❌ วิเคราะห์ผิดพลาด: ${error.message}</span>`;
+  }
 }
 
 // Event Listener for Sai Moo Image Upload
@@ -5344,11 +5538,23 @@ async function sacredImgGeneratePromptOnly() {
             const selectedEffect = document.getElementById('sacred-effect-select')?.value || 'divine_power';
             const effectData = window.getSacredEffect ? window.getSacredEffect(selectedEffect) : {};
             
+            // NEW: Get text effect for blessing mode
+            const blessingText = document.getElementById('sacred-blessing-text')?.value?.trim() || '';
+            const textEffectId = document.getElementById('sacred-blessing-text-effect')?.value || 'none';
+            const textEffectData = window.getSaiMooTextEffect ? window.getSaiMooTextEffect(textEffectId) : { name: 'None', prompt: '' };
+            
             if (isSmartAuto) {
                 userMessage = `สร้าง prompt ภาพองค์เทพจากภาพนี้ ให้ AI คิดเอฟเฟกต์ที่เหมาะกับองค์เทพโดยอัตโนมัติ`;
+                if (blessingText) userMessage += `\nข้อความอวยพร: "${blessingText}"`;
             } else {
                 userMessage = `สร้าง prompt ภาพองค์เทพจากภาพนี้
 เอฟเฟกต์: ${effectData.name || selectedEffect} - ${effectData.prompt || ''}`;
+                if (blessingText) {
+                    userMessage += `\nข้อความอวยพร: "${blessingText}"`;
+                    if (textEffectId !== 'none') {
+                        userMessage += `\nเอฟเฟกต์ตัวอักษร: ${textEffectData.name} - ${textEffectData.prompt}`;
+                    }
+                }
             }
         } else {
             systemPrompt = window.SACRED_COMMERCIAL_SYSTEM_PROMPT || '';
@@ -6241,13 +6447,19 @@ function sacredImgSetupEventListeners() {
         });
     });
 
-    // Text Effect Dropdown Listener
+    // Text Effect Dropdown Listener (Commercial Mode)
     const sacredTextEffectSelect = document.getElementById('sacred-text-effect');
     if (sacredTextEffectSelect) {
         sacredTextEffectSelect.addEventListener('change', () => {
-            // Optional: Trigger preview/analysis or just update local state if needed
-            // For now, just logging or doing nothing is fine, as sacredGeneratePromptOnly pulls the value directly.
-            console.log('Text effect changed to:', sacredTextEffectSelect.value);
+            console.log('Commercial text effect changed to:', sacredTextEffectSelect.value);
+        });
+    }
+    
+    // Text Effect Dropdown Listener (Blessing Mode)
+    const sacredBlessingTextEffectSelect = document.getElementById('sacred-blessing-text-effect');
+    if (sacredBlessingTextEffectSelect) {
+        sacredBlessingTextEffectSelect.addEventListener('change', () => {
+            console.log('Blessing text effect changed to:', sacredBlessingTextEffectSelect.value);
         });
     }
     

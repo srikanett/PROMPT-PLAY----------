@@ -577,6 +577,24 @@
           <div class="input-row">
             <label>รูปแบบวิดีโอ (Video Style)</label>
             </div>
+          
+          <!-- Smart Auto (Styled Box) -->
+          <div class="input-group" style="background: rgba(59, 130, 246, 0.1); border: 2px solid rgba(59, 130, 246, 0.5); border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <label style="color: #60a5fa; font-weight:600; font-size: 14px;">
+                🚀 โหมดอัจฉริยะ (Smart Auto)
+              </label>
+              <label class="switch">
+                <input type="checkbox" id="video-smart-auto-checkbox">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div style="font-size:12px; color:#94a3b8; margin-top:8px; line-height: 1.5;">
+              ให้ AI คิดชุด, ฉาก และสไตล์ที่ <strong style="color:#60a5fa;">"เข้ากับสินค้า"</strong> ให้เองอัตโนมัติ<br>
+              (ไม่ต้องเลือกข้างล่าง เดี่ยวบอทจัดการให้)
+            </div>
+          </div>
+
           <input type="hidden" id="video-style-select" value="auto"> <div class="char-tab-container" id="config-content-vstyle" style="margin-top:5px;">
               <div class="char-tabs">
                   <button class="char-tab-btn active config-tab-btn" data-type="vstyle" data-group="auto">✨ สุ่ม</button>
@@ -815,6 +833,24 @@
           <input type="hidden" id="sacred-text-position" value="bottom">
         </div>
 
+        <!-- NEW: Text Effect for Blessing Mode -->
+        <div class="input-group">
+           <div class="input-row"><label>✨ เอฟเฟกต์ตัวอักษร (Text Effect)</label></div>
+           <select id="sacred-blessing-text-effect">
+             <option value="none">❌ ไม่ใส่เอฟเฟกต์</option>
+             <option value="gold_emboss">🥇 ทองนูน (Gold Emboss)</option>
+             <option value="glowing_aura">✨ เรืองแสง (Glowing Aura)</option>
+             <option value="ancient_stone">🗿 แกะสลักหิน (Ancient Stone)</option>
+             <option value="sacred_yantra">🕉️ อักขระยันต์ (Sacred Yantra)</option>
+             <option value="fire_power">🔥 เปลวเพลิง (Fire Power)</option>
+             <option value="diamond_sparkle">💎 เพชรระยิบ (Diamond Sparkle)</option>
+             <option value="neon_spiritual">🔮 นีออนมู (Neon Spiritual)</option>
+             <option value="cloud_heaven">☁️ เมฆสวรรค์ (Cloud Heaven)</option>
+             <option value="flower_garland">🌼 พวงมาลัย (Flower Garland)</option>
+             <option value="liquid_gold">🧈 ทองคำเหลว (Liquid Gold)</option>
+           </select>
+        </div>
+
         <div class="input-group">
           <div class="input-row"><label>✨ แสง/ฉาก ศักดิ์สิทธิ์</label></div>
           <div class="sacred-effects-grid">
@@ -985,9 +1021,10 @@
       </div>
 
       <!-- Smart Auto Mode -->
-      <div class="input-group smart-mode-highlight" style="background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(217,119,6,0.1)); border-color: rgba(245,158,11,0.4);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-          <label style="color: #fbbf24; font-weight:800; font-size:15px;">
+      <!-- Smart Auto (Styled Box like Image Tab) -->
+      <div class="input-group" style="background: rgba(59, 130, 246, 0.1); border: 2px solid rgba(59, 130, 246, 0.5); border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label style="color: #60a5fa; font-weight:600; font-size: 14px;">
             🚀 โหมดอัจฉริยะ (Smart Auto)
           </label>
           <label class="switch">
@@ -995,8 +1032,9 @@
             <span class="slider"></span>
           </label>
         </div>
-        <div style="font-size: 12px; color: #fcd34d; opacity:0.9; line-height:1.4;">
-          ให้ AI คิดเอฟเฟกต์และข้อความที่เหมาะกับองค์เทพให้อัตโนมัติ
+        <div style="font-size:12px; color:#94a3b8; margin-top:8px; line-height: 1.5;">
+          ให้ AI คิดเอฟเฟกต์, ฉาก และสไตล์ที่ <strong style="color:#60a5fa;">"เข้ากับองค์เทพ"</strong> ให้เองอัตโนมัติ<br>
+          (ไม่ต้องเลือกข้างล่าง เดี๋ยวบอทจัดการให้)
         </div>
       </div>
 
@@ -1177,9 +1215,10 @@
       </div>
 
       <!-- Smart Auto Mode -->
-      <div class="input-group smart-mode-highlight" style="background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(109,40,217,0.1)); border-color: rgba(139,92,246,0.4);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-          <label style="color: #a78bfa; font-weight:800; font-size:15px;">
+      <!-- Smart Auto (Styled Box like Image Tab) -->
+      <div class="input-group" style="background: rgba(59, 130, 246, 0.1); border: 2px solid rgba(59, 130, 246, 0.5); border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label style="color: #60a5fa; font-weight:600; font-size: 14px;">
             🚀 โหมดอัจฉริยะ (Smart Auto)
           </label>
           <label class="switch">
@@ -1187,8 +1226,9 @@
             <span class="slider"></span>
           </label>
         </div>
-        <div style="font-size: 12px; color: #c4b5fd; opacity:0.9; line-height:1.4;">
-          ให้ AI คิดบทพูดและอารมณ์ที่เหมาะกับองค์เทพให้อัตโนมัติ
+        <div style="font-size:12px; color:#94a3b8; margin-top:8px; line-height: 1.5;">
+          ให้ AI คิดบทพูด, อารมณ์ และสไตล์ที่ <strong style="color:#60a5fa;">"เข้ากับองค์เทพ"</strong> ให้เองอัตโนมัติ<br>
+          (ไม่ต้องเลือกข้างล่าง เดี๋ยวบอทจัดการให้)
         </div>
       </div>
 
