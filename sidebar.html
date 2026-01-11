@@ -801,6 +801,22 @@
         </div>
       </div>
 
+      <!-- Generate Prompt Only -->
+      <div class="input-group" style="margin-top:10px;">
+        <button id="sacred-img-btn-generate-prompt" style="width:100%; padding:10px; background:#1e1e24; border:1px solid #fbbf24; color:#fbbf24; cursor:pointer; border-radius:8px; font-weight:600;">
+          📝 Generate Prompt Only
+        </button>
+      </div>
+      
+      <!-- Prompt Result Container -->
+      <div id="sacred-img-prompt-result-container" style="display:none; margin-top:10px; padding:12px; background:#1a1a1f; border:1px solid #3f3f46; border-radius:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:12px; color:#888;">Generated Prompt:</span>
+          <button id="sacred-img-btn-copy-prompt" style="background:#333; border:1px solid #555; color:#fff; padding:4px 10px; cursor:pointer; border-radius:4px; font-size:11px;">📋 Copy</button>
+        </div>
+        <div id="sacred-img-prompt-result" style="font-size:12px; color:#ccc; line-height:1.5; white-space:pre-wrap; max-height:150px; overflow-y:auto;"></div>
+      </div>
+
       <!-- Logs -->
       <div style="margin-top:15px; display:flex; justify-content:space-between; align-items:center;">
         <span style="font-size:12px; color:#555; font-weight:bold;">LOGS</span>
@@ -975,6 +991,22 @@
             <button class="segment-opt" data-type="downloads" data-value="4">4</button>
           </div>
         </div>
+      </div>
+
+      <!-- Generate Prompt Only -->
+      <div class="input-group" style="margin-top:10px;">
+        <button id="sacred-video-btn-generate-prompt" style="width:100%; padding:10px; background:#1e1e24; border:1px solid #a78bfa; color:#a78bfa; cursor:pointer; border-radius:8px; font-weight:600;">
+          📝 Generate Prompt Only
+        </button>
+      </div>
+      
+      <!-- Prompt Result Container -->
+      <div id="sacred-video-prompt-result-container" style="display:none; margin-top:10px; padding:12px; background:#1a1a1f; border:1px solid #3f3f46; border-radius:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:12px; color:#888;">Generated Prompt:</span>
+          <button id="sacred-video-btn-copy-prompt" style="background:#333; border:1px solid #555; color:#fff; padding:4px 10px; cursor:pointer; border-radius:4px; font-size:11px;">📋 Copy</button>
+        </div>
+        <div id="sacred-video-prompt-result" style="font-size:12px; color:#ccc; line-height:1.5; white-space:pre-wrap; max-height:150px; overflow-y:auto;"></div>
       </div>
 
       <!-- Logs -->

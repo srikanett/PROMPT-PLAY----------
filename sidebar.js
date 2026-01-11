@@ -5011,6 +5011,103 @@ function sacredImgToggleMode(mode) {
     if (sacredCommercialConfig) sacredCommercialConfig.style.display = mode === 'commercial' ? 'block' : 'none';
 }
 
+// ============================================
+// Sacred Image: Generate Prompt Only (ไม่รัน Automation)
+// ============================================
+async function sacredImgGeneratePromptOnly() {
+    const apiKey = getGeminiApiKey();
+    if (!apiKey) {
+        showToast('กรุณาตั้งค่า Gemini API Key ก่อน', 'error');
+        return;
+    }
+    
+    if (sacredImgUploadedImages.length === 0) {
+        showToast('กรุณาอัพโหลดภาพก่อน', 'error');
+        return;
+    }
+    
+    showToast('กำลังสร้าง Prompt...', 'info');
+    
+    try {
+        const imageData = sacredImgUploadedImages[0];
+        const isSmartAuto = document.getElementById('sacred-img-smart-auto')?.checked || false;
+        const currentMode = sacredImgCurrentMode || 'blessing';
+        
+        let userMessage = '';
+        let systemPrompt = '';
+        
+        if (currentMode === 'blessing') {
+            systemPrompt = window.SACRED_BLESSING_SYSTEM_PROMPT || '';
+            const selectedEffect = document.getElementById('sacred-effect-select')?.value || 'divine_power';
+            const effectData = window.getSacredEffect ? window.getSacredEffect(selectedEffect) : {};
+            
+            if (isSmartAuto) {
+                userMessage = `สร้าง prompt ภาพองค์เทพจากภาพนี้ ให้ AI คิดเอฟเฟกต์ที่เหมาะกับองค์เทพโดยอัตโนมัติ`;
+            } else {
+                userMessage = `สร้าง prompt ภาพองค์เทพจากภาพนี้
+เอฟเฟกต์: ${effectData.name || selectedEffect} - ${effectData.prompt || ''}`;
+            }
+        } else {
+            systemPrompt = window.SACRED_COMMERCIAL_SYSTEM_PROMPT || '';
+            const productName = document.getElementById('sacred-product-name')?.value || '';
+            const caption = document.getElementById('sacred-commercial-caption')?.value || '';
+            const priceFull = document.getElementById('sacred-price-full')?.value || '';
+            const pricePromo = document.getElementById('sacred-price-promo')?.value || '';
+            const styleValue = document.getElementById('sacred-price-tag-style')?.value || 'circle_gold';
+            const colorValue = document.getElementById('sacred-price-tag-color')?.value || 'gold_classic';
+            
+            if (isSmartAuto) {
+                userMessage = `สร้าง prompt ภาพโฆษณาวัตถุมงคลจากภาพนี้ ให้ AI คิดป้ายราคาและเอฟเฟกต์ที่เหมาะสมโดยอัตโนมัติ`;
+            } else {
+                const priceText = pricePromo ? `บูชา ${pricePromo} บาท จาก ${priceFull} บาท` : `บูชา ${priceFull || '999'} บาท`;
+                userMessage = `สร้าง prompt ภาพโฆษณาวัตถุมงคลจากภาพนี้
+ชื่อสินค้า: ${productName || 'วัตถุมงคล'}
+ข้อความโฆษณา: ${caption}
+ป้ายราคา: ${priceText}
+สไตล์ป้าย: ${styleValue}
+โทนสี: ${colorValue}`;
+            }
+        }
+        
+        const base64Data = imageData.dataUrl.split(',')[1];
+        const mimeType = imageData.dataUrl.split(';')[0].split(':')[1];
+        
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                contents: [{
+                    parts: [
+                        { text: userMessage },
+                        { inline_data: { mime_type: mimeType, data: base64Data } }
+                    ]
+                }]
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+            const generatedPrompt = data.candidates[0].content.parts[0].text.trim();
+            
+            const container = document.getElementById('sacred-img-prompt-result-container');
+            const result = document.getElementById('sacred-img-prompt-result');
+            if (container) container.style.display = 'block';
+            if (result) result.textContent = generatedPrompt;
+            
+            showToast('สร้าง Prompt สำเร็จ!', 'success');
+            sacredImgAddLog('✅ สร้าง Prompt สำเร็จ', 'success');
+        } else {
+            throw new Error('ไม่สามารถสร้าง Prompt ได้');
+        }
+    } catch (error) {
+        console.error('Generate Prompt Error:', error);
+        showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
+        sacredImgAddLog(`❌ Error: ${error.message}`, 'error');
+    }
+}
+
 // Add Log (Sacred Image)
 function sacredImgAddLog(message, type = 'info') {
     const timestamp = new Date().toLocaleTimeString('th-TH');
@@ -5850,6 +5947,24 @@ function sacredImgSetupEventListeners() {
     
     // Log clear
     if (sacredImgLogClear) sacredImgLogClear.addEventListener('click', sacredImgClearLogs);
+    
+    // Generate Prompt Only button
+    const sacredImgBtnGeneratePrompt = document.getElementById('sacred-img-btn-generate-prompt');
+    if (sacredImgBtnGeneratePrompt) {
+        sacredImgBtnGeneratePrompt.addEventListener('click', sacredImgGeneratePromptOnly);
+    }
+    
+    // Copy Prompt button
+    const sacredImgBtnCopyPrompt = document.getElementById('sacred-img-btn-copy-prompt');
+    if (sacredImgBtnCopyPrompt) {
+        sacredImgBtnCopyPrompt.addEventListener('click', () => {
+            const result = document.getElementById('sacred-img-prompt-result');
+            if (result && result.textContent) {
+                navigator.clipboard.writeText(result.textContent);
+                showToast('คัดลอก Prompt เรียบร้อย!', 'success');
+            }
+        });
+    }
 }
 
 // ============================================
@@ -6158,6 +6273,45 @@ async function sacredVideoGeneratePrompt(imageDataUrl) {
     }
     
     return null;
+}
+
+// ============================================
+// Sacred Video: Generate Prompt Only (ไม่รัน Automation)
+// ============================================
+async function sacredVideoGeneratePromptOnly() {
+    const apiKey = getGeminiApiKey();
+    if (!apiKey) {
+        showToast('กรุณาตั้งค่า Gemini API Key ก่อน', 'error');
+        return;
+    }
+    
+    if (sacredVideoUploadedImages.length === 0) {
+        showToast('กรุณาอัพโหลดภาพก่อน', 'error');
+        return;
+    }
+    
+    showToast('กำลังสร้าง Prompt...', 'info');
+    
+    try {
+        const imageData = sacredVideoUploadedImages[0];
+        const prompt = await sacredVideoGeneratePrompt(imageData.dataUrl);
+        
+        if (prompt) {
+            const container = document.getElementById('sacred-video-prompt-result-container');
+            const result = document.getElementById('sacred-video-prompt-result');
+            if (container) container.style.display = 'block';
+            if (result) result.textContent = prompt;
+            
+            showToast('สร้าง Prompt สำเร็จ!', 'success');
+            sacredVideoAddLog('✅ สร้าง Prompt สำเร็จ', 'success');
+        } else {
+            throw new Error('ไม่สามารถสร้าง Prompt ได้');
+        }
+    } catch (error) {
+        console.error('Generate Prompt Error:', error);
+        showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
+        sacredVideoAddLog(`❌ Error: ${error.message}`, 'error');
+    }
 }
 
 // Main Automation (Sacred Video) - Copy Logic จาก Video Module 100%
@@ -6741,6 +6895,24 @@ function sacredVideoSetupEventListeners() {
     
     // Log clear
     if (sacredVideoLogClear) sacredVideoLogClear.addEventListener('click', sacredVideoClearLogs);
+    
+    // Generate Prompt Only button
+    const sacredVideoBtnGeneratePrompt = document.getElementById('sacred-video-btn-generate-prompt');
+    if (sacredVideoBtnGeneratePrompt) {
+        sacredVideoBtnGeneratePrompt.addEventListener('click', sacredVideoGeneratePromptOnly);
+    }
+    
+    // Copy Prompt button
+    const sacredVideoBtnCopyPrompt = document.getElementById('sacred-video-btn-copy-prompt');
+    if (sacredVideoBtnCopyPrompt) {
+        sacredVideoBtnCopyPrompt.addEventListener('click', () => {
+            const result = document.getElementById('sacred-video-prompt-result');
+            if (result && result.textContent) {
+                navigator.clipboard.writeText(result.textContent);
+                showToast('คัดลอก Prompt เรียบร้อย!', 'success');
+            }
+        });
+    }
 }
 
 // ============================================
