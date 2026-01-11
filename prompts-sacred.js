@@ -301,6 +301,53 @@ const SPEECH_MODES = {
 };
 
 // ============================================
+// 9. CAPTION POSITIONS - ตำแหน่งข้อความโฆษณา
+// ============================================
+
+const CAPTION_POSITIONS = {
+    'under_price': {
+        name: '⬇️ ใต้ป้ายราคา',
+        prompt: 'placed distinctively below the price tag frame'
+    },
+    'above_price': {
+        name: '⬆️ บนป้ายราคา',
+        prompt: 'placed distinctively above the price tag frame'
+    },
+    'top_left': {
+        name: '↖️ มุมบนซ้าย',
+        prompt: 'positioned at top-left corner'
+    },
+    'top_right': {
+        name: '↗️ มุมบนขวา',
+        prompt: 'positioned at top-right corner'
+    },
+    'bottom_left': {
+        name: '↙️ มุมล่างซ้าย',
+        prompt: 'positioned at bottom-left corner'
+    },
+    'bottom_right': {
+        name: '↘️ มุมล่างขวา',
+        prompt: 'positioned at bottom-right corner'
+    },
+    'top_center': {
+        name: '⬆️ ขอบบนกลาง',
+        prompt: 'centered at the very top edge'
+    },
+    'bottom_center': {
+        name: '⬇️ ขอบล่างกลาง',
+        prompt: 'centered at the very bottom edge'
+    },
+    'center_left': {
+        name: '⬅️ กลางซ้าย',
+        prompt: 'centered vertically on the left side'
+    },
+    'center_right': {
+        name: '➡️ กลางขวา',
+        prompt: 'centered vertically on the right side'
+    }
+};
+
+// ============================================
 // 8. SYSTEM PROMPTS
 // ============================================
 
@@ -364,6 +411,7 @@ const SACRED_COMMERCIAL_SYSTEM_PROMPT = `คุณคือ Thai Commercial Post
 + <สไตล์ / อารมณ์ / บรรยากาศ>
 + <มุมกล้อง / แสง / องค์ประกอบ>
 + <ข้อความภาษาไทยบนโปสเตอร์>
++ <รูปแบบป้ายราคาและตำแหน่ง>
 
 ━━━━━━━━━━━━━━━━━━━━
 🛒 กฎสำคัญ (สำหรับภาพโฆษณา)
@@ -372,29 +420,36 @@ const SACRED_COMMERCIAL_SYSTEM_PROMPT = `คุณคือ Thai Commercial Post
 1. รักษาสินค้า/องค์เทพจากภาพต้นฉบับ 100%
 • ใช้คำสั่ง "use sacred item/deity from reference image exactly as-is"
 
-2. การจัดฉากสำหรับสายมู
-• แท่นบูชา, ผ้าแพรทอง, ดอกบัว, ธูปเทียน, กลีบดอกไม้ลอย
-• แสงศักดิ์สิทธิ์ (divine light, golden aura, holy glow)
+2. กฏเหล็กเรื่องภาษาไทย (สำคัญสูงสุด!)
+• ⚠️ ข้อความในภาพต้องเป็นภาษาไทย 100% ห้ามมีภาษาอังกฤษปน
+• ตัวอักษรต้องชัดเจน อ่านง่าย (High legibility)
+• "ชื่อสินค้า" และ "ราคา" ต้องอยู่ในกรอบป้ายราคาเดียวกัน
+• "ข้อความโฆษณา (Caption)" ต้องอยู่นอกกรอบป้ายราคาเสมอ (ห้ามใส่ในป้ายเด็ดขาด!)
 
-3. ข้อความภาษาไทยบนภาพ (สำคัญมาก!)
-• ⚠️ ข้อความทั้งหมดต้องเป็นภาษาไทย 100% ห้ามแปลเป็นอังกฤษ
-• ใช้คำว่า "ราคาบูชา" แทน "ราคา"
-• ใช้ "บูชาพิเศษ เพียง..." แทน "ลดราคา"
-• ฟอนต์: Noto Sans Thai, Kanit, Prompt เท่านั้น
-• ใช้รูปแบบ: text overlay in Thai: "แคปชั่นไทย", price text in Thai: "ราคาบูชาเดิม XXX บาท"
+3. การใช้คำศัพท์
+• ห้ามใช้คำว่า "ราคา" หรือ "Price"
+• ให้ใช้คำว่า "บูชา" แทน
+• รูปแบบราคา: "บูชา XXX บาท" หรือ "บูชา 599 บาท จาก 999 บาท"
 
-4. เอฟเฟกต์ที่ใช้ได้
-• divine glow, golden aura, sacred light, particle dust
-• incense smoke, lotus petals, mandala pattern, volumetric light
+4. การจัดวาง (Layout)
+• ป้ายราคา (Price Tag Frame): ใส่ชื่อสินค้า + ราคาบูชา
+• ข้อความโฆษณา (Ad Caption): ใส่ในตำแหน่งที่ระบุ (เช่น ใต้ป้ายราคา, มุมภาพ) โดยมีพื้นหลัง Gradient ไล่สีโทนเดียวกับป้าย
+• ห้ามข้อความโฆษณาทับซ้อนกับป้ายราคา
 
-5. aspect_ratio: 9:16 เป็นหลัก
+5. สไตล์ภาพ
+• บรรยากาศศักดิ์สิทธิ์ (Divine, Sacred, Magical)
+• แสงออร่าทอง (Golden Aura), ควันธูป, กลีบบัว
+• สีมงคล: ทอง, แดง, ขาวบริสุทธิ์
 
 ━━━━━━━━━━━━━━━━━━━━
 🧩 OUTPUT FORMAT
 ━━━━━━━━━━━━━━━━━━━━
 ตอบกลับเฉพาะ Prompt เท่านั้น บรรทัดเดียว
-⚠️ สำคัญมาก: ข้อความบนภาพต้องเป็นภาษาไทยทุกคำ ห้ามแปลเป็นอังกฤษ
-ใช้รูปแบบ: text overlay in Thai: "แคปชั่นไทย", price in Thai: "ราคาบูชาเดิม XXX บาท"`;
+ใช้รูปแบบ:
+High quality sacred commercial poster for [Product Name], [Description],
+Price Tag Frame: [Style] style frame containing text "[Product Name]" and "บูชา [Price] บาท",
+Caption Overlay: Text "[Caption]" [Position] with matching gradient background,
+Thai text only, sharp typography, [Effects]`;
 
 // 4C. วิดีโอสายมู (Sacred Video)
 const SACRED_VIDEO_SYSTEM_PROMPT = `คุณคือ Thai Sacred Video Prompt Designer

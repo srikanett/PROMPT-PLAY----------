@@ -12,9 +12,9 @@
 
   <header class="app-header">
     <div class="brand-box">
-      <div class="brand-logo">P</div>
+      <div class="brand-logo"><img src="icons/icon48.png" id="brand-logo-img" style="width:100%; height:100%; object-fit:cover; border-radius:12px;"></div>
       <div class="brand-info">
-        <h1>PROMPT&PLAY AUTO PRO V.1</h1>
+        <h1>DEWVY PROMPT AUTO GEN</h1>
         <span class="brand-version">1.0.0</span>
       </div>
     </div>
@@ -652,19 +652,48 @@
       <div id="sacred-commercial-config" style="display:none;">
         
         <div class="input-group">
-          <div class="input-row"><label>📝 แคปชั่น/ข้อความโฆษณา</label></div>
-          <textarea id="sacred-commercial-caption" placeholder="เช่น: เสริมพลังบารมีด้านความสำเร็จ..." style="height:60px; padding:10px; border-radius:8px; border:1px solid #3f3f46; background:#27272a; color:#fff;"></textarea>
+          <div class="input-row"><label>📦 ชื่อสินค้า</label></div>
+          <input type="text" id="sacred-product-name" placeholder="เช่น: จี้พระพิฆเนศ" style="width:100%; padding:10px; border-radius:8px; border:1px solid #3f3f46; background:#27272a; color:#fff;">
+        </div>
+
+        <div class="input-group">
+          <div class="input-row"><label>📝 ข้อความโฆษณา (Caption)</label></div>
+          <textarea id="sacred-commercial-caption" placeholder="เช่น: เมตตาประทานความสำเร็จ..." style="height:60px; padding:10px; border-radius:8px; border:1px solid #3f3f46; background:#27272a; color:#fff;"></textarea>
+        </div>
+        
+        <div class="input-group">
+          <div class="input-row"><label>📍 ตำแหน่งข้อความโฆษณา</label></div>
+          <select id="sacred-caption-position">
+             <option value="under_price">⬇️ ใต้ป้ายราคา (แนะนำ)</option>
+             <option value="above_price">⬆️ บนป้ายราคา</option>
+             <option value="top_left">↖️ มุมบนซ้าย</option>
+             <option value="top_right">↗️ มุมบนขวา</option>
+             <option value="bottom_left">↙️ มุมล่างซ้าย</option>
+             <option value="bottom_right">↘️ มุมล่างขวา</option>
+             <option value="top_center">⬆️ ขอบบนกลาง</option>
+             <option value="bottom_center">⬇️ ขอบล่างกลาง</option>
+             <option value="center_left">⬅️ กลางซ้าย</option>
+             <option value="center_right">➡️ กลางขวา</option>
+          </select>
         </div>
 
         <div class="grid-2">
           <div class="input-group">
-            <div class="input-row"><label>💰 ราคาเต็ม</label></div>
+            <div class="input-row"><label>💰 บูชา (ราคาเต็ม)</label></div>
             <input type="text" id="sacred-price-full" placeholder="999">
           </div>
           <div class="input-group">
-            <div class="input-row"><label>🏷️ ราคาพิเศษ(โปร)</label></div>
+            <div class="input-row"><label>🏷️ บูชาพิเศษ (โปร)</label></div>
             <input type="text" id="sacred-price-promo" placeholder="599">
           </div>
+        </div>
+        
+        <div class="toggle-group" style="margin-top:15px; margin-bottom:15px; display:flex; align-items:center; gap:10px;">
+           <label class="toggle-switch">
+             <input type="checkbox" id="sacred-frame-only">
+             <span class="slider"></span>
+           </label>
+           <span style="font-size:14px; color:#ddd;">สร้างเฉพาะกรอบป้าย (ไม่ใส่ข้อความ)</span>
         </div>
 
         <div class="input-group">

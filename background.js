@@ -37,7 +37,7 @@ chrome.downloads.onDeterminingFilename.addListener((downloadItem, suggest) => {
   const isVideoOrImage = /\.(mp4|webm|mov|avi|mkv|jpg|jpeg|png|gif|webp)$/i.test(filename);
   
   if (isVideoOrImage) {
-    // Generate new filename: PROMPT_PLAY_YYYYMMDD_HHMMSS.ext
+    // Generate new filename: PROMPT_PLAY_YYYYMMDD_HHMMSS_RAND.ext
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -45,6 +45,7 @@ chrome.downloads.onDeterminingFilename.addListener((downloadItem, suggest) => {
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
+    const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
     
     // Get file extension from original filename or URL
     let extension = 'mp4';
@@ -54,7 +55,7 @@ chrome.downloads.onDeterminingFilename.addListener((downloadItem, suggest) => {
     }
     
     // Create new filename
-    const newFilename = `PROMPT_PLAY_${year}${month}${day}_${hours}${minutes}${seconds}.${extension}`;
+    const newFilename = `PROMPT_PLAY_${year}${month}${day}_${hours}${minutes}${seconds}_${random}.${extension}`;
     
     // Get the directory from original filename (if it has a path)
     let newPath = newFilename;
@@ -63,8 +64,8 @@ chrome.downloads.onDeterminingFilename.addListener((downloadItem, suggest) => {
       newPath = directory + newFilename;
     }
     
-    // Suggest the new filename
-    suggest({ filename: newPath });
+    // Suggest the new filename with conflictAction
+    suggest({ filename: newPath, conflictAction: 'uniquify' });
   } else {
     // For other files, use default behavior
     suggest({});

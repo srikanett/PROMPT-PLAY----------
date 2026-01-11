@@ -4703,9 +4703,30 @@ function sacredImgSetupUploadZone() {
 
 // Handle Files (Sacred Image)
 async function sacredImgHandleFiles(files) {
-    const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+    const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/') || file.name.toLowerCase().endsWith('.heic'));
     
-    for (const file of imageFiles) {
+    for (let file of imageFiles) {
+        // HEIC Support
+        if (file.name.toLowerCase().endsWith('.heic')) {
+            try {
+                showToast('กำลังแปลงไฟล์ HEIC...', 'info');
+                if (typeof heic2any !== 'undefined') {
+                    const blob = await heic2any({ 
+                        blob: file, 
+                        toType: "image/jpeg", 
+                        quality: 0.8 
+                    });
+                     file = new File([blob], file.name.toLowerCase().replace('.heic', '.jpg'), { type: "image/jpeg" });
+                } else {
+                    console.error('heic2any library not loaded');
+                    showToast('ไม่พบ Library แปลง HEIC', 'error');
+                }
+            } catch (e) {
+                console.error("HEIC conversion failed", e);
+                showToast("แปลงไฟล์ HEIC ไม่สำเร็จ กรุณาใช้ JPG/PNG", "error");
+                continue; 
+            }
+        }
         const reader = new FileReader();
         reader.onload = async (e) => {
             const imageData = {
@@ -4913,32 +4934,58 @@ async function sacredImgGeneratePrompt(imageDataUrl) {
         // Commercial mode
         systemPrompt = window.SACRED_COMMERCIAL_SYSTEM_PROMPT || '';
         
+        const productName = document.getElementById('sacred-product-name')?.value || '';
         const caption = document.getElementById('sacred-commercial-caption')?.value || '';
         const priceFull = document.getElementById('sacred-price-full')?.value || '';
         const pricePromo = document.getElementById('sacred-price-promo')?.value || '';
         const commercialEffect = document.getElementById('sacred-commercial-effect')?.value || 'divine_glow';
-        const noText = document.getElementById('sacred-commercial-no-text')?.checked || false;
+        const frameOnly = document.getElementById('sacred-frame-only')?.checked || false;
+        
         const priceTagStyle = document.getElementById('sacred-price-tag-style')?.value || 'circle_gold';
         const priceTagColor = document.getElementById('sacred-price-tag-color')?.value || 'gold_shine';
+        const captionPosition = document.getElementById('sacred-caption-position')?.value || 'under_price';
         
         const styleData = window.getPriceTagStyle ? window.getPriceTagStyle(priceTagStyle) : {};
         const colorData = window.getPriceTagColor ? window.getPriceTagColor(priceTagColor) : {};
+        // Use global CAPTION_POSITIONS if available, else fallback
+        const posData = (window.CAPTION_POSITIONS && window.CAPTION_POSITIONS[captionPosition]) 
+                        ? window.CAPTION_POSITIONS[captionPosition] 
+                        : { name: captionPosition, prompt: 'placed below price tag' };
         
-        if (noText) {
-            // โหมดไม่ใส่ข้อความ - สร้างแค่เอฟเฟกต์
-            userMessage = `สร้าง prompt ภาพวัตถุมงคลจากภาพนี้
+        if (frameOnly) {
+             userMessage = `สร้าง prompt ภาพโฆษณาวัตถุมงคลจากภาพนี้
+สินค้า: "${productName || 'วัตถุมงคล'}"
+คำสั่งสำคัญ: สร้างเฉพาะกรอบป้ายราคาที่สวยงามและว่างเปล่า (Empty Price Tag Frame) ตามสไตล์ที่เลือก
+รูปแบบป้าย: ${styleData.prompt || 'circular golden price tag'}
+โทนสีป้าย: ${colorData.prompt || 'shiny gold color'}
 เอฟเฟกต์: ${commercialEffect}
-⚠️ สำคัญ: ไม่ต้องใส่ข้อความใด ๆ ลงบนภาพ เน้นเฉพาะเอฟเฟกต์และบรรยากาศศักดิ์สิทธิ์`;
+ตำแหน่งป้าย: จัดวางอย่างสวยงาม
+⚠️ ข้อความ: ห้ามใส่ข้อความใดๆ ลงในป้าย (Empty Frame)`;
         } else if (isSmartAuto) {
-            userMessage = `สร้าง prompt ภาพโฆษณาวัตถุมงคลจากภาพนี้ ให้ AI คิดข้อความโฆษณาและรูปแบบป้ายราคาให้เหมาะกับวัตถุมงคลโดยอัตโนมัติ`;
+             userMessage = `สร้าง prompt ภาพโฆษณาวัตถุมงคลจากภาพนี้ 
+สินค้า: "${productName || 'AI คิดให้'}"
+ให้ AI คิดแคปชั่นและรูปแบบป้ายราคาให้เหมาะสม
+คำสั่งสำคัญ: 
+1. ถ้ามีชื่อสินค้า ให้ใส่ชื่อสินค้าในป้ายราคา
+2. ใส่ราคา "บูชา XXX บาท" ในป้ายราคา
+3. ข้อความโฆษณา (Caption) ต้องอยู่นอกป้ายราคา และมีพื้นหลังไล่สี (Gradient)
+4. ภาษาไทยต้องถูกต้อง 100%`;
         } else {
-            userMessage = `สร้าง prompt ภาพโฆษณาวัตถุมงคลจากภาพนี้
-แคปชั่น: ${caption || 'วัตถุมงคลศักดิ์สิทธิ์'}
-ราคาบูชาเดิม: ${priceFull || '999'} บาท
-บูชาพิเศษเพียง: ${pricePromo || '599'} บาท
+             const priceText = pricePromo 
+                 ? `บูชา ${pricePromo} บาท จาก ${priceFull} บาท` 
+                 : `บูชา ${priceFull || '999'} บาท`;
+                 
+             userMessage = `สร้าง prompt ภาพโฆษณาวัตถุมงคลจากภาพนี้
+สินค้า: "${productName || 'วัตถุมงคล'}"
+ข้อความในป้ายราคา: "${productName} ${priceText}"
+ข้อความโฆษณา (Caption): "${caption}" (ตำแหน่ง: ${posData.name} - ${posData.prompt})
 รูปแบบป้ายราคา: ${styleData.prompt || 'circular golden price tag'}
 โทนสีป้าย: ${colorData.prompt || 'shiny gold color'}
-เอฟเฟกต์: ${commercialEffect}`;
+เอฟเฟกต์: ${commercialEffect}
+⚠️ กฎเหล็ก:
+1. ข้อความในป้ายราคาต้องมีแค่ "${productName}" และ "${priceText}"
+2. ข้อความโฆษณา "${caption}" ต้องอยู่นอกป้ายราคา (${posData.name})
+3. พื้นหลังข้อความโฆษณาต้องเป็น Gradient สวยงาม`;
         }
     }
     
@@ -5716,9 +5763,30 @@ function sacredVideoSetupUploadZone() {
 
 // Handle Files (Sacred Video)
 async function sacredVideoHandleFiles(files) {
-    const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+    const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/') || file.name.toLowerCase().endsWith('.heic'));
     
-    for (const file of imageFiles) {
+    for (let file of imageFiles) {
+        // HEIC Support
+        if (file.name.toLowerCase().endsWith('.heic')) {
+            try {
+                showToast('กำลังแปลงไฟล์ HEIC...', 'info');
+                if (typeof heic2any !== 'undefined') {
+                    const blob = await heic2any({ 
+                        blob: file, 
+                        toType: "image/jpeg", 
+                        quality: 0.8 
+                    });
+                     file = new File([blob], file.name.toLowerCase().replace('.heic', '.jpg'), { type: "image/jpeg" });
+                } else {
+                    console.error('heic2any library not loaded');
+                    showToast('ไม่พบ Library แปลง HEIC', 'error');
+                }
+            } catch (e) {
+                console.error("HEIC conversion failed", e);
+                showToast("แปลงไฟล์ HEIC ไม่สำเร็จ กรุณาใช้ JPG/PNG", "error");
+                continue; 
+            }
+        }
         const reader = new FileReader();
         reader.onload = async (e) => {
             const imageData = {
@@ -6532,6 +6600,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('sacred-img-upload-zone')) {
         sacredImgSetupUploadZone();
         sacredImgSetupEventListeners();
+        // Initialize Mode
+        sacredImgToggleMode('blessing');
     }
     
     // Setup Sacred Video Module

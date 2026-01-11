@@ -927,3 +927,92 @@ summary { cursor: pointer; color: #888; font-size: 13px; }
     border-color: #8b5cf6; 
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
+
+/* Commercial Mode Config Fixes */
+#sacred-commercial-config {
+  width: 100%;
+  animation: fadeUp 0.3s ease;
+}
+
+#sacred-commercial-config .input-group {
+  margin-bottom: 12px;
+}
+
+#sacred-commercial-config input[type="text"],
+#sacred-commercial-config textarea,
+#sacred-commercial-config select {
+  width: 100%;
+  background-color: var(--bg-input);
+  color: var(--text-main);
+  border: 1px solid var(--border);
+  padding: 10px;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 14px;
+}
+
+#sacred-commercial-config label {
+  color: #ccc;
+  font-size: 13px;
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* Fix Toggle Switch alignment */
+.toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+/* Branding Fallback */
+.brand-logo {
+  background-color: #333;
+}
+
+/* Toggle Switch CSS */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #3f3f46; /* var(--border) */
+  transition: .4s;
+  border-radius: 22px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #a855f7; /* var(--accent) */
+}
+
+input:checked + .slider:before {
+  transform: translateX(18px);
+}
