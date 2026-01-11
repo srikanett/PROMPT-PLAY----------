@@ -728,12 +728,23 @@ async function videoGeneratePromptOnly() {
     const isSmartAuto = document.getElementById('video-smart-auto-checkbox')?.checked || false;
     
     let userMessage = '';
+    const noText = document.getElementById('video-no-text')?.checked || false;
+    const textEffectValue = document.getElementById('video-text-effect')?.value || 'none';
+    const textEffectData = window.getTextEffect ? window.getTextEffect(textEffectValue) : { prompt: '' };
+    
+    let textInstruction = '';
+    if (noText) {
+      textInstruction = '\n⚠️ สำคัญ: ห้ามใส่ข้อความใดๆ ลงบนวีดีโอ (no text overlay)';
+    } else if (textEffectValue !== 'none') {
+      textInstruction = `\nเอฟเฟกต์ข้อความ: ${textEffectData.prompt}`;
+    }
+    
     if (isSmartAuto) {
-      userMessage = `สร้าง prompt สำหรับวิดีโอจากภาพนี้ ให้ AI คิดสไตล์การเคลื่อนไหวและบรรยากาศที่เหมาะสม${productName ? ` ชื่อ: ${productName}` : ''}`;
+      userMessage = `สร้าง prompt สำหรับวิดีโอจากภาพนี้ ให้ AI คิดสไตล์การเคลื่อนไหวและบรรยากาศที่เหมาะสม${productName ? ` ชื่อ: ${productName}` : ''}${textInstruction}`;
     } else {
       userMessage = `สร้าง prompt สำหรับวิดีโอจากภาพนี้
 ${productName ? `ชื่อ: ${productName}` : ''}
-สไตล์: วิดีโอโฆษณาสินค้า`;
+สไตล์: วิดีโอโฆษณาสินค้า${textInstruction}`;
     }
     
     const base64Data = imageData.dataUrl.split(',')[1];
@@ -3290,15 +3301,26 @@ async function bananaGeneratePromptOnly() {
     
     // Build prompt request
     let userMessage = '';
+    const noText = document.getElementById('banana-no-text')?.checked || false;
+    const textEffectValue = document.getElementById('banana-text-effect')?.value || 'none';
+    const textEffectData = window.getTextEffect ? window.getTextEffect(textEffectValue) : { prompt: '' };
+    
+    let textInstruction = '';
+    if (noText) {
+      textInstruction = '\n⚠️ สำคัญ: ห้ามใส่ข้อความใดๆ ลงบนภาพ (no text overlay)';
+    } else if (textEffectValue !== 'none') {
+      textInstruction = `\nเอฟเฟกต์ข้อความ: ${textEffectData.prompt}`;
+    }
+    
     if (isSmartAuto) {
-      userMessage = `สร้าง prompt สำหรับภาพโฆษณาสินค้าจากภาพนี้ ให้ AI คิดสไตล์และฉากหลังที่เหมาะสมเอง${productName ? ` ชื่อสินค้า: ${productName}` : ''}`;
+      userMessage = `สร้าง prompt สำหรับภาพโฆษณาสินค้าจากภาพนี้ ให้ AI คิดสไตล์และฉากหลังที่เหมาะสมเอง${productName ? ` ชื่อสินค้า: ${productName}` : ''}${textInstruction}`;
     } else {
       const selectedStyle = bananaStyleSelect?.value || 'studio';
       const selectedBg = bananaBgSelect?.value || 'white';
       userMessage = `สร้าง prompt สำหรับภาพโฆษณาสินค้าจากภาพนี้
 ${productName ? `ชื่อสินค้า: ${productName}` : ''}
 สไตล์: ${selectedStyle}
-ฉากหลัง: ${selectedBg}`;
+ฉากหลัง: ${selectedBg}${textInstruction}`;
     }
     
     const base64Data = imageData.dataUrl.split(',')[1];

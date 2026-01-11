@@ -361,7 +361,48 @@
               </div>
           </div>
 
-      </div> <div class="grid-2">
+      </div>
+      
+      <!-- Text Options -->
+      <div class="section-title">4. ตัวเลือกข้อความ</div>
+      
+      <div class="input-group" style="background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.3);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label style="color: #818cf8; font-weight:600;">
+            🚫 ไม่ต้องใส่ข้อความลงภาพ
+          </label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="banana-no-text">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div style="font-size:11px; color:#94a3b8; margin-top:5px;">
+          เปิดเพื่อสร้างภาพโดยไม่มีข้อความใดๆ
+        </div>
+      </div>
+      
+      <div class="input-group" id="banana-text-effect-container">
+        <div class="input-row"><label>✨ เอฟเฟกต์ข้อความ</label></div>
+        <select id="banana-text-effect">
+          <option value="none">ไม่มีเอฟเฟกต์</option>
+          <option value="glow_white">🌟 Glow สีขาว</option>
+          <option value="glow_gold">✨ Glow สีทอง</option>
+          <option value="neon_blue">💙 Neon สีฟ้า</option>
+          <option value="neon_pink">💗 Neon สีชมพู</option>
+          <option value="shadow_soft">🌫️ เงาอ่อน</option>
+          <option value="shadow_hard">⬛ เงาแข็ง</option>
+          <option value="outline_white">⬜ ขอบขาว</option>
+          <option value="outline_black">⬛ ขอบดำ</option>
+          <option value="gradient_rainbow">🌈 Gradient รุ้ง</option>
+          <option value="gradient_gold">🥇 Gradient ทอง</option>
+          <option value="metallic_silver">🔘 เมทัลลิกเงิน</option>
+          <option value="metallic_gold">🪙 เมทัลลิกทอง</option>
+          <option value="emboss_3d">🏔️ นูน 3D</option>
+          <option value="vintage_retro">📺 วินเทจ Retro</option>
+        </select>
+      </div>
+      
+      <div class="grid-2">
         <div class="input-group">
           <label style="font-size:12px; color:#aaa;">รอบการสร้าง (Rounds)</label>
           <input type="hidden" id="banana-round-count" value="1">
@@ -511,6 +552,45 @@
               <option value="isan">🌶️ ภาคอีสาน (Isan Dialect)</option>
               <option value="northern">🌸 ภาคเหนือ (Northern Dialect)</option>
           </select>
+      </div>
+
+      <!-- Text Options for Video -->
+      <div class="section-title">4. ตัวเลือกข้อความ</div>
+      
+      <div class="input-group" style="background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.3);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label style="color: #fb7185; font-weight:600;">
+            🚫 ไม่ต้องใส่ข้อความลงวีดีโอ
+          </label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="video-no-text">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div style="font-size:11px; color:#94a3b8; margin-top:5px;">
+          เปิดเพื่อสร้างวีดีโอโดยไม่มีข้อความใดๆ
+        </div>
+      </div>
+      
+      <div class="input-group" id="video-text-effect-container">
+        <div class="input-row"><label>✨ เอฟเฟกต์ข้อความ</label></div>
+        <select id="video-text-effect">
+          <option value="none">ไม่มีเอฟเฟกต์</option>
+          <option value="glow_white">🌟 Glow สีขาว</option>
+          <option value="glow_gold">✨ Glow สีทอง</option>
+          <option value="neon_blue">💙 Neon สีฟ้า</option>
+          <option value="neon_pink">💗 Neon สีชมพู</option>
+          <option value="shadow_soft">🌫️ เงาอ่อน</option>
+          <option value="shadow_hard">⬛ เงาแข็ง</option>
+          <option value="outline_white">⬜ ขอบขาว</option>
+          <option value="outline_black">⬛ ขอบดำ</option>
+          <option value="gradient_rainbow">🌈 Gradient รุ้ง</option>
+          <option value="gradient_gold">🥇 Gradient ทอง</option>
+          <option value="metallic_silver">🔘 เมทัลลิกเงิน</option>
+          <option value="metallic_gold">🪙 เมทัลลิกทอง</option>
+          <option value="emboss_3d">🏔️ นูน 3D</option>
+          <option value="vintage_retro">📺 วินเทจ Retro</option>
+        </select>
       </div>
 
       <div class="grid-2">

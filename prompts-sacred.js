@@ -3,6 +3,77 @@
 // ============================================
 
 // ============================================
+// 0. TEXT EFFECTS - เอฟเฟกต์ข้อความ (สำหรับทุกโมดูล)
+// ============================================
+
+const TEXT_EFFECTS = {
+    'none': {
+        name: 'ไม่มีเอฟเฟกต์',
+        prompt: 'clean simple text without effects'
+    },
+    'glow_white': {
+        name: '🌟 Glow สีขาว',
+        prompt: 'text with soft white glowing effect'
+    },
+    'glow_gold': {
+        name: '✨ Glow สีทอง',
+        prompt: 'text with golden shimmering glow effect'
+    },
+    'neon_blue': {
+        name: '💙 Neon สีฟ้า',
+        prompt: 'text with electric blue neon effect'
+    },
+    'neon_pink': {
+        name: '💗 Neon สีชมพู',
+        prompt: 'text with vibrant pink neon effect'
+    },
+    'shadow_soft': {
+        name: '🌫️ เงาอ่อน',
+        prompt: 'text with soft drop shadow'
+    },
+    'shadow_hard': {
+        name: '⬛ เงาแข็ง',
+        prompt: 'text with strong hard shadow'
+    },
+    'outline_white': {
+        name: '⬜ ขอบขาว',
+        prompt: 'text with white outline stroke'
+    },
+    'outline_black': {
+        name: '⬛ ขอบดำ',
+        prompt: 'text with black outline stroke'
+    },
+    'gradient_rainbow': {
+        name: '🌈 Gradient รุ้ง',
+        prompt: 'text with rainbow gradient fill'
+    },
+    'gradient_gold': {
+        name: '🥇 Gradient ทอง',
+        prompt: 'text with golden gradient fill'
+    },
+    'metallic_silver': {
+        name: '🔘 เมทัลลิกเงิน',
+        prompt: 'text with metallic silver chrome effect'
+    },
+    'metallic_gold': {
+        name: '🪙 เมทัลลิกทอง',
+        prompt: 'text with metallic gold chrome effect'
+    },
+    'emboss_3d': {
+        name: '🏔️ นูน 3D',
+        prompt: 'text with 3D embossed raised effect'
+    },
+    'vintage_retro': {
+        name: '📺 วินเทจ Retro',
+        prompt: 'text with retro vintage distressed effect'
+    }
+};
+
+function getTextEffect(effectId) {
+    return TEXT_EFFECTS[effectId] || TEXT_EFFECTS['none'];
+}
+
+// ============================================
 // 1. DEITY DATABASE - ข้อมูลองค์เทพ
 // ============================================
 
@@ -669,6 +740,7 @@ if (typeof window !== 'undefined') {
     window.SPEECH_MODES = SPEECH_MODES;
     window.CAPTION_POSITIONS = CAPTION_POSITIONS;
     window.CHARACTER_POSES = CHARACTER_POSES;
+    window.TEXT_EFFECTS = TEXT_EFFECTS;
     window.SACRED_BLESSING_SYSTEM_PROMPT = SACRED_BLESSING_SYSTEM_PROMPT;
     window.SACRED_COMMERCIAL_SYSTEM_PROMPT = SACRED_COMMERCIAL_SYSTEM_PROMPT;
     window.SACRED_VIDEO_SYSTEM_PROMPT = SACRED_VIDEO_SYSTEM_PROMPT;
@@ -680,6 +752,7 @@ if (typeof window !== 'undefined') {
     window.getPriceTagColor = getPriceTagColor;
     window.getVoiceTone = getVoiceTone;
     window.getSpeechMode = getSpeechMode;
+    window.getTextEffect = getTextEffect;
     window.getAllDeities = getAllDeities;
     window.getAllSacredEffects = getAllSacredEffects;
     window.getAllDeityMoods = getAllDeityMoods;
