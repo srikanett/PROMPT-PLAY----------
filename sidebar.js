@@ -4917,8 +4917,14 @@ async function sacredImgGeneratePrompt(imageDataUrl) {
         const priceFull = document.getElementById('sacred-price-full')?.value || '';
         const pricePromo = document.getElementById('sacred-price-promo')?.value || '';
         const commercialEffect = document.getElementById('sacred-commercial-effect')?.value || 'divine_glow';
+        const noText = document.getElementById('sacred-commercial-no-text')?.checked || false;
         
-        if (isSmartAuto) {
+        if (noText) {
+            // โหมดไม่ใส่ข้อความ - สร้างแค่เอฟเฟกต์
+            userMessage = `สร้าง prompt ภาพวัตถุมงคลจากภาพนี้
+เอฟเฟกต์: ${commercialEffect}
+⚠️ สำคัญ: ไม่ต้องใส่ข้อความใด ๆ ลงบนภาพ เน้นเฉพาะเอฟเฟกต์และบรรยากาศศักดิ์สิทธิ์`;
+        } else if (isSmartAuto) {
             userMessage = `สร้าง prompt ภาพโฆษณาวัตถุมงคลจากภาพนี้ ให้ AI คิดข้อความโฆษณาให้เหมาะกับวัตถุมงคลโดยอัตโนมัติ`;
         } else {
             userMessage = `สร้าง prompt ภาพโฆษณาวัตถุมงคลจากภาพนี้
