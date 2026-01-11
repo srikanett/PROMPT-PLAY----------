@@ -203,6 +203,92 @@
   </div>
 </div>
 
+       <!-- Price and Details Section (Moved) -->
+       <div class="section-title">3. ราคาและรายละเอียด (Price & Details)</div>
+      
+      <div class="input-group" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label style="color: #34d399; font-weight:600;">
+            🏷️ แสดงป้ายราคา/รายละเอียด
+          </label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="banana-price-tag-toggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div style="font-size:11px; color:#94a3b8; margin-top:5px;">
+          เพิ่มป้ายราคาและรายละเอียดสินค้าลงในภาพ
+        </div>
+      </div>
+      
+      <div id="banana-price-tag-container" style="display:none; margin-top: 10px; padding-left: 10px; border-left: 2px solid #34d399;">
+        <div class="input-group">
+            <label>💰 ราคา (Price)</label>
+            <input type="text" id="banana-product-price" placeholder="เช่น 990.-, 1290 บาท" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff;">
+        </div>
+        
+        <div class="input-group">
+            <label>📝 รายละเอียด (Details)</label>
+            <input type="text" id="banana-product-detail" placeholder="เช่น ผ้านุ่ม ใส่สบาย, กันน้ำ 100%" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff;">
+        </div>
+        
+        <div class="input-group">
+            <div class="input-row"><label>🎨 รูปแบบป้าย (Tag Style)</label></div>
+            <select id="banana-price-style" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff;">
+              <option value="auto">✨ อัตโนมัติ (AI เลือกให้)</option>
+              <option value="modern_minimal">⬜ Modern Minimal</option>
+              <option value="luxury_gold">🥇 Luxury Gold</option>
+              <option value="bold_impact">💥 Bold Impact</option>
+              <option value="pastel_cute">🌸 Pastel Cute</option>
+              <option value="neon_cyber">💙 Neon Cyber</option>
+              <option value="vintage_paper">📜 Vintage Paper</option>
+              <option value="glass_morphism">🧊 Glassmorphism</option>
+              <option value="chalkboard">🖍️ Chalkboard</option>
+              <option value="eco_natural">🍃 Eco Natural</option>
+              <option value="sale_red">🧧 Red Sale Tag</option>
+            </select>
+        </div>
+      </div>
+
+       <!-- Text Options Section (Moved and Renumbered) -->
+       <div class="section-title">4. ตัวเลือกข้อความ (Text Options)</div>
+      
+      <div class="input-group" style="background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.3);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label style="color: #818cf8; font-weight:600;">
+            🚫 ไม่ต้องใส่ข้อความลงภาพ
+          </label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="banana-no-text">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div style="font-size:11px; color:#94a3b8; margin-top:5px;">
+          เปิดเพื่อสร้างภาพโดยไม่มีข้อความใดๆ
+        </div>
+      </div>
+      
+      <div class="input-group" id="banana-text-effect-container">
+        <div class="input-row"><label>✨ เอฟเฟกต์ข้อความ</label></div>
+        <select id="banana-text-effect">
+          <option value="none">ไม่มีเอฟเฟกต์</option>
+          <option value="glow_white">🌟 Glow สีขาว</option>
+          <option value="glow_gold">✨ Glow สีทอง</option>
+          <option value="neon_blue">💙 Neon สีฟ้า</option>
+          <option value="neon_pink">💗 Neon สีชมพู</option>
+          <option value="shadow_soft">🌫️ เงาอ่อน</option>
+          <option value="shadow_hard">⬛ เงาแข็ง</option>
+          <option value="outline_white">⬜ ขอบขาว</option>
+          <option value="outline_black">⬛ ขอบดำ</option>
+          <option value="gradient_rainbow">🌈 Gradient รุ้ง</option>
+          <option value="gradient_gold">🥇 Gradient ทอง</option>
+          <option value="metallic_silver">🔘 เมทัลลิกเงิน</option>
+          <option value="metallic_gold">🪙 เมทัลลิกทอง</option>
+          <option value="emboss_3d">🏔️ นูน 3D</option>
+          <option value="vintage_retro">📺 วินเทจ Retro</option>
+        </select>
+      </div>
+
       <div id="manual-config-container">
 
            <div class="input-group">
@@ -394,45 +480,6 @@
               </div>
           </div>
 
-      </div>
-      
-      <!-- Text Options -->
-      <div class="section-title">4. ตัวเลือกข้อความ</div>
-      
-      <div class="input-group" style="background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.3);">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <label style="color: #818cf8; font-weight:600;">
-            🚫 ไม่ต้องใส่ข้อความลงภาพ
-          </label>
-          <label class="toggle-switch">
-            <input type="checkbox" id="banana-no-text">
-            <span class="slider"></span>
-          </label>
-        </div>
-        <div style="font-size:11px; color:#94a3b8; margin-top:5px;">
-          เปิดเพื่อสร้างภาพโดยไม่มีข้อความใดๆ
-        </div>
-      </div>
-      
-      <div class="input-group" id="banana-text-effect-container">
-        <div class="input-row"><label>✨ เอฟเฟกต์ข้อความ</label></div>
-        <select id="banana-text-effect">
-          <option value="none">ไม่มีเอฟเฟกต์</option>
-          <option value="glow_white">🌟 Glow สีขาว</option>
-          <option value="glow_gold">✨ Glow สีทอง</option>
-          <option value="neon_blue">💙 Neon สีฟ้า</option>
-          <option value="neon_pink">💗 Neon สีชมพู</option>
-          <option value="shadow_soft">🌫️ เงาอ่อน</option>
-          <option value="shadow_hard">⬛ เงาแข็ง</option>
-          <option value="outline_white">⬜ ขอบขาว</option>
-          <option value="outline_black">⬛ ขอบดำ</option>
-          <option value="gradient_rainbow">🌈 Gradient รุ้ง</option>
-          <option value="gradient_gold">🥇 Gradient ทอง</option>
-          <option value="metallic_silver">🔘 เมทัลลิกเงิน</option>
-          <option value="metallic_gold">🪙 เมทัลลิกทอง</option>
-          <option value="emboss_3d">🏔️ นูน 3D</option>
-          <option value="vintage_retro">📺 วินเทจ Retro</option>
-        </select>
       </div>
       
       <div class="grid-2">

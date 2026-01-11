@@ -188,6 +188,60 @@ function getVideoPresentationStyle(styleId) {
 }
 
 // ============================================
+// NEW: Price & Detail Overlay Styles
+// ============================================
+const PRICE_TAG_STYLES = {
+    'auto': {
+        name: '✨ อัตโนมัติ (AI เลือกให้)',
+        prompt: 'Analyze the image composition and product style. Automatically select the most suitable text layout, font, and color scheme for the price tag and product details to maximize visual appeal and readability. Harmonize with the background.'
+    },
+    'modern_minimal': {
+        name: '⬜ Modern Minimal',
+        prompt: 'Style: Modern Minimalist. Use clean sans-serif typography. Black or dark grey text on white background or subtle transparent boxes. Clean lines, ample whitespace. Professional and sleek look.'
+    },
+    'luxury_gold': {
+        name: '🥇 Luxury Gold',
+        prompt: 'Style: Luxury Gold. Elegant serif fonts. Gold metallic text effect or gold border elements. Black or deep rich background for contrast. Premium, expensive high-end look.'
+    },
+    'bold_impact': {
+        name: '💥 Bold Impact',
+        prompt: 'Style: Bold Impact. Large, thick, bold typography. High contrast colors (Red/White or Yellow/Black). Attention-grabbing sale sticker style. Dynamic layout.'
+    },
+    'pastel_cute': {
+        name: '🌸 Pastel Cute',
+        prompt: 'Style: Pastel Cute. Soft rounded fonts. Pastel color palette (pink, mint, baby blue). Cute decorative elements like small stars or hearts. Sweet and approachable look.'
+    },
+    'neon_cyber': {
+        name: '💙 Neon Cyber',
+        prompt: 'Style: Neon Cyberpunk. Glowing neon text effects (blue, pink, purple). Dark background to make text pop. Futuristic digital font style. High-tech vibe.'
+    },
+    'vintage_paper': {
+        name: '📜 Vintage Paper',
+        prompt: 'Style: Vintage Paper. Text overlaid on textured kraft paper or old parchment visuals. Retro serif or typewriter fonts. Warm earth tones. Classic nostalgic look.'
+    },
+    'glass_morphism': {
+        name: '🧊 Glassmorphism',
+        prompt: 'Style: Glassmorphism. Text on semi-transparent frosted glass cards with soft white borders. Blurred background behind text. Modern, airy, and premium tech look.'
+    },
+    'chalkboard': {
+        name: '🖍️ Chalkboard',
+        prompt: 'Style: Chalkboard Art. White handwritten-style text on black chalkboard texture. Hand-drawn doodle elements. Casual, creative, and craft vibe.'
+    },
+    'eco_natural': {
+        name: '🍃 Eco Natural',
+        prompt: 'Style: Eco Natural. Earthy tones (green, brown, beige). Organic fonts. Leaf or nature motifs. Clean fresh look suitable for organic/natural products.'
+    },
+    'sale_red': {
+        name: '🧧 Red Sale Tag',
+        prompt: 'Style: Classic Red Sale Tag. Bright red background or badge for price. White bold text. Urgent "On Sale" appearance. Traditional retail promotion style.'
+    }
+};
+
+function getPriceTagStyle(styleId) {
+    return PRICE_TAG_STYLES[styleId] || PRICE_TAG_STYLES['auto'];
+}
+
+// ============================================
 // 1. DEITY DATABASE - ข้อมูลองค์เทพ
 // ============================================
 

@@ -3058,6 +3058,14 @@ async function bananaToVideoAutomation() {
 
   try {
     // ============================================
+    // STEP 0.5: Capture Pre-existing Images (Snapshot)
+    // ============================================
+    bananaUpdateStatus('🎬 [0/2] กำลังจดจำรายการรูปเดิม...');
+    const preExistingImages = await bananaGetGeneratedImages();
+    const preExistingSrcs = new Set(preExistingImages.map(img => img.src));
+    console.log("Pre-existing images count:", preExistingImages.length);
+
+    // ============================================
     // STEP 1: รัน Banana (สร้างภาพ)
     // ============================================
     bananaUpdateStatus('🎬 [1/2] กำลังสร้างภาพ...');
@@ -3074,10 +3082,21 @@ async function bananaToVideoAutomation() {
 
     // Step 2: Get generated images from page
     bananaUpdateStatus('🎬 [2/2] กำลังดึงภาพที่สร้างเสร็จ...');
-    const generatedImages = await bananaGetGeneratedImages();
+    const allCurrentImages = await bananaGetGeneratedImages();
+
+    // FILTER: Get ONLY NEW images
+    const generatedImages = allCurrentImages.filter(img => !preExistingSrcs.has(img.src));
+    console.log("New images found:", generatedImages.length);
 
     if (generatedImages.length === 0) {
-      throw new Error('ไม่พบภาพที่สร้างเสร็จ กรุณาตรวจสอบหน้าเว็บ');
+      // Fallback: If no new images found (maybe replaced?), try using all if pre-existing was 0
+      if (preExistingImages.length === 0 && allCurrentImages.length > 0) {
+          console.log("Fallback: Using all images as new");
+           // Assign to generatedImages reference logic (need to manage array)
+           generatedImages.push(...allCurrentImages);
+      } else {
+           throw new Error('ไม่พบภาพที่สร้างใหม่ (New Generated Images Not Found)');
+      }
     }
 
     // Step 3: Convert images to data URLs and add to video upload
@@ -3282,10 +3301,19 @@ function bananaSetupEventListeners() {
           }
       });
   }
-	
+
 	
 	
   if(bananaClearImagesBtn) bananaClearImagesBtn.addEventListener('click', bananaClearAllImages);
+
+  // Price & Details toggle - show/hide container
+  const bananaPriceTagToggle = document.getElementById('banana-price-tag-toggle');
+  const bananaPriceTagContainer = document.getElementById('banana-price-tag-container');
+  if (bananaPriceTagToggle && bananaPriceTagContainer) {
+    bananaPriceTagToggle.addEventListener('change', (e) => {
+        bananaPriceTagContainer.style.display = e.target.checked ? 'block' : 'none';
+    });
+  }
   
   // No Character toggle - show/hide presentation container AND disable character selection
   const bananaNoCharacter = document.getElementById('banana-no-character');
@@ -3376,6 +3404,24 @@ async function bananaGeneratePromptOnly() {
       textInstruction = '\n⚠️ สำคัญ: ห้ามใส่ข้อความใดๆ ลงบนภาพ (no text overlay)';
     } else if (textEffectValue !== 'none') {
       textInstruction = `\nเอฟเฟกต์ข้อความ: ${textEffectData.prompt}`;
+    }
+    
+    // Price & Details Logic
+    const showPriceTag = document.getElementById('banana-price-tag-toggle')?.checked || false;
+    if (showPriceTag && !noText) { // Only add if enabled and Text Disabled is OFF
+        const priceText = document.getElementById('banana-product-price')?.value?.trim() || '';
+        const detailText = document.getElementById('banana-product-detail')?.value?.trim() || '';
+        const priceStyleValue = document.getElementById('banana-price-style')?.value || 'auto';
+        const priceStyleData = window.getPriceTagStyle ? window.getPriceTagStyle(priceStyleValue) : { prompt: '' };
+
+        if (priceText || detailText) {
+            textInstruction += `\n\n📌 PRICE & DETAILS OVERLAY:
+- Display Price: "${priceText}"
+- Display Details: "${detailText}"
+- Tag Style: ${priceStyleData.prompt}
+- Ensure the text is clearly visible, stylish, and suitable for commercial advertisement.
+- Use appropriate currency symbol if provided.`;
+        }
     }
     
     // No Character mode - CRITICAL: Must exclude all character/model instructions from prompt
@@ -3713,9 +3759,29 @@ CRITICAL REQUIREMENTS:
 - NO model, NO person, NO human figure
 - Focus purely on the product itself
 - Professional lighting highlighting product details
-- Clean composition showcasing product features
+- Clean composition showcasing product features`;
 
-Style: High-end commercial product photography, 8k resolution, professional studio quality.
+              // Price & Details Logic (For No-Character Mode)
+              const showPriceTag = document.getElementById('banana-price-tag-toggle')?.checked || false;
+              const noText = document.getElementById('banana-no-text')?.checked || false;
+              
+              if (showPriceTag && !noText) {
+                  const priceText = document.getElementById('banana-product-price')?.value?.trim() || '';
+                  const detailText = document.getElementById('banana-product-detail')?.value?.trim() || '';
+                  const priceStyleValue = document.getElementById('banana-price-style')?.value || 'auto';
+                  const priceStyleData = window.getPriceTagStyle ? window.getPriceTagStyle(priceStyleValue) : { prompt: '' };
+
+                  if (priceText || detailText) {
+                    generatedPrompt += `\n\n📌 PRICE & DETAILS OVERLAY:
+- Display Price: "${priceText}"
+- Display Details: "${detailText}"
+- Tag Style: ${priceStyleData.prompt}
+- Ensure the text is clearly visible, stylish, and suitable for commercial advertisement.`;
+                      bananaAddLog(`🏷️ ใส่ป้ายราคา: ${priceText} / ${detailText}`, 'info');
+                  }
+              }
+
+              generatedPrompt += `\n\nStyle: High-end commercial product photography, 8k resolution, professional studio quality.
 
 Negative Prompt: "person, human, model, woman, man, hands, fingers, face, body, character, people${imgNegative}."`;
               
@@ -3989,6 +4055,27 @@ Negative Prompt: "person, human, model, woman, man, hands, fingers, face, body, 
           // แทนที่ชื่อสินค้า
           generatedPrompt = generatedPrompt.replace(/\[product\]/g, productName || 'product');
           
+
+          // Price & Details Logic (For Normal Mode)
+          const showPriceTag = document.getElementById('banana-price-tag-toggle')?.checked || false;
+          const noText = document.getElementById('banana-no-text')?.checked || false;
+          
+          if (showPriceTag && !noText) {
+              const priceText = document.getElementById('banana-product-price')?.value?.trim() || '';
+              const detailText = document.getElementById('banana-product-detail')?.value?.trim() || '';
+              const priceStyleValue = document.getElementById('banana-price-style')?.value || 'auto';
+              const priceStyleData = window.getPriceTagStyle ? window.getPriceTagStyle(priceStyleValue) : { prompt: '' };
+
+              if (priceText || detailText) {
+                generatedPrompt += `\n\n📌 PRICE & DETAILS OVERLAY:
+- Display Price: "${priceText}"
+- Display Details: "${detailText}"
+- Tag Style: ${priceStyleData.prompt}
+- Ensure the text is clearly visible, stylish, and suitable for commercial advertisement.`;
+                  bananaAddLog(`🏷️ ใส่ป้ายราคา: ${priceText} / ${detailText}`, 'info');
+              }
+          }
+
           bananaPromptResult.textContent = generatedPrompt;
           await bananaSleep(500);
 		  
