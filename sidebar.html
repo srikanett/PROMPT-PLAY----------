@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>PROMPT&PLAY AUTO GEN PRO V.1</title>
   <link rel="stylesheet" href="sidebar.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
 </head>
 <body>
 
@@ -677,6 +678,40 @@
           </select>
         </div>
 
+        <!-- รูปแบบป้ายราคา -->
+        <div class="input-group">
+          <div class="input-row"><label>🏷️ รูปแบบป้ายราคา</label></div>
+          <select id="sacred-price-tag-style">
+            <option value="circle_gold">⭕ วงกลมทอง</option>
+            <option value="square_luxury">◻️ สี่เหลี่ยมหรูหรา</option>
+            <option value="ribbon_red">🎀 ริบบิ้นแดง</option>
+            <option value="badge_silver">🏅 เหรียญเงิน</option>
+            <option value="banner_traditional">📜 แบนเนอร์โบราณ</option>
+            <option value="starburst_gold">⭐ ดาวระเบิดทอง</option>
+            <option value="shield_premium">🛡️ โล่พรีเมียม</option>
+            <option value="lotus_elegant">🌸 ดอกบัวสง่างาม</option>
+            <option value="hexagon_modern">⬡ หกเหลี่ยมโมเดิร์น</option>
+            <option value="scroll_ancient">📖 ม้วนหนังสือโบราณ</option>
+          </select>
+        </div>
+
+        <!-- โทนสีป้ายราคา -->
+        <div class="input-group">
+          <div class="input-row"><label>🎨 โทนสีป้ายราคา</label></div>
+          <select id="sacred-price-tag-color">
+            <option value="gold_shine">✨ ทองเงางาม</option>
+            <option value="silver_elegant">🌟 เงินสง่างาม</option>
+            <option value="red_royal">👑 แดงราชา</option>
+            <option value="black_premium">🖤 ดำพรีเมียม</option>
+            <option value="white_pure">🤍 ขาวบริสุทธิ์</option>
+            <option value="bronze_antique">🥉 ทองแดงโบราณ</option>
+            <option value="purple_mystic">💜 ม่วงลึกลับ</option>
+            <option value="green_jade">💚 เขียวหยก</option>
+            <option value="blue_sapphire">💙 น้ำเงินไพลิน</option>
+            <option value="rainbow_divine">🌈 รุ้งศักดิ์สิทธิ์</option>
+          </select>
+        </div>
+
         <!-- ตัวเลือกไม่ใส่ข้อความ -->
         <div class="input-group" style="background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3);">
           <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -818,6 +853,34 @@
       <div class="input-group">
         <div class="input-row"><label>📝 คำสั่งเพิ่มเติม (Optional)</label></div>
         <textarea id="sacred-video-extra" placeholder="เช่น: ให้มีแสงทองลอยรอบ ๆ, ให้มีกลีบดอกบัวลอย..." style="height:50px; padding:10px; border-radius:8px; border:1px solid #3f3f46; background:#27272a; color:#fff;"></textarea>
+      </div>
+
+      <!-- โทนเสียงคำพูด -->
+      <div class="input-group">
+        <div class="input-row"><label>🎤 โทนเสียงคำพูด</label></div>
+        <select id="sacred-voice-tone">
+          <option value="gentle_soft">🌸 นุ่มนวลอ่อนโยน</option>
+          <option value="powerful_strong">⚡ ทรงพลังแข็งแกร่ง</option>
+          <option value="calm_serene">🧘 สงบนิ่ง</option>
+          <option value="warm_loving">❤️ อบอุ่นเมตตา</option>
+          <option value="wise_ancient">👴 ปราชญ์โบราณ</option>
+          <option value="cheerful_joyful">😊 ร่าเริงสดใส</option>
+          <option value="mysterious_deep">🔮 ลึกลับลี้ลับ</option>
+          <option value="royal_majestic">👑 ราชาสง่างาม</option>
+          <option value="energetic_vibrant">🔥 กระฉับกระเฉง</option>
+          <option value="ethereal_divine">✨ เทวดาศักดิ์สิทธิ์</option>
+        </select>
+      </div>
+
+      <!-- โหมดการพูด -->
+      <div class="input-group">
+        <div class="input-row"><label>🎵 โหมดการพูด</label></div>
+        <select id="sacred-speech-mode">
+          <option value="speaking">🗣️ พูด (Speaking)</option>
+          <option value="singing">🎵 ร้องเพลง (Singing)</option>
+          <option value="chanting">🙏 สวดมนต์ (Chanting)</option>
+        </select>
+        <div style="font-size:10px; color:#666; margin-top:4px;">*เลือกว่าจะให้องค์เทพพูด ร้องเพลง หรือสวดมนต์</div>
       </div>
 
       <!-- Smart Auto Mode -->

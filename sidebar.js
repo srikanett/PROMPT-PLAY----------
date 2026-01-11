@@ -4918,6 +4918,11 @@ async function sacredImgGeneratePrompt(imageDataUrl) {
         const pricePromo = document.getElementById('sacred-price-promo')?.value || '';
         const commercialEffect = document.getElementById('sacred-commercial-effect')?.value || 'divine_glow';
         const noText = document.getElementById('sacred-commercial-no-text')?.checked || false;
+        const priceTagStyle = document.getElementById('sacred-price-tag-style')?.value || 'circle_gold';
+        const priceTagColor = document.getElementById('sacred-price-tag-color')?.value || 'gold_shine';
+        
+        const styleData = window.getPriceTagStyle ? window.getPriceTagStyle(priceTagStyle) : {};
+        const colorData = window.getPriceTagColor ? window.getPriceTagColor(priceTagColor) : {};
         
         if (noText) {
             // โหมดไม่ใส่ข้อความ - สร้างแค่เอฟเฟกต์
@@ -4925,12 +4930,14 @@ async function sacredImgGeneratePrompt(imageDataUrl) {
 เอฟเฟกต์: ${commercialEffect}
 ⚠️ สำคัญ: ไม่ต้องใส่ข้อความใด ๆ ลงบนภาพ เน้นเฉพาะเอฟเฟกต์และบรรยากาศศักดิ์สิทธิ์`;
         } else if (isSmartAuto) {
-            userMessage = `สร้าง prompt ภาพโฆษณาวัตถุมงคลจากภาพนี้ ให้ AI คิดข้อความโฆษณาให้เหมาะกับวัตถุมงคลโดยอัตโนมัติ`;
+            userMessage = `สร้าง prompt ภาพโฆษณาวัตถุมงคลจากภาพนี้ ให้ AI คิดข้อความโฆษณาและรูปแบบป้ายราคาให้เหมาะกับวัตถุมงคลโดยอัตโนมัติ`;
         } else {
             userMessage = `สร้าง prompt ภาพโฆษณาวัตถุมงคลจากภาพนี้
 แคปชั่น: ${caption || 'วัตถุมงคลศักดิ์สิทธิ์'}
 ราคาบูชาเดิม: ${priceFull || '999'} บาท
 บูชาพิเศษเพียง: ${pricePromo || '599'} บาท
+รูปแบบป้ายราคา: ${styleData.prompt || 'circular golden price tag'}
+โทนสีป้าย: ${colorData.prompt || 'shiny gold color'}
 เอฟเฟกต์: ${commercialEffect}`;
         }
     }
@@ -5887,12 +5894,19 @@ async function sacredVideoGeneratePrompt(imageDataUrl) {
     
     const systemPrompt = window.SACRED_VIDEO_SYSTEM_PROMPT || '';
     
+    const voiceTone = document.getElementById('sacred-voice-tone')?.value || 'gentle_soft';
+    const speechMode = document.getElementById('sacred-speech-mode')?.value || 'speaking';
+    const toneData = window.getVoiceTone ? window.getVoiceTone(voiceTone) : {};
+    const modeData = window.getSpeechMode ? window.getSpeechMode(speechMode) : {};
+    
     let userMessage;
     if (isSmartAuto) {
-        userMessage = `สร้าง prompt วิดีโอองค์เทพพูดจากภาพนี้ ให้ AI คิดบทพูดและอารมณ์ให้เหมาะกับองค์เทพโดยอัตโนมัติ`;
+        userMessage = `สร้าง prompt วิดีโอองค์เทพพูดจากภาพนี้ ให้ AI คิดบทพูด โทนเสียง และอารมณ์ให้เหมาะกับองค์เทพโดยอัตโนมัติ`;
     } else {
         userMessage = `สร้าง prompt วิดีโอองค์เทพพูดจากภาพนี้
 บทพูดองค์เทพ: "${speech || 'ลูก ๆ จงเชื่อมั่นในตัวเอง'}"
+โทนเสียง: ${toneData.prompt || 'gentle soft voice'}
+โหมดการพูด: ${modeData.prompt || 'spoken dialogue'}
 อารมณ์/พลัง: ${moodData.name || 'เมตตา'} - ${moodData.prompt || ''}
 คำสั่งเพิ่มเติม: ${extraInstructions}`;
     }

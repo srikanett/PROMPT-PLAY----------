@@ -141,7 +141,167 @@ const DEITY_MOODS = {
 };
 
 // ============================================
-// 4. SYSTEM PROMPTS
+// 4. PRICE TAG STYLES - รูปแบบป้ายราคา
+// ============================================
+
+const PRICE_TAG_STYLES = {
+    'circle_gold': {
+        name: '⭕ วงกลมทอง',
+        prompt: 'circular golden price tag, ornate border, Thai numerals, elegant design, metallic shine'
+    },
+    'square_luxury': {
+        name: '◻️ สี่เหลี่ยมหรูหรา',
+        prompt: 'luxury square price tag, premium frame, gold accents, sophisticated Thai text, royal design'
+    },
+    'ribbon_red': {
+        name: '🎀 ริบบิ้นแดง',
+        prompt: 'red ribbon price tag, flowing design, Thai script, festive style, silk texture'
+    },
+    'badge_silver': {
+        name: '🏅 เหรียญเงิน',
+        prompt: 'silver badge price tag, metallic shine, embossed Thai numbers, medal-like design'
+    },
+    'banner_traditional': {
+        name: '📜 แบนเนอร์โบราณ',
+        prompt: 'traditional Thai banner price tag, sacred patterns, vintage style, classical ornaments'
+    },
+    'starburst_gold': {
+        name: '⭐ ดาวระเบิดทอง',
+        prompt: 'golden starburst price tag, radiating design, eye-catching Thai text, dynamic rays'
+    },
+    'shield_premium': {
+        name: '🛡️ โล่พรีเมียม',
+        prompt: 'premium shield-shaped price tag, royal design, Thai numerals, coat of arms style'
+    },
+    'lotus_elegant': {
+        name: '🌸 ดอกบัวสง่างาม',
+        prompt: 'lotus-shaped price tag, elegant petals, sacred Thai design, natural flower form'
+    },
+    'hexagon_modern': {
+        name: '⬡ หกเหลี่ยมโมเดิร์น',
+        prompt: 'modern hexagon price tag, clean lines, contemporary Thai font, geometric design'
+    },
+    'scroll_ancient': {
+        name: '📖 ม้วนหนังสือโบราณ',
+        prompt: 'ancient scroll price tag, rolled edges, classical Thai script, parchment style'
+    }
+};
+
+// ============================================
+// 5. PRICE TAG COLORS - โทนสีป้ายราคา
+// ============================================
+
+const PRICE_TAG_COLORS = {
+    'gold_shine': {
+        name: '✨ ทองเงางาม',
+        prompt: 'shiny gold color, metallic finish, warm glow, luxurious golden tone'
+    },
+    'silver_elegant': {
+        name: '🌟 เงินสง่างาม',
+        prompt: 'elegant silver tone, polished metallic, cool shine, premium silver color'
+    },
+    'red_royal': {
+        name: '👑 แดงราชา',
+        prompt: 'royal red color, deep crimson, regal tone, majestic red shade'
+    },
+    'black_premium': {
+        name: '🖤 ดำพรีเมียม',
+        prompt: 'premium black, matte finish, luxury dark tone, sophisticated black'
+    },
+    'white_pure': {
+        name: '🤍 ขาวบริสุทธิ์',
+        prompt: 'pure white, clean tone, sacred brightness, pristine white color'
+    },
+    'bronze_antique': {
+        name: '🥉 ทองแดงโบราณ',
+        prompt: 'antique bronze, aged patina, vintage copper tone, weathered metal'
+    },
+    'purple_mystic': {
+        name: '💜 ม่วงลึกลับ',
+        prompt: 'mystic purple, deep violet, spiritual tone, royal purple shade'
+    },
+    'green_jade': {
+        name: '💚 เขียวหยก',
+        prompt: 'jade green, precious stone color, natural tone, emerald green'
+    },
+    'blue_sapphire': {
+        name: '💙 น้ำเงินไพลิน',
+        prompt: 'sapphire blue, deep blue gem tone, royal color, precious blue'
+    },
+    'rainbow_divine': {
+        name: '🌈 รุ้งศักดิ์สิทธิ์',
+        prompt: 'divine rainbow gradient, multi-color sacred glow, celestial tones, iridescent shine'
+    }
+};
+
+// ============================================
+// 6. VOICE TONES - โทนเสียงคำพูด
+// ============================================
+
+const VOICE_TONES = {
+    'gentle_soft': {
+        name: '🌸 นุ่มนวลอ่อนโยน',
+        prompt: 'gentle soft voice, soothing tone, calm peaceful speech, tender delivery'
+    },
+    'powerful_strong': {
+        name: '⚡ ทรงพลังแข็งแกร่ง',
+        prompt: 'powerful strong voice, commanding tone, authoritative speech, forceful delivery'
+    },
+    'calm_serene': {
+        name: '🧘 สงบนิ่ง',
+        prompt: 'calm serene voice, meditative tone, tranquil speech, peaceful delivery'
+    },
+    'warm_loving': {
+        name: '❤️ อบอุ่นเมตตา',
+        prompt: 'warm loving voice, compassionate tone, caring speech, affectionate delivery'
+    },
+    'wise_ancient': {
+        name: '👴 ปราชญ์โบราณ',
+        prompt: 'wise ancient voice, sage-like tone, knowledgeable speech, elder delivery'
+    },
+    'cheerful_joyful': {
+        name: '😊 ร่าเริงสดใส',
+        prompt: 'cheerful joyful voice, happy tone, uplifting speech, bright delivery'
+    },
+    'mysterious_deep': {
+        name: '🔮 ลึกลับลี้ลับ',
+        prompt: 'mysterious deep voice, enigmatic tone, mystical speech, cryptic delivery'
+    },
+    'royal_majestic': {
+        name: '👑 ราชาสง่างาม',
+        prompt: 'royal majestic voice, regal tone, noble speech, dignified delivery'
+    },
+    'energetic_vibrant': {
+        name: '🔥 กระฉับกระเฉง',
+        prompt: 'energetic vibrant voice, dynamic tone, lively speech, spirited delivery'
+    },
+    'ethereal_divine': {
+        name: '✨ เทวดาศักดิ์สิทธิ์',
+        prompt: 'ethereal divine voice, heavenly tone, celestial speech, angelic delivery'
+    }
+};
+
+// ============================================
+// 7. SPEECH MODES - โหมดการพูด
+// ============================================
+
+const SPEECH_MODES = {
+    'speaking': {
+        name: '🗣️ พูด (Speaking)',
+        prompt: 'spoken dialogue, clear speech, conversational tone, natural talking'
+    },
+    'singing': {
+        name: '🎵 ร้องเพลง (Singing)',
+        prompt: 'melodic singing, musical tone, lyrical delivery, sacred chant style, harmonic voice'
+    },
+    'chanting': {
+        name: '🙏 สวดมนต์ (Chanting)',
+        prompt: 'sacred chanting, rhythmic mantra, spiritual recitation, meditative prayer'
+    }
+};
+
+// ============================================
+// 8. SYSTEM PROMPTS
 // ============================================
 
 // 4A. ภาพอวยพร (Blessing Image)
@@ -332,11 +492,59 @@ function getAllDeityMoods() {
     }));
 }
 
+function getPriceTagStyle(styleId) {
+    return PRICE_TAG_STYLES[styleId] || PRICE_TAG_STYLES['circle_gold'];
+}
+
+function getPriceTagColor(colorId) {
+    return PRICE_TAG_COLORS[colorId] || PRICE_TAG_COLORS['gold_shine'];
+}
+
+function getVoiceTone(toneId) {
+    return VOICE_TONES[toneId] || VOICE_TONES['gentle_soft'];
+}
+
+function getSpeechMode(modeId) {
+    return SPEECH_MODES[modeId] || SPEECH_MODES['speaking'];
+}
+
+function getAllPriceTagStyles() {
+    return Object.entries(PRICE_TAG_STYLES).map(([id, data]) => ({
+        id,
+        ...data
+    }));
+}
+
+function getAllPriceTagColors() {
+    return Object.entries(PRICE_TAG_COLORS).map(([id, data]) => ({
+        id,
+        ...data
+    }));
+}
+
+function getAllVoiceTones() {
+    return Object.entries(VOICE_TONES).map(([id, data]) => ({
+        id,
+        ...data
+    }));
+}
+
+function getAllSpeechModes() {
+    return Object.entries(SPEECH_MODES).map(([id, data]) => ({
+        id,
+        ...data
+    }));
+}
+
 // Export for use in sidebar.js
 if (typeof window !== 'undefined') {
     window.DEITY_DATABASE = DEITY_DATABASE;
     window.SACRED_EFFECTS = SACRED_EFFECTS;
     window.DEITY_MOODS = DEITY_MOODS;
+    window.PRICE_TAG_STYLES = PRICE_TAG_STYLES;
+    window.PRICE_TAG_COLORS = PRICE_TAG_COLORS;
+    window.VOICE_TONES = VOICE_TONES;
+    window.SPEECH_MODES = SPEECH_MODES;
     window.SACRED_BLESSING_SYSTEM_PROMPT = SACRED_BLESSING_SYSTEM_PROMPT;
     window.SACRED_COMMERCIAL_SYSTEM_PROMPT = SACRED_COMMERCIAL_SYSTEM_PROMPT;
     window.SACRED_VIDEO_SYSTEM_PROMPT = SACRED_VIDEO_SYSTEM_PROMPT;
@@ -344,7 +552,15 @@ if (typeof window !== 'undefined') {
     window.getDeityInfo = getDeityInfo;
     window.getSacredEffect = getSacredEffect;
     window.getDeityMood = getDeityMood;
+    window.getPriceTagStyle = getPriceTagStyle;
+    window.getPriceTagColor = getPriceTagColor;
+    window.getVoiceTone = getVoiceTone;
+    window.getSpeechMode = getSpeechMode;
     window.getAllDeities = getAllDeities;
     window.getAllSacredEffects = getAllSacredEffects;
     window.getAllDeityMoods = getAllDeityMoods;
+    window.getAllPriceTagStyles = getAllPriceTagStyles;
+    window.getAllPriceTagColors = getAllPriceTagColors;
+    window.getAllVoiceTones = getAllVoiceTones;
+    window.getAllSpeechModes = getAllSpeechModes;
 }
