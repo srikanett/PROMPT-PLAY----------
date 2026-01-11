@@ -144,6 +144,39 @@
             </div>
         </div>
       </div>
+      
+      <!-- No Character Mode - Under Character Selection -->
+      <div class="input-group" id="banana-no-character-container" style="background: rgba(234, 179, 8, 0.1); border-color: rgba(234, 179, 8, 0.3); margin-top:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label style="color: #fbbf24; font-weight:600;">
+            🚫 ไม่ใช้ตัวละคร/นางแบบ
+          </label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="banana-no-character">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div style="font-size:11px; color:#94a3b8; margin-top:5px;">
+          สร้างภาพเน้นสินค้าอย่างเดียว ไม่มีคนถือหรือโชว์
+        </div>
+      </div>
+      
+      <div class="input-group" id="banana-presentation-container" style="display:none;">
+        <div class="input-row"><label>📸 แบบนำเสนอสินค้า</label></div>
+        <select id="banana-presentation-style">
+          <option value="product_only">📦 เสนอเพียงสินค้า</option>
+          <option value="hero_shot">🌟 Hero Shot</option>
+          <option value="multi_angle">🔄 หลายมุมมอง</option>
+          <option value="floating_3d">🎈 ลอยกลางอากาศ</option>
+          <option value="exploded_view">💥 แยกชิ้นส่วน</option>
+          <option value="macro_detail">🔍 ซูมดีเทล</option>
+          <option value="lifestyle_context">🏠 ในบริบทใช้งาน</option>
+          <option value="minimalist_clean">⬜ มินิมอล</option>
+          <option value="shadow_play">🌑 เล่นแสงเงา</option>
+          <option value="reflective_surface">✨ สะท้อนพื้นผิว</option>
+          <option value="gradient_backdrop">🎨 ฉากไล่สี</option>
+        </select>
+      </div>
 	  
       <div class="section-title">2. Configuration</div>
       
@@ -590,6 +623,42 @@
           <option value="metallic_gold">🪙 เมทัลลิกทอง</option>
           <option value="emboss_3d">🏔️ นูน 3D</option>
           <option value="vintage_retro">📺 วินเทจ Retro</option>
+        </select>
+      </div>
+
+      <!-- No Character Mode for Video -->
+      <div class="section-title">5. ตัวเลือกตัวละคร</div>
+      
+      <div class="input-group" style="background: rgba(234, 179, 8, 0.1); border-color: rgba(234, 179, 8, 0.3);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label style="color: #fbbf24; font-weight:600;">
+            🚫 ไม่ใช้ตัวละคร/นางแบบ
+          </label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="video-no-character">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div style="font-size:11px; color:#94a3b8; margin-top:5px;">
+          สร้างวีดีโอเน้นสินค้าอย่างเดียว ไม่มีคนถือหรือโชว์
+        </div>
+      </div>
+      
+      <div class="input-group" id="video-presentation-container" style="display:none;">
+        <div class="input-row"><label>🎬 แบบนำเสนอสินค้า</label></div>
+        <select id="video-presentation-style">
+          <option value="product_present">📦 เสนอสินค้า</option>
+          <option value="product_zoom">🔍 ซูมสินค้า</option>
+          <option value="orbit_360">🔄 หมุนรอบ 360°</option>
+          <option value="zoom_in_reveal">🔍 ซูมเข้าเปิดเผย</option>
+          <option value="zoom_out_context">🔭 ซูมออกเห็นบริบท</option>
+          <option value="slow_pan">📷 แพนช้าๆ</option>
+          <option value="turntable_spin">💫 หมุนบนแท่น</option>
+          <option value="floating_drift">🎈 ลอยละล่อง</option>
+          <option value="detail_montage">🎬 มอนตาจดีเทล</option>
+          <option value="unboxing_reveal">📦 Unboxing</option>
+          <option value="dynamic_angles">⚡ มุมไดนามิก</option>
+          <option value="spotlight_focus">💡 Spotlight</option>
         </select>
       </div>
 

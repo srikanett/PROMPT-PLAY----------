@@ -74,6 +74,120 @@ function getTextEffect(effectId) {
 }
 
 // ============================================
+// 0.2 IMAGE PRESENTATION STYLES - แบบนำเสนอสินค้า (ไม่ใช้ตัวละคร)
+// ============================================
+
+const IMAGE_PRESENTATION_STYLES = {
+    'product_only': {
+        name: '📦 เสนอเพียงสินค้า',
+        prompt: 'Extreme close-up macro shot of product only. Hand holding product showing texture, label, and key details. Sharp focus on product with blurred background. May show blurred face behind. Professional lighting highlighting details. ABSOLUTELY NO FULL BODY PERSON. NO MODEL. Product is the main focus.'
+    },
+    'multi_angle': {
+        name: '🔄 หลายมุมมอง',
+        prompt: 'Product shown from multiple angles (front, side, back) in clean professional layout. NO PERSON. NO MODEL. NO CHARACTER. Product only.'
+    },
+    'hero_shot': {
+        name: '🌟 Hero Shot',
+        prompt: 'Dramatic hero product shot with cinematic lighting and depth of field. NO PERSON. NO MODEL. NO CHARACTER. Product only.'
+    },
+    'floating_3d': {
+        name: '🎈 ลอยกลางอากาศ',
+        prompt: 'Product floating in mid-air with soft shadows and clean background. NO PERSON. NO MODEL. NO CHARACTER. Product only levitating.'
+    },
+    'exploded_view': {
+        name: '💥 แยกชิ้นส่วน',
+        prompt: 'Exploded view showing all product components separated elegantly. NO PERSON. NO MODEL. NO CHARACTER. Technical product visualization.'
+    },
+    'macro_detail': {
+        name: '🔍 ซูมดีเทล',
+        prompt: 'Extreme close-up macro shot highlighting product texture and quality details. NO PERSON. NO MODEL. NO CHARACTER. Detail focus only.'
+    },
+    'lifestyle_context': {
+        name: '🏠 ในบริบทใช้งาน',
+        prompt: 'Product placed in natural lifestyle setting showing real-world usage context. NO PERSON VISIBLE. NO MODEL. Product in environment only.'
+    },
+    'minimalist_clean': {
+        name: '⬜ มินิมอล',
+        prompt: 'Ultra minimalist product shot with generous white space and elegant simplicity. NO PERSON. NO MODEL. Clean product only.'
+    },
+    'shadow_play': {
+        name: '🌑 เล่นแสงเงา',
+        prompt: 'Artistic product shot with dramatic shadows and lighting contrasts. NO PERSON. NO MODEL. NO CHARACTER. Artistic product only.'
+    },
+    'reflective_surface': {
+        name: '✨ สะท้อนพื้นผิว',
+        prompt: 'Product on reflective surface creating mirror-like reflection effect. NO PERSON. NO MODEL. NO CHARACTER. Product reflection only.'
+    },
+    'gradient_backdrop': {
+        name: '🎨 ฉากไล่สี',
+        prompt: 'Product against beautiful gradient background with professional studio lighting. NO PERSON. NO MODEL. NO CHARACTER. Product only.'
+    }
+};
+
+function getImagePresentationStyle(styleId) {
+    return IMAGE_PRESENTATION_STYLES[styleId] || IMAGE_PRESENTATION_STYLES['hero_shot'];
+}
+
+// ============================================
+// 0.3 VIDEO PRESENTATION STYLES - แบบนำเสนอสินค้าวีดีโอ (ไม่ใช้ตัวละคร)
+// ============================================
+
+const VIDEO_PRESENTATION_STYLES = {
+    'product_present': {
+        name: '📦 เสนอสินค้า',
+        prompt: '8-second product video. ABSOLUTELY NO PERSON in video. Product only focus. 360 degree rotation around product. Slow zoom to show details. Product floating or levitating. Light rays and reflections. Clean white or gradient background. Smooth camera movement. NO MODEL. NO CHARACTER. NO HUMAN.'
+    },
+    'product_zoom': {
+        name: '🔍 ซูมสินค้า',
+        prompt: '8-second UGC style product video. Extreme close-up macro shot. Hand holding product and rotating to show details. Focus on texture, components, labels. Professional lighting highlights details. Thai voiceover describing product. ABSOLUTELY NO FULL BODY PERSON. May show hands only. Product is main focus.'
+    },
+    'orbit_360': {
+        name: '🔄 หมุนรอบ 360°',
+        prompt: 'Smooth 360 degree orbit around product showcasing all angles. NO PERSON. NO MODEL. NO CHARACTER. Product only. 8 seconds.'
+    },
+    'zoom_in_reveal': {
+        name: '🔍 ซูมเข้าเปิดเผย',
+        prompt: 'Dramatic zoom in revealing product details and textures. NO PERSON. NO MODEL. NO CHARACTER. Product only. 8 seconds.'
+    },
+    'zoom_out_context': {
+        name: '🔭 ซูมออกเห็นบริบท',
+        prompt: 'Zoom out from product detail to reveal full product in context. NO PERSON. NO MODEL. NO CHARACTER. Product only. 8 seconds.'
+    },
+    'slow_pan': {
+        name: '📷 แพนช้าๆ',
+        prompt: 'Slow elegant pan across product surface highlighting craftsmanship. NO PERSON. NO MODEL. NO CHARACTER. Product only. 8 seconds.'
+    },
+    'turntable_spin': {
+        name: '💫 หมุนบนแท่น',
+        prompt: 'Product spinning on turntable with professional studio lighting. NO PERSON. NO MODEL. NO CHARACTER. Product only. 8 seconds.'
+    },
+    'floating_drift': {
+        name: '🎈 ลอยละล่อง',
+        prompt: 'Product gently floating and drifting with dreamy atmosphere. NO PERSON. NO MODEL. NO CHARACTER. Product only levitating. 8 seconds.'
+    },
+    'detail_montage': {
+        name: '🎬 มอนตาจดีเทล',
+        prompt: 'Quick montage cuts between various product detail close-ups. NO PERSON. NO MODEL. NO CHARACTER. Product details only. 8 seconds.'
+    },
+    'unboxing_reveal': {
+        name: '📦 Unboxing',
+        prompt: 'Dramatic unboxing reveal animation showing product emerging. NO PERSON. NO MODEL. NO CHARACTER. Product reveal only. 8 seconds.'
+    },
+    'dynamic_angles': {
+        name: '⚡ มุมไดนามิก',
+        prompt: 'Dynamic camera movement with multiple angle switches around product. NO PERSON. NO MODEL. NO CHARACTER. Product only. 8 seconds.'
+    },
+    'spotlight_focus': {
+        name: '💡 Spotlight',
+        prompt: 'Spotlight dramatically illuminating product in dark setting. NO PERSON. NO MODEL. NO CHARACTER. Product only. 8 seconds.'
+    }
+};
+
+function getVideoPresentationStyle(styleId) {
+    return VIDEO_PRESENTATION_STYLES[styleId] || VIDEO_PRESENTATION_STYLES['orbit_360'];
+}
+
+// ============================================
 // 1. DEITY DATABASE - ข้อมูลองค์เทพ
 // ============================================
 
@@ -741,6 +855,8 @@ if (typeof window !== 'undefined') {
     window.CAPTION_POSITIONS = CAPTION_POSITIONS;
     window.CHARACTER_POSES = CHARACTER_POSES;
     window.TEXT_EFFECTS = TEXT_EFFECTS;
+    window.IMAGE_PRESENTATION_STYLES = IMAGE_PRESENTATION_STYLES;
+    window.VIDEO_PRESENTATION_STYLES = VIDEO_PRESENTATION_STYLES;
     window.SACRED_BLESSING_SYSTEM_PROMPT = SACRED_BLESSING_SYSTEM_PROMPT;
     window.SACRED_COMMERCIAL_SYSTEM_PROMPT = SACRED_COMMERCIAL_SYSTEM_PROMPT;
     window.SACRED_VIDEO_SYSTEM_PROMPT = SACRED_VIDEO_SYSTEM_PROMPT;
@@ -753,6 +869,8 @@ if (typeof window !== 'undefined') {
     window.getVoiceTone = getVoiceTone;
     window.getSpeechMode = getSpeechMode;
     window.getTextEffect = getTextEffect;
+    window.getImagePresentationStyle = getImagePresentationStyle;
+    window.getVideoPresentationStyle = getVideoPresentationStyle;
     window.getAllDeities = getAllDeities;
     window.getAllSacredEffects = getAllSacredEffects;
     window.getAllDeityMoods = getAllDeityMoods;

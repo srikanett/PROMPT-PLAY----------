@@ -703,6 +703,15 @@ function videoSetupEventListeners() {
   if (videoBtnGeneratePrompt) {
     videoBtnGeneratePrompt.addEventListener('click', videoGeneratePromptOnly);
   }
+  
+  // No Character toggle - show/hide presentation container
+  const videoNoCharacter = document.getElementById('video-no-character');
+  const videoPresentationContainer = document.getElementById('video-presentation-container');
+  if (videoNoCharacter && videoPresentationContainer) {
+    videoNoCharacter.addEventListener('change', (e) => {
+      videoPresentationContainer.style.display = e.target.checked ? 'block' : 'none';
+    });
+  }
 }
 
 // ============================================
@@ -739,12 +748,42 @@ async function videoGeneratePromptOnly() {
       textInstruction = `\nเอฟเฟกต์ข้อความ: ${textEffectData.prompt}`;
     }
     
+    // No Character mode - CRITICAL: Must exclude all character/model instructions from prompt
+    const noCharacter = document.getElementById('video-no-character')?.checked || false;
+    const presentationValue = document.getElementById('video-presentation-style')?.value || 'product_present';
+    const presentationData = window.getVideoPresentationStyle ? window.getVideoPresentationStyle(presentationValue) : { prompt: '' };
+    
+    let characterInstruction = '';
+    if (noCharacter) {
+      // CRITICAL: Strong instructions to absolutely exclude any person/model/character
+      characterInstruction = `
+
+⚠️⚠️⚠️ CRITICAL INSTRUCTION - ABSOLUTELY NO PEOPLE ⚠️⚠️⚠️
+- DO NOT include ANY person, model, character, human, man, woman, or any part of human body in the video
+- NO hands holding product (unless "ซูมสินค้า" is selected)
+- NO face, NO body parts
+- PRODUCT ONLY - The product must be the ONLY subject in the video
+- 8 seconds video length
+- If I see ANY human in the video, it is a FAILURE
+
+Presentation Style: ${presentationData.prompt}`;
+    }
+    
     if (isSmartAuto) {
-      userMessage = `สร้าง prompt สำหรับวิดีโอจากภาพนี้ ให้ AI คิดสไตล์การเคลื่อนไหวและบรรยากาศที่เหมาะสม${productName ? ` ชื่อ: ${productName}` : ''}${textInstruction}`;
+      if (noCharacter) {
+        userMessage = `Create a product-only video from this photo. NO HUMAN. NO MODEL. NO PERSON. Product only focus. 8 seconds.${productName ? ` Product name: ${productName}` : ''}${textInstruction}${characterInstruction}`;
+      } else {
+        userMessage = `สร้าง prompt สำหรับวิดีโอจากภาพนี้ ให้ AI คิดสไตล์การเคลื่อนไหวและบรรยากาศที่เหมาะสม${productName ? ` ชื่อ: ${productName}` : ''}${textInstruction}`;
+      }
     } else {
-      userMessage = `สร้าง prompt สำหรับวิดีโอจากภาพนี้
+      if (noCharacter) {
+        userMessage = `Create a product-only video. NO HUMAN. NO MODEL. NO PERSON. 8 seconds.
+Product name: ${productName || 'Product'}${textInstruction}${characterInstruction}`;
+      } else {
+        userMessage = `สร้าง prompt สำหรับวิดีโอจากภาพนี้
 ${productName ? `ชื่อ: ${productName}` : ''}
 สไตล์: วิดีโอโฆษณาสินค้า${textInstruction}`;
+      }
     }
     
     const base64Data = imageData.dataUrl.split(',')[1];
@@ -3248,6 +3287,33 @@ function bananaSetupEventListeners() {
 	
   if(bananaClearImagesBtn) bananaClearImagesBtn.addEventListener('click', bananaClearAllImages);
   
+  // No Character toggle - show/hide presentation container AND disable character selection
+  const bananaNoCharacter = document.getElementById('banana-no-character');
+  const bananaPresentationContainer = document.getElementById('banana-presentation-container');
+  const bananaCharacterContainer = document.querySelector('.input-group:has(#banana-character-select)') || document.getElementById('banana-character-select')?.closest('.input-group');
+  const bananaCharacterTabs = document.querySelectorAll('.char-tab-container .char-tabs, .char-tab-container .char-content-area');
+  
+  if (bananaNoCharacter) {
+    bananaNoCharacter.addEventListener('change', (e) => {
+      // Show/hide presentation container
+      if (bananaPresentationContainer) {
+        bananaPresentationContainer.style.display = e.target.checked ? 'block' : 'none';
+      }
+      // Disable/enable character selection
+      if (bananaCharacterTabs) {
+        bananaCharacterTabs.forEach(el => {
+          if (e.target.checked) {
+            el.style.opacity = '0.4';
+            el.style.pointerEvents = 'none';
+          } else {
+            el.style.opacity = '1';
+            el.style.pointerEvents = 'auto';
+          }
+        });
+      }
+    });
+  }
+  
   // ปุ่ม START (จัดการทั้งแบบธรรมดา และแบบต่อเนื่อง)
   if(bananaBtnAutomation) {
       bananaBtnAutomation.addEventListener('click', async () => {
@@ -3312,15 +3378,48 @@ async function bananaGeneratePromptOnly() {
       textInstruction = `\nเอฟเฟกต์ข้อความ: ${textEffectData.prompt}`;
     }
     
+    // No Character mode - CRITICAL: Must exclude all character/model instructions from prompt
+    const noCharacter = document.getElementById('banana-no-character')?.checked || false;
+    const presentationValue = document.getElementById('banana-presentation-style')?.value || 'product_only';
+    const presentationData = window.getImagePresentationStyle ? window.getImagePresentationStyle(presentationValue) : { prompt: '' };
+    
+    let characterInstruction = '';
+    if (noCharacter) {
+      // CRITICAL: Strong instructions to absolutely exclude any person/model/character
+      characterInstruction = `
+
+⚠️⚠️⚠️ CRITICAL INSTRUCTION - ABSOLUTELY NO PEOPLE ⚠️⚠️⚠️
+- DO NOT include ANY person, model, character, human, man, woman, or any part of human body in the image
+- NO hands holding product (unless "เสนอเพียงสินค้า" is selected)
+- NO face, NO body parts
+- PRODUCT ONLY - The product must be the ONLY subject in the image
+- If I see ANY human in the image, it is a FAILURE
+
+Presentation Style: ${presentationData.prompt}`;
+    }
+    
     if (isSmartAuto) {
-      userMessage = `สร้าง prompt สำหรับภาพโฆษณาสินค้าจากภาพนี้ ให้ AI คิดสไตล์และฉากหลังที่เหมาะสมเอง${productName ? ` ชื่อสินค้า: ${productName}` : ''}${textInstruction}`;
+      // When no-character is on, DO NOT include any character selection in prompt
+      if (noCharacter) {
+        userMessage = `Create a product-only advertising image from this photo. NO HUMAN. NO MODEL. NO PERSON. Product only focus.${productName ? ` Product name: ${productName}` : ''}${textInstruction}${characterInstruction}`;
+      } else {
+        userMessage = `สร้าง prompt สำหรับภาพโฆษณาสินค้าจากภาพนี้ ให้ AI คิดสไตล์และฉากหลังที่เหมาะสมเอง${productName ? ` ชื่อสินค้า: ${productName}` : ''}${textInstruction}`;
+      }
     } else {
       const selectedStyle = bananaStyleSelect?.value || 'studio';
       const selectedBg = bananaBgSelect?.value || 'white';
-      userMessage = `สร้าง prompt สำหรับภาพโฆษณาสินค้าจากภาพนี้
+      
+      if (noCharacter) {
+        // DO NOT include style/character when no-character mode is on
+        userMessage = `Create a product-only advertising image. NO HUMAN. NO MODEL. NO PERSON.
+Product name: ${productName || 'Product'}
+Background: ${selectedBg}${textInstruction}${characterInstruction}`;
+      } else {
+        userMessage = `สร้าง prompt สำหรับภาพโฆษณาสินค้าจากภาพนี้
 ${productName ? `ชื่อสินค้า: ${productName}` : ''}
 สไตล์: ${selectedStyle}
 ฉากหลัง: ${selectedBg}${textInstruction}`;
+      }
     }
     
     const base64Data = imageData.dataUrl.split(',')[1];
@@ -3581,7 +3680,59 @@ try {
           let currentOutfit = "";
 
           // ------------------------------------
-          // 1.1 เลือกคาแรคเตอร์ (Logic ใหม่)
+          // 1.1 CHECK NO-CHARACTER MODE FIRST
+          // ------------------------------------
+          const noCharacterMode = document.getElementById('banana-no-character')?.checked || false;
+          const presentationStyleValue = document.getElementById('banana-presentation-style')?.value || 'product_only';
+          const presentationStyleData = window.getImagePresentationStyle ? window.getImagePresentationStyle(presentationStyleValue) : { prompt: '' };
+          
+          // 🚫 NO CHARACTER MODE - Skip ALL character/model logic
+          if (noCharacterMode) {
+              bananaAddLog(`🚫 โหมดไม่ใช้ตัวละคร: เน้นสินค้าเท่านั้น`, 'info');
+              
+              // Get background if selected
+              const bananaBgSelectNoChar = document.getElementById('banana-bg-select');
+              let bgForProductOnly = 'clean professional studio background with soft lighting';
+              if (bananaBgSelectNoChar && bananaBgSelectNoChar.value !== 'auto') {
+                  // Use selected background
+                  bgForProductOnly = bananaBgSelectNoChar.value;
+              }
+              
+              // Generate PRODUCT-ONLY prompt - ABSOLUTELY NO PERSON/MODEL/CHARACTER
+              generatedPrompt = `Professional product photography. PRODUCT ONLY. ABSOLUTELY NO PERSON, NO MODEL, NO HUMAN, NO CHARACTER, NO HANDS, NO BODY PARTS in this image.
+              
+[product] as the ONLY subject in the frame.
+
+${presentationStyleData.prompt}
+
+Background: ${bgForProductOnly}
+
+CRITICAL REQUIREMENTS:
+- The product must be the ONLY subject - NO PEOPLE ALLOWED
+- NO hands holding the product
+- NO model, NO person, NO human figure
+- Focus purely on the product itself
+- Professional lighting highlighting product details
+- Clean composition showcasing product features
+
+Style: High-end commercial product photography, 8k resolution, professional studio quality.
+
+Negative Prompt: "person, human, model, woman, man, hands, fingers, face, body, character, people${imgNegative}."`;
+              
+              // Replace product name
+              generatedPrompt = generatedPrompt.replace(/\\[product\\]/g, productName || 'product');
+              
+              bananaPromptResult.textContent = generatedPrompt;
+              bananaAddLog(`📸 Prompt สินค้าเท่านั้น: ${presentationStyleValue}`, 'success');
+              
+              // Skip to next step (don't continue with character selection)
+              await bananaSleep(500);
+              
+          } else {
+              // NORMAL MODE - Continue with character selection
+              
+          // ------------------------------------
+          // 1.2 เลือกคาแรคเตอร์ (Logic ใหม่) - ONLY IF NOT NO-CHARACTER MODE
           // ------------------------------------
           let characterDesc = "a professional model (Thai/Asian ethnicity)";
           let isJobCharacter = false;
@@ -3833,6 +3984,7 @@ try {
                    generatedPrompt += ` (Outfit details: ${currentOutfit}).`;
               }
           }
+          } // End of else block (normal mode with character)
 
           // แทนที่ชื่อสินค้า
           generatedPrompt = generatedPrompt.replace(/\[product\]/g, productName || 'product');
