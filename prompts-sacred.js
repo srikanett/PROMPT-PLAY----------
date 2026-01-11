@@ -348,6 +348,73 @@ const CAPTION_POSITIONS = {
 };
 
 // ============================================
+// 10. CHARACTER POSES - อริยาบถตัวละคร/เทวรูป (สำหรับ Sacred Video)
+// ============================================
+
+const CHARACTER_POSES = {
+    'walk_forward': {
+        name: '🚶 เดินไปข้างหน้า',
+        prompt: 'walking forward slowly towards the viewer with graceful steps'
+    },
+    'float_down': {
+        name: '⬇️ ลอยลงมา',
+        prompt: 'floating down gracefully from above with divine light'
+    },
+    'float_up': {
+        name: '⬆️ ลอยขึ้น',
+        prompt: 'ascending upward with radiant divine energy'
+    },
+    'rotate_360': {
+        name: '🔄 หมุนรอบตัว',
+        prompt: 'rotating slowly 360 degrees with majestic presence'
+    },
+    'bless_hand': {
+        name: '✋ ยกมือให้พร',
+        prompt: 'raising hand in blessing gesture with sacred light emanating'
+    },
+    'pray_hands': {
+        name: '🙏 พนมมือ',
+        prompt: 'hands pressed together in prayer position with peaceful expression'
+    },
+    'wave_hand': {
+        name: '👋 โบกมือ',
+        prompt: 'waving hand gently with compassionate smile'
+    },
+    'radiate_aura': {
+        name: '✨ ส่องรัศมี',
+        prompt: 'emanating powerful radiant aura outward with divine energy'
+    },
+    'deep_breath': {
+        name: '💨 หายใจลึก',
+        prompt: 'breathing deeply with chest rising peacefully'
+    },
+    'look_around': {
+        name: '👀 มองรอบ',
+        prompt: 'looking around slowly with wise and knowing gaze'
+    },
+    'bow_head': {
+        name: '🙇 ก้มศีรษะ',
+        prompt: 'bowing head gracefully with humility and compassion'
+    },
+    'lift_head': {
+        name: '🔝 เงยหน้า',
+        prompt: 'lifting head upward towards the heavens with serene expression'
+    },
+    'blink_eyes': {
+        name: '😌 กระพริบตา',
+        prompt: 'blinking eyes slowly with calm meditative presence'
+    },
+    'soft_smile': {
+        name: '😊 ยิ้มอ่อน',
+        prompt: 'smiling softly with warmth and compassion'
+    },
+    'still_peace': {
+        name: '🧘 นิ่งสงบ',
+        prompt: 'standing still peacefully with serene meditative energy radiating'
+    }
+};
+
+// ============================================
 // 8. SYSTEM PROMPTS
 // ============================================
 
@@ -600,6 +667,8 @@ if (typeof window !== 'undefined') {
     window.PRICE_TAG_COLORS = PRICE_TAG_COLORS;
     window.VOICE_TONES = VOICE_TONES;
     window.SPEECH_MODES = SPEECH_MODES;
+    window.CAPTION_POSITIONS = CAPTION_POSITIONS;
+    window.CHARACTER_POSES = CHARACTER_POSES;
     window.SACRED_BLESSING_SYSTEM_PROMPT = SACRED_BLESSING_SYSTEM_PROMPT;
     window.SACRED_COMMERCIAL_SYSTEM_PROMPT = SACRED_COMMERCIAL_SYSTEM_PROMPT;
     window.SACRED_VIDEO_SYSTEM_PROMPT = SACRED_VIDEO_SYSTEM_PROMPT;

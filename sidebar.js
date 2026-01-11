@@ -698,6 +698,77 @@ function videoSetupEventListeners() {
   if (videoLogClearBtn) {
     videoLogClearBtn.addEventListener('click', videoClearLogs);
   }
+  
+  // Generate Prompt Only button
+  if (videoBtnGeneratePrompt) {
+    videoBtnGeneratePrompt.addEventListener('click', videoGeneratePromptOnly);
+  }
+}
+
+// ============================================
+// Video: Generate Prompt Only (ไม่รัน Automation)
+// ============================================
+async function videoGeneratePromptOnly() {
+  const apiKey = getGeminiApiKey();
+  if (!apiKey) {
+    showToast('กรุณาตั้งค่า Gemini API Key ก่อน', 'error');
+    return;
+  }
+  
+  if (videoUploadedImages.length === 0) {
+    showToast('กรุณาอัพโหลดภาพก่อน', 'error');
+    return;
+  }
+  
+  showToast('กำลังสร้าง Prompt...', 'info');
+  
+  try {
+    const imageData = videoUploadedImages[0];
+    const productName = videoProductNameInput?.value?.trim() || '';
+    const isSmartAuto = document.getElementById('video-smart-auto-checkbox')?.checked || false;
+    
+    let userMessage = '';
+    if (isSmartAuto) {
+      userMessage = `สร้าง prompt สำหรับวิดีโอจากภาพนี้ ให้ AI คิดสไตล์การเคลื่อนไหวและบรรยากาศที่เหมาะสม${productName ? ` ชื่อ: ${productName}` : ''}`;
+    } else {
+      userMessage = `สร้าง prompt สำหรับวิดีโอจากภาพนี้
+${productName ? `ชื่อ: ${productName}` : ''}
+สไตล์: วิดีโอโฆษณาสินค้า`;
+    }
+    
+    const base64Data = imageData.dataUrl.split(',')[1];
+    const mimeType = imageData.dataUrl.split(';')[0].split(':')[1];
+    
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { text: userMessage },
+            { inline_data: { mime_type: mimeType, data: base64Data } }
+          ]
+        }]
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+      const generatedPrompt = data.candidates[0].content.parts[0].text;
+      
+      // Display the prompt
+      if (videoPromptResultContainer) videoPromptResultContainer.style.display = 'block';
+      if (videoPromptResult) videoPromptResult.textContent = generatedPrompt;
+      
+      showToast('สร้าง Prompt สำเร็จ!', 'success');
+    } else {
+      throw new Error('ไม่สามารถสร้าง Prompt ได้');
+    }
+  } catch (error) {
+    console.error('Generate Prompt Error:', error);
+    showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
+  }
 }
 
 // Video PROMPT&PLAY: Handle test fill - fills prompt result into target element
@@ -3185,10 +3256,85 @@ function bananaSetupEventListeners() {
   if (bananaLogClearBtn) {
     bananaLogClearBtn.addEventListener('click', bananaClearLogs);
   }
+  
+  // Generate Prompt Only button
+  if (bananaBtnGeneratePrompt) {
+    bananaBtnGeneratePrompt.addEventListener('click', bananaGeneratePromptOnly);
+  }
 }
 
 
 
+
+// ============================================
+// Banana: Generate Prompt Only (ไม่รัน Automation)
+// ============================================
+async function bananaGeneratePromptOnly() {
+  const apiKey = getGeminiApiKey();
+  if (!apiKey) {
+    showToast('กรุณาตั้งค่า Gemini API Key ก่อน', 'error');
+    return;
+  }
+  
+  if (bananaUploadedImages.length === 0) {
+    showToast('กรุณาอัพโหลดภาพสินค้าก่อน', 'error');
+    return;
+  }
+  
+  showToast('กำลังสร้าง Prompt...', 'info');
+  
+  try {
+    const imageData = bananaUploadedImages[0];
+    const productName = bananaProductNameInput?.value?.trim() || '';
+    const isSmartAuto = document.getElementById('banana-smart-auto-checkbox')?.checked || false;
+    
+    // Build prompt request
+    let userMessage = '';
+    if (isSmartAuto) {
+      userMessage = `สร้าง prompt สำหรับภาพโฆษณาสินค้าจากภาพนี้ ให้ AI คิดสไตล์และฉากหลังที่เหมาะสมเอง${productName ? ` ชื่อสินค้า: ${productName}` : ''}`;
+    } else {
+      const selectedStyle = bananaStyleSelect?.value || 'studio';
+      const selectedBg = bananaBgSelect?.value || 'white';
+      userMessage = `สร้าง prompt สำหรับภาพโฆษณาสินค้าจากภาพนี้
+${productName ? `ชื่อสินค้า: ${productName}` : ''}
+สไตล์: ${selectedStyle}
+ฉากหลัง: ${selectedBg}`;
+    }
+    
+    const base64Data = imageData.dataUrl.split(',')[1];
+    const mimeType = imageData.dataUrl.split(';')[0].split(':')[1];
+    
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { text: userMessage },
+            { inline_data: { mime_type: mimeType, data: base64Data } }
+          ]
+        }]
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+      const generatedPrompt = data.candidates[0].content.parts[0].text;
+      
+      // Display the prompt
+      if (bananaPromptResultContainer) bananaPromptResultContainer.style.display = 'block';
+      if (bananaPromptResult) bananaPromptResult.textContent = generatedPrompt;
+      
+      showToast('สร้าง Prompt สำเร็จ!', 'success');
+    } else {
+      throw new Error('ไม่สามารถสร้าง Prompt ได้');
+    }
+  } catch (error) {
+    console.error('Generate Prompt Error:', error);
+    showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
+  }
+}
 
 // ============================================
 // Banana: Main Automation Logic (ส่วนที่ 1: เริ่มต้น + เตรียม Prompt)
@@ -5964,17 +6110,22 @@ async function sacredVideoGeneratePrompt(imageDataUrl) {
     
     const voiceTone = document.getElementById('sacred-voice-tone')?.value || 'gentle_soft';
     const speechMode = document.getElementById('sacred-speech-mode')?.value || 'speaking';
+    const characterPose = document.getElementById('sacred-character-pose')?.value || 'still_peace';
     const toneData = window.getVoiceTone ? window.getVoiceTone(voiceTone) : {};
     const modeData = window.getSpeechMode ? window.getSpeechMode(speechMode) : {};
+    const poseData = window.CHARACTER_POSES && window.CHARACTER_POSES[characterPose] 
+                     ? window.CHARACTER_POSES[characterPose] 
+                     : { name: 'นิ่งสงบ', prompt: 'standing still peacefully' };
     
     let userMessage;
     if (isSmartAuto) {
-        userMessage = `สร้าง prompt วิดีโอองค์เทพพูดจากภาพนี้ ให้ AI คิดบทพูด โทนเสียง และอารมณ์ให้เหมาะกับองค์เทพโดยอัตโนมัติ`;
+        userMessage = `สร้าง prompt วิดีโอองค์เทพพูดจากภาพนี้ ให้ AI คิดบทพูด โทนเสียง อารมณ์ และท่าทางการเคลื่อนไหวให้เหมาะกับองค์เทพโดยอัตโนมัติ`;
     } else {
         userMessage = `สร้าง prompt วิดีโอองค์เทพพูดจากภาพนี้
 บทพูดองค์เทพ: "${speech || 'ลูก ๆ จงเชื่อมั่นในตัวเอง'}"
 โทนเสียง: ${toneData.prompt || 'gentle soft voice'}
 โหมดการพูด: ${modeData.prompt || 'spoken dialogue'}
+อริยาบถ/ท่าทาง: ${poseData.name} - ${poseData.prompt}
 อารมณ์/พลัง: ${moodData.name || 'เมตตา'} - ${moodData.prompt || ''}
 คำสั่งเพิ่มเติม: ${extraInstructions}`;
     }
