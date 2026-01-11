@@ -953,6 +953,35 @@
           </div>
         </div>
 
+        <!-- NEW: Text Effect Dropdown -->
+        <div class="input-group">
+           <div class="input-row"><label>✨ เอฟเฟกต์ตัวอักษร (Text Effect)</label></div>
+           <select id="sacred-text-effect">
+             <option value="none">❌ ไม่ใส่เอฟเฟกต์</option>
+             <option value="gold_emboss">🥇 ทองนูน (Gold Emboss)</option>
+             <option value="glowing_aura">✨ เรืองแสง (Glowing Aura)</option>
+             <option value="ancient_stone">🗿 แกะสลักหิน (Ancient Stone)</option>
+             <option value="sacred_yantra">🕉️ อักขระยันต์ (Sacred Yantra)</option>
+             <option value="fire_power">🔥 เปลวเพลิง (Fire Power)</option>
+             <option value="diamond_sparkle">💎 เพชรระยิบ (Diamond Sparkle)</option>
+             <option value="neon_spiritual">🔮 นีออนมู (Neon Spiritual)</option>
+             <option value="cloud_heaven">☁️ เมฆสวรรค์ (Cloud Heaven)</option>
+             <option value="flower_garland">🌼 พวงมาลัย (Flower Garland)</option>
+             <option value="liquid_gold">🧈 ทองคำเหลว (Liquid Gold)</option>
+           </select>
+        </div>
+
+        <!-- NEW: AI Analysis Result Display -->
+        <div id="sacred-analysis-result" class="input-group" style="display:none; border: 1px solid #dba617; background: #2a2005;">
+            <div class="input-row" style="color:#fbbf24; font-weight:bold;">
+                👁️ AI วิเคราะห์พบ:
+            </div>
+            <div id="sacred-analysis-content" style="font-size:12px; color:#fff; margin-top:5px; line-height:1.4;">
+                <!-- Result will be inserted here -->
+            </div>
+            <input type="hidden" id="sacred-analysis-prompt" value="">
+        </div>
+
       </div>
 
       <!-- Smart Auto Mode -->

@@ -187,58 +187,109 @@ function getVideoPresentationStyle(styleId) {
     return VIDEO_PRESENTATION_STYLES[styleId] || VIDEO_PRESENTATION_STYLES['orbit_360'];
 }
 
-// ============================================
-// NEW: Price & Detail Overlay Styles
-// ============================================
+// ----------------------------------------------------------------------
+// 🏷️ Price Tag & Details Styles (สำหรับป้ายราคา)
+// ----------------------------------------------------------------------
 const PRICE_TAG_STYLES = {
     'auto': {
         name: '✨ อัตโนมัติ (AI เลือกให้)',
-        prompt: 'Analyze the image composition and product style. Automatically select the most suitable text layout, font, and color scheme for the price tag and product details to maximize visual appeal and readability. Harmonize with the background.'
+        prompt: 'Use an AI-selected price tag style that best fits the product\'s aesthetics, color palette, and mood. It should look professional and integrated.'
     },
     'modern_minimal': {
         name: '⬜ Modern Minimal',
-        prompt: 'Style: Modern Minimalist. Use clean sans-serif typography. Black or dark grey text on white background or subtle transparent boxes. Clean lines, ample whitespace. Professional and sleek look.'
+        prompt: 'Use a clean, white, modern minimalist rectangle tag with thin elegant fonts. Simple and sophisticated.'
     },
     'luxury_gold': {
         name: '🥇 Luxury Gold',
-        prompt: 'Style: Luxury Gold. Elegant serif fonts. Gold metallic text effect or gold border elements. Black or deep rich background for contrast. Premium, expensive high-end look.'
+        prompt: 'Use a premium gold-bordered tag with serif fonts, metallic texture, and a sense of luxury and exclusivity.'
     },
-    'bold_impact': {
+     'bold_impact': {
         name: '💥 Bold Impact',
-        prompt: 'Style: Bold Impact. Large, thick, bold typography. High contrast colors (Red/White or Yellow/Black). Attention-grabbing sale sticker style. Dynamic layout.'
+        prompt: 'Use a bold, high-contrast price tag (e.g., bright yellow or red with black text) to instantly grab attention. Large, thick fonts.'
     },
     'pastel_cute': {
         name: '🌸 Pastel Cute',
-        prompt: 'Style: Pastel Cute. Soft rounded fonts. Pastel color palette (pink, mint, baby blue). Cute decorative elements like small stars or hearts. Sweet and approachable look.'
+        prompt: 'Use soft pastel colors (pink, blue, mint) with rounded corners and cute, playful fonts. Suitable for teen or beauty products.'
     },
     'neon_cyber': {
         name: '💙 Neon Cyber',
-        prompt: 'Style: Neon Cyberpunk. Glowing neon text effects (blue, pink, purple). Dark background to make text pop. Futuristic digital font style. High-tech vibe.'
+        prompt: 'Use a futuristic neon-glowing tag (cyan, magenta) with digital/tech fonts. Dark background to make it pop. Cyberpunk vibe.'
     },
     'vintage_paper': {
         name: '📜 Vintage Paper',
-        prompt: 'Style: Vintage Paper. Text overlaid on textured kraft paper or old parchment visuals. Retro serif or typewriter fonts. Warm earth tones. Classic nostalgic look.'
+        prompt: 'Use a textured craft paper or aged parchment tag style using typewriter fonts. Nostalgic, handmade, or organic vibe.'
     },
     'glass_morphism': {
         name: '🧊 Glassmorphism',
-        prompt: 'Style: Glassmorphism. Text on semi-transparent frosted glass cards with soft white borders. Blurred background behind text. Modern, airy, and premium tech look.'
+        prompt: 'Use a semi-transparent frosted glass effect tag with white text and subtle border. Modern, sleek, and high-tech look.'
     },
     'chalkboard': {
         name: '🖍️ Chalkboard',
-        prompt: 'Style: Chalkboard Art. White handwritten-style text on black chalkboard texture. Hand-drawn doodle elements. Casual, creative, and craft vibe.'
+        prompt: 'Use a black chalkboard style tag with handwritten white chalk text and doodle elements. Cafe or handmade vibe.'
     },
     'eco_natural': {
         name: '🍃 Eco Natural',
-        prompt: 'Style: Eco Natural. Earthy tones (green, brown, beige). Organic fonts. Leaf or nature motifs. Clean fresh look suitable for organic/natural products.'
+        prompt: 'Use a tag design inspired by nature, using green tones, leaf motifs, or recycled paper textures. Organic and eco-friendly.'
     },
     'sale_red': {
         name: '🧧 Red Sale Tag',
-        prompt: 'Style: Classic Red Sale Tag. Bright red background or badge for price. White bold text. Urgent "On Sale" appearance. Traditional retail promotion style.'
+        prompt: 'Use a classic bright red sale tag or sticker style with bold white text. Indicates a special offer or discount.'
     }
 };
 
 function getPriceTagStyle(styleId) {
     return PRICE_TAG_STYLES[styleId] || PRICE_TAG_STYLES['auto'];
+}
+
+// ----------------------------------------------------------------------
+// 🔮 Sai Moo Text Effects (เอฟเฟกต์ข้อความสายมู)
+// ----------------------------------------------------------------------
+const SAI_MOO_TEXT_EFFECTS = {
+    'none': { name: '❌ ไม่มีเอฟเฟกต์', prompt: '' },
+    'gold_emboss': { 
+        name: '🥇 ทองนูน (Gold Emboss)', 
+        prompt: 'Text Style: 3D Embossed Gold lettering, shiny metallic texture, sacred and premium look.' 
+    },
+    'glowing_aura': { 
+        name: '✨ เรืองแสง (Glowing Aura)', 
+        prompt: 'Text Style: Glowing celestial aura around the text, mystical light emitting from the letters, holy atmosphere.' 
+    },
+    'ancient_stone': { 
+        name: '🗿 แกะสลักหิน (Ancient Stone)', 
+        prompt: 'Text Style: Carved ancient stone texture, looking like sacred inscriptions on a temple wall, weathered and powerful.' 
+    },
+    'sacred_yantra': { 
+        name: '🕉️ อักขระยันต์ (Sacred Yantra)', 
+        prompt: 'Text Style: Text designed to look like sacred Thai/Pali Yantra tattoos (Sak Yant), mystical ink lines, spiritual power.' 
+    },
+    'fire_power': { 
+        name: '🔥 เปลวเพลิง (Fire Power)', 
+        prompt: 'Text Style: Burning text effect with flames and embers, representing power, passion, and intense energy.' 
+    },
+    'diamond_sparkle': { 
+        name: '💎 เพชรระยิบ (Diamond Sparkle)', 
+        prompt: 'Text Style: Sparkling diamond crystal texture, glittering and luxurious, representing wealth and clarity.' 
+    },
+    'neon_spiritual': { 
+        name: '🔮 นีออนมู (Neon Spiritual)', 
+        prompt: 'Text Style: Modern spiritual neon light (purple/gold/lotus pink), combining modern aesthetics with sacred symbols.' 
+    },
+    'cloud_heaven': { 
+        name: '☁️ เมฆสวรรค์ (Cloud Heaven)', 
+        prompt: 'Text Style: Soft white cloud-like formations forming the letters, dreamy and heavenly atmosphere.' 
+    },
+    'flower_garland': { 
+        name: '🌼 พวงมาลัย (Flower Garland)', 
+        prompt: 'Text Style: Text formed by traditional Thai flower garlands (Marigold/Jasmine), fresh, colorful, and auspicious.' 
+    },
+    'liquid_gold': { 
+        name: '🧈 ทองคำเหลว (Liquid Gold)', 
+        prompt: 'Text Style: Molten liquid gold flowing to form the characters, rich, fluid, and extremely wealthy looking.' 
+    }
+};
+
+function getSaiMooTextEffect(effectId) {
+    return SAI_MOO_TEXT_EFFECTS[effectId] || SAI_MOO_TEXT_EFFECTS['none'];
 }
 
 // ============================================

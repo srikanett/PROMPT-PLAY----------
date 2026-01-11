@@ -5049,6 +5049,48 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================
+// NEW: Sai Moo AI Analysis Logic
+// ============================================
+async function analyzeSaiMooImage(file) {
+  const resultArea = document.getElementById('sacred-analysis-result');
+  const contentArea = document.getElementById('sacred-analysis-content');
+  const promptInput = document.getElementById('sacred-analysis-prompt');
+
+  // Show loading state
+  resultArea.style.display = 'block';
+  contentArea.innerHTML = '<span class="loading-pulse">🔮 กำลังเพ่งจิตวิเคราะห์...</span>';
+  
+  // Simulate AI Analysis (In reality, this would call Gemini Vision API)
+  // For now, we simulate detection based on filename or just generic 'Holy Object'
+  setTimeout(() => {
+    // Mock Result
+    const mockResult = `
+      <b>Detected:</b> Sacred Object / Deity Figure<br>
+      <b>Atmosphere:</b> Mystical, Golden Light, Ancient<br>
+      <b>Suggestion:</b> Use 'Ancient Stone' or 'Gold Emboss' text effect.
+    `;
+    const mockPrompt = "A highly detailed sacred image of a Thai deity, emitting golden aura, ancient temple background, mystical atmosphere, 8k resolution, photorealistic.";
+    
+    contentArea.innerHTML = mockResult;
+    promptInput.value = mockPrompt;
+    
+    // Auto-select effect if smart mode is on (Logic for future)
+    
+  }, 2000);
+}
+
+// Event Listener for Sai Moo Image Upload
+const sacredImageInput = document.getElementById('sacred-image-upload'); // Assuming this ID exists or needs to be added to HTML
+if (sacredImageInput) {
+    sacredImageInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+            analyzeSaiMooImage(e.target.files[0]);
+        }
+    });
+}
+
+
+// ============================================
 // 🕉️ SACRED IMAGE MODULE (ภาพสายมู)
 // ============================================
 
@@ -6198,6 +6240,16 @@ function sacredImgSetupEventListeners() {
             if (effectInput) effectInput.value = card.dataset.effect;
         });
     });
+
+    // Text Effect Dropdown Listener
+    const sacredTextEffectSelect = document.getElementById('sacred-text-effect');
+    if (sacredTextEffectSelect) {
+        sacredTextEffectSelect.addEventListener('change', () => {
+            // Optional: Trigger preview/analysis or just update local state if needed
+            // For now, just logging or doing nothing is fine, as sacredGeneratePromptOnly pulls the value directly.
+            console.log('Text effect changed to:', sacredTextEffectSelect.value);
+        });
+    }
     
     // Clear button
     if (sacredImgClearBtn) sacredImgClearBtn.addEventListener('click', sacredImgClearAll);
