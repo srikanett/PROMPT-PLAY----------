@@ -3611,6 +3611,7 @@ ${characterInstruction}`;
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        systemInstruction: { parts: [{ text: window.IMAGE_SYSTEM_PROMPT || 'คุณคือผู้เชี่ยวชาญสร้าง prompt ภาพโฆษณาระดับมืออาชีพ' }] },
         contents: [{
           parts: [
             { text: userMessage },
