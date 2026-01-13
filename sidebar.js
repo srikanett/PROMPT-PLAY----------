@@ -2390,13 +2390,26 @@ try {
                                       await sleep(1500);
                                       const menus = document.querySelectorAll('[role="menuitem"], li');
                                       let clicked = false;
+                                      // ✅ ลำดับการเลือก: 1080p > original > 720p (ชอบขนาดใหญ่สุด)
                                       for(const m of menus) {
                                           if(m.offsetParent === null) continue;
                                           const t = (m.textContent || '').toLowerCase();
-                                          if(t.includes('original') || t.includes('ขนาดเดิม') || t.includes('720p') || t.includes('download')) {
+                                          if(t.includes('1080') || t.includes('original') || t.includes('ขนาดเดิม')) {
                                               heavyClick(m);
                                               clicked = true;
                                               break;
+                                          }
+                                      }
+                                      // Fallback: ถ้าไม่เจอ 1080p ให้เอา 720p
+                                      if (!clicked) {
+                                          for(const m of menus) {
+                                              if(m.offsetParent === null) continue;
+                                              const t = (m.textContent || '').toLowerCase();
+                                              if(t.includes('720p') || t.includes('download')) {
+                                                  heavyClick(m);
+                                                  clicked = true;
+                                                  break;
+                                              }
                                           }
                                       }
                                       await sleep(1000);
@@ -3373,29 +3386,46 @@ function bananaSetupEventListeners() {
     });
   }
   
-  // No Character toggle - show/hide presentation container AND disable character selection
+  // No Character toggle - disable only character AND outfit selection, NOT style/background
   const bananaNoCharacter = document.getElementById('banana-no-character');
   const bananaPresentationContainer = document.getElementById('banana-presentation-container');
-  const bananaCharacterContainer = document.querySelector('.input-group:has(#banana-character-select)') || document.getElementById('banana-character-select')?.closest('.input-group');
-  const bananaCharacterTabs = document.querySelectorAll('.char-tab-container .char-tabs, .char-tab-container .char-content-area');
+  // Get the character container - it's the parent input-group of #banana-character-select
+  const bananaCharacterInput = document.getElementById('banana-character-select');
+  const bananaCharacterContainer = bananaCharacterInput?.closest('.input-group');
+  // Outfit container has specific ID
+  const bananaOutfitContainer = document.getElementById('config-content-outfit');
+  const bananaOutfitLabel = bananaOutfitContainer?.closest('.input-group')?.querySelector('.input-row');
   
   if (bananaNoCharacter) {
     bananaNoCharacter.addEventListener('change', (e) => {
-      // Show/hide presentation container
+      // Show/hide presentation container (for product-only display options)
       if (bananaPresentationContainer) {
         bananaPresentationContainer.style.display = e.target.checked ? 'block' : 'none';
       }
-      // Disable/enable character selection
-      if (bananaCharacterTabs) {
-        bananaCharacterTabs.forEach(el => {
-          if (e.target.checked) {
-            el.style.opacity = '0.4';
-            el.style.pointerEvents = 'none';
-          } else {
-            el.style.opacity = '1';
-            el.style.pointerEvents = 'auto';
-          }
-        });
+      
+      // Disable/enable ONLY character selection (NOT style/background!)
+      if (bananaCharacterContainer) {
+        if (e.target.checked) {
+          bananaCharacterContainer.style.opacity = '0.4';
+          bananaCharacterContainer.style.pointerEvents = 'none';
+        } else {
+          bananaCharacterContainer.style.opacity = '1';
+          bananaCharacterContainer.style.pointerEvents = 'auto';
+        }
+      }
+      
+      // Disable/enable ONLY outfit container (no model = no outfit needed)
+      if (bananaOutfitContainer) {
+        if (e.target.checked) {
+          bananaOutfitContainer.style.opacity = '0.4';
+          bananaOutfitContainer.style.pointerEvents = 'none';
+        } else {
+          bananaOutfitContainer.style.opacity = '1';
+          bananaOutfitContainer.style.pointerEvents = 'auto';
+        }
+      }
+      if (bananaOutfitLabel) {
+        bananaOutfitLabel.style.opacity = e.target.checked ? '0.4' : '1';
       }
     });
   }
@@ -3504,12 +3534,27 @@ async function bananaGeneratePromptOnly() {
     
     let textInstruction = '';
     if (noText) {
-      // STRICT NO TEXT
+      // STRICT NO TEXT - Focus on pure visual/product quality
       textInstruction = `
-\n⚠️⚠️⚠️ STRICT NEGATIVE PROMPT: TEXT / WATERMARK / LABELS ⚠️⚠️⚠️
-- DO NOT generate any text, letters, words, typography, watermark, logo, or price tag in this image.
-- The image must be clean of any written content.
-- Negative Prompt: text, watermark, username, signature, price tag, label, typography, writing.
+⚠️⚠️⚠️ CRITICAL: ABSOLUTELY NO TEXT IN THIS IMAGE ⚠️⚠️⚠️
+
+📌 สิ่งที่ต้องทำ:
+- สร้างภาพที่มีเฉพาะ สินค้า และ/หรือ นางแบบ ที่ถือ/สวมใส่/โชว์สินค้า
+- เน้นความสวยงามของสินค้าและนางแบบตาม Style, Background, Outfit ที่เลือก
+- ภาพต้องดูสวยงาม น่าสนใจ เหมาะสำหรับโฆษณา
+
+🚫 สิ่งที่ห้ามมีในภาพ (STRICTLY FORBIDDEN):
+- NO TEXT, NO LETTERS, NO WORDS, NO TYPOGRAPHY
+- NO WATERMARK, NO LOGO, NO BRAND NAME
+- NO PRICE TAG, NO LABEL, NO CAPTION
+- NO USERNAME, NO SIGNATURE
+- ห้ามมีตัวอักษร ตัวเลข หรือข้อความใดๆ ปรากฏในภาพเด็ดขาด!
+
+OUTPUT Requirement:
+- Generate a prompt that creates a CLEAN image with ONLY visual elements
+- Focus on: Product showcase + Model (if included) + Selected style/background/outfit
+- The image should look like a professional advertisement photo WITHOUT any overlays
+- Negative Prompt MUST include: text, watermark, logo, typography, letters, words, labels, price tag, caption
 `;
     } else {
         // Text is allowed
@@ -3547,15 +3592,24 @@ async function bananaGeneratePromptOnly() {
     let characterInstruction = '';
     
     if (noCharacter) {
-      // PRODUCT ONLY
+      // PRODUCT ONLY - Get style and background for product-only shot
+      const selectedStyleValue = bananaStyleSelect?.value || 'studio';
+      const selectedBgValue = bananaBgSelect?.value || 'white';
+      
       characterInstruction = `
-\n⚠️⚠️⚠️ CRITICAL INSTRUCTION - PRODUCT ONLY - NO PEOPLE ⚠️⚠️⚠️
+⚠️⚠️⚠️ CRITICAL INSTRUCTION - PRODUCT ONLY - NO PEOPLE ⚠️⚠️⚠️
 - This is a product-only shot.
 - DO NOT include ANY person, model, character, human, man, woman, or any part of human body.
 - NO hands holding product (unless using "Hand Holding" presentation explicitly).
 - NO face, NO body parts.
 - The product is the SOLITARY HERO.
-Presentation Style: ${presentationData.prompt}`;
+
+📷 Product Shot Settings:
+- Style: ${selectedStyleValue}
+- Background: ${selectedBgValue}
+- Presentation: ${presentationData.prompt}
+
+สร้างภาพสินค้าที่สวยงาม ตามสไตล์และฉากหลังที่เลือก โดยไม่มีคนหรือนางแบบ`;
 
     } else {
         // MODEL / CHARACTER INCLUDED
@@ -4899,10 +4953,16 @@ Negative Prompt: "person, human, model, woman, man, hands, fingers, face, body, 
                                     // เช็คว่ามองเห็นไหม
                                     if(item.offsetParent === null) continue;
 
-                                    // ✅ เงื่อนไขใหม่: ขอแค่มีคำว่า "1k" อยู่ข้างใน (ไม่ต้องเป๊ะ)
-                                    if(t.includes('1k') || t.includes('original')) {
+                                    // ✅ ลำดับการเลือก: 4K > 2K > 1K > original (ชอบขนาดใหญ่สุด)
+                                    if(t.includes('4k')) {
                                         targetMenu = item;
                                         break; 
+                                    }
+                                    if(t.includes('2k') && !targetMenu) {
+                                        targetMenu = item;
+                                    }
+                                    if((t.includes('1k') || t.includes('original')) && !targetMenu) {
+                                        targetMenu = item;
                                     }
                                 }
                                 
@@ -6411,7 +6471,9 @@ async function sacredImgDownloadImage(index) {
     
     await chrome.scripting.executeScript({
         target: { tabId: tab.id },
-        func: (idx) => {
+        func: async (idx) => {
+            const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+            
             function heavyClick(element) {
                 if (!element) return;
                 const pOpts = { bubbles: true, cancelable: true, view: window };
@@ -6420,26 +6482,53 @@ async function sacredImgDownloadImage(index) {
                 element.click();
             }
             
-            // หาปุ่ม Download
-            const downloadBtns = document.querySelectorAll('button[aria-label*="download"], button[aria-label*="Download"], a[download]');
-            if (downloadBtns[idx]) {
-                heavyClick(downloadBtns[idx]);
-                return { success: true };
+            // หาปุ่ม Download ทั้งหมด
+            const allBtns = document.querySelectorAll('button');
+            let downloadBtns = [];
+            
+            for (const btn of allBtns) {
+                const iconText = btn.querySelector('i')?.textContent || '';
+                const txt = (btn.textContent || '').toLowerCase();
+                if (iconText === 'download' || iconText === 'get_app' || 
+                    txt.includes('download') || txt.includes('ดาวน์โหลด')) {
+                    downloadBtns.push(btn);
+                }
             }
             
-            // Fallback: หาปุ่มที่มีไอคอน download
-            const allBtns = document.querySelectorAll('button');
-            let foundIdx = 0;
-            for (const btn of allBtns) {
-                const svg = btn.querySelector('svg');
-                const txt = (btn.textContent || '').toLowerCase();
-                if (txt.includes('download') || txt.includes('ดาวน์โหลด') || (svg && svg.innerHTML.includes('download'))) {
-                    if (foundIdx === idx) {
-                        heavyClick(btn);
-                        return { success: true };
+            if (downloadBtns[idx]) {
+                heavyClick(downloadBtns[idx]);
+                
+                // รอเมนู resolution ปรากฏ
+                await sleep(1500);
+                
+                // หาเมนู resolution - ลำดับการเลือก: 4K > 2K > 1K > original
+                const menus = document.querySelectorAll('[role="menuitem"]');
+                let targetMenu = null;
+                
+                for(const item of menus) {
+                    if(item.offsetParent === null) continue;
+                    const t = (item.textContent || '').toLowerCase();
+                    
+                    if(t.includes('4k')) {
+                        targetMenu = item;
+                        break;
                     }
-                    foundIdx++;
+                    if(t.includes('2k') && !targetMenu) {
+                        targetMenu = item;
+                    }
+                    if((t.includes('1k') || t.includes('original')) && !targetMenu) {
+                        targetMenu = item;
+                    }
                 }
+                
+                if(targetMenu) {
+                    heavyClick(targetMenu);
+                }
+                
+                await sleep(500);
+                document.body.click(); // ปิดเมนู
+                
+                return { success: true };
             }
             
             return { success: false };
