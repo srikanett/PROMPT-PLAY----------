@@ -932,6 +932,20 @@
           <textarea id="sacred-commercial-caption" placeholder="เช่น: เมตตาประทานความสำเร็จ..." style="height:60px; padding:10px; border-radius:8px; border:1px solid #3f3f46; background:#27272a; color:#fff;"></textarea>
         </div>
         
+        <!-- 👤 การเลือกนางแบบ (Model Selection) - ใหม่! -->
+        <div class="input-group" id="sacred-commercial-model-container">
+          <div class="input-row"><label>👤 นางแบบ/นายแบบ (Model)</label></div>
+          <div style="font-size:12px; color:#94a3b8; margin-bottom:8px;">อัพโหลดรูปนางแบบเพื่อให้ AI ใช้ใบหน้าเดียวกัน (ไม่บังคับ)</div>
+          <div id="sacred-commercial-model-upload" class="upload-area" style="padding:15px; border:2px dashed #4f46e5; border-radius:8px; text-align:center; cursor:pointer;">
+            <span style="color:#818cf8;">📷 คลิกเพื่ออัพโหลดรูปนางแบบ</span>
+            <input type="file" id="sacred-commercial-model-input" accept="image/*" style="display:none;">
+          </div>
+          <div id="sacred-commercial-model-preview" style="display:none; margin-top:8px;">
+            <img id="sacred-commercial-model-img" style="max-height:80px; border-radius:8px;">
+            <button id="sacred-commercial-model-remove" style="margin-left:8px; padding:4px 8px; background:#ef4444; border:none; border-radius:4px; color:#fff; cursor:pointer;">❌ ลบ</button>
+          </div>
+        </div>
+        
         <!-- สไตล์ภาพ (Style) - เหมือน Image Module -->
         <div class="input-group">
           <div class="input-row"><label>🎨 สไตล์ภาพ (Style)</label></div>
@@ -1030,13 +1044,29 @@
         </div>
 
         <div class="input-group">
-          <div class="input-row"><label>🎨 เอฟเฟกต์ภาพ</label></div>
+          <div class="input-row"><label>🎨 เอฟเฟกต์ภาพศักดิ์สิทธิ์ (Sacred Effect)</label></div>
           <select id="sacred-commercial-effect">
+            <option value="auto">🎲 สุ่มอัตโนมัติ (AI เลือกให้)</option>
+            <!-- แสงและรัศมี -->
             <option value="divine_glow">✨ Divine Glow (แสงศักดิ์สิทธิ์)</option>
-            <option value="golden_aura">🌟 Golden Aura (รัศมีทอง)</option>
+            <option value="golden_light">🌟 Golden Light (แสงสีทอง)</option>
+            <option value="golden_aura">💫 Golden Aura (รัศมีทอง)</option>
+            <option value="holy_rays">☀️ Holy Rays (รัศมีแห่งความศักดิ์สิทธิ์)</option>
+            <!-- ดอกไม้และธรรมชาติ -->
+            <option value="lotus_petals">🌸 Lotus Petals (กลีบดอกบัว)</option>
+            <option value="rose_petals">🌹 Rose Petals (กลีบกุหลาบ)</option>
+            <option value="jasmine_flowers">🌼 Jasmine Flowers (ดอกมะลิ)</option>
+            <option value="bodhi_leaves">🍃 Bodhi Leaves (ใบโพธิ์)</option>
+            <!-- ควันและหมอก -->
             <option value="sacred_smoke">💨 Sacred Smoke (ควันธูป)</option>
-            <option value="lotus_petals">🌸 Lotus Petals (กลีบบัว)</option>
+            <option value="mystical_fog">🌫️ Mystical Fog (หมอกลึกลับ)</option>
+            <!-- พรีเมียม -->
             <option value="premium_dark">🖤 Premium Dark (พรีเมียมดำ)</option>
+            <option value="luxury_gold">👑 Luxury Gold (หรูหราทอง)</option>
+            <!-- พิเศษ -->
+            <option value="floating_sparkles">✨ Floating Sparkles (ประกายลอย)</option>
+            <option value="sacred_mandala">☸️ Sacred Mandala (มันดาลา)</option>
+            <option value="heavenly_clouds">☁️ Heavenly Clouds (เมฆสวรรค์)</option>
           </select>
         </div>
 

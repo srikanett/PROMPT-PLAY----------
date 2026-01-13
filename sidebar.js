@@ -3656,8 +3656,34 @@ OUTPUT Requirement:
     if (isSmartAuto) {
         // Read Image Effect even in Smart Auto
         const imageEffect = document.getElementById('banana-image-effect')?.value || 'none';
-        const imageEffectHint = imageEffect !== 'none' && imageEffect !== 'auto'
-            ? `\nUser wants this specific effect: ${imageEffect}` 
+        // 🎨 IMAGE EFFECT MAPPING for SmartAuto
+        const smartAutoImageEffects = {
+          'none': '',
+          'auto': 'Auto (AI chooses best lighting)',
+          'golden_hour': 'Golden Hour lighting - warm golden sunlight, magical sunset glow',
+          'soft_light': 'Soft diffused lighting - gentle shadows, flattering natural light',
+          'dramatic_light': 'Dramatic lighting - high contrast, deep shadows, cinematic mood',
+          'rim_light': 'Rim lighting - glowing outline around subject, backlit halo effect',
+          'studio_lighting': 'Professional studio lighting - clean, even illumination',
+          'dreamy_blur': 'Dreamy blur effect - soft focus, ethereal glow, fantasy-like',
+          'cinematic': 'Cinematic style - film-like color grading, movie poster quality',
+          'bokeh': 'Beautiful bokeh background - blurred lights, shallow depth of field',
+          'luxury_premium': 'Luxury premium aesthetic - expensive look, elegant lighting',
+          'minimal_clean': 'Minimal clean style - white space, simple composition',
+          'warm_tone': 'Warm color tones - orange, yellow, amber hues, cozy atmosphere',
+          'cool_tone': 'Cool color tones - blue, teal, cyan hues, fresh feel',
+          'vibrant_pop': 'Vibrant pop colors - saturated, bold colors, eye-catching',
+          'pastel_soft': 'Pastel soft palette - muted, gentle colors, kawaii aesthetic',
+          'moody_dark': 'Moody dark aesthetic - low key lighting, dark shadows',
+          'sparkle_glitter': 'Sparkle and glitter effects - shimmering particles',
+          'smoke_fog': 'Smoke and fog atmosphere - mystical mist, dramatic fog',
+          'water_splash': 'Water splash effect - dynamic water droplets',
+          'confetti': 'Confetti celebration - colorful paper pieces, festive mood',
+          'floating_elements': 'Floating elements - petals, leaves floating around product',
+        };
+        const effectDesc = smartAutoImageEffects[imageEffect] || '';
+        const imageEffectHint = effectDesc 
+            ? `\nUser wants this specific effect: ${effectDesc}` 
             : '';
             
         userMessage = `Role: Professional Advertising Creative Director.
@@ -3677,8 +3703,39 @@ Auto-Analysis:
       
       // Read Image Effect
       const imageEffect = document.getElementById('banana-image-effect')?.value || 'none';
-      const imageEffectInstruction = (imageEffect !== 'none' && imageEffect !== 'auto')
-        ? `\n🎨 Image Effect: ${imageEffect}` 
+      
+      // 🎨 IMAGE EFFECT MAPPING - Convert effect values to AI-readable descriptions
+      const imageEffectDescriptions = {
+        'none': '',
+        'auto': 'Auto (AI chooses best lighting and atmosphere for product)',
+        // Lighting
+        'golden_hour': 'Golden Hour lighting - warm golden sunlight, magical sunset glow, romantic atmosphere',
+        'soft_light': 'Soft diffused lighting - gentle shadows, flattering natural light, airy feel',
+        'dramatic_light': 'Dramatic lighting - high contrast, deep shadows, cinematic mood, chiaroscuro effect',
+        'rim_light': 'Rim lighting - glowing outline around subject, backlit halo effect, ethereal glow',
+        'studio_lighting': 'Professional studio lighting - clean, even illumination, product photography style',
+        // Mood & Atmosphere
+        'dreamy_blur': 'Dreamy blur effect - soft focus, ethereal glow, fantasy-like atmosphere, lens flare',
+        'cinematic': 'Cinematic style - film-like color grading, movie poster quality, dramatic composition',
+        'bokeh': 'Beautiful bokeh background - blurred lights, shallow depth of field, subject isolation',
+        'luxury_premium': 'Luxury premium aesthetic - expensive look, elegant lighting, high-end commercial quality',
+        'minimal_clean': 'Minimal clean style - white space, simple composition, scandinavian aesthetic',
+        // Color Tones
+        'warm_tone': 'Warm color tones - orange, yellow, amber hues, cozy and inviting atmosphere',
+        'cool_tone': 'Cool color tones - blue, teal, cyan hues, fresh and modern feel',
+        'vibrant_pop': 'Vibrant pop colors - saturated, bold colors, eye-catching contrast, energetic mood',
+        'pastel_soft': 'Pastel soft palette - muted, gentle colors, pink, mint, lavender tones, kawaii aesthetic',
+        'moody_dark': 'Moody dark aesthetic - low key lighting, dark shadows, mysterious atmosphere',
+        // Special Effects
+        'sparkle_glitter': 'Sparkle and glitter effects - shimmering particles, magical sparkles around product',
+        'smoke_fog': 'Smoke and fog atmosphere - mystical mist, dramatic fog, floating smoke wisps',
+        'water_splash': 'Water splash effect - dynamic water droplets, fresh splash around product',
+        'confetti': 'Confetti celebration - colorful paper pieces, festive party mood, joyful atmosphere',
+        'floating_elements': 'Floating elements - petals, leaves, or particles gently floating around product',
+      };
+      const imageEffectDescription = imageEffectDescriptions[imageEffect] || '';
+      const imageEffectInstruction = imageEffectDescription 
+        ? `\n🎨 Image Effect: ${imageEffectDescription}` 
         : '';
       
       // 🎯 STYLE MAPPING - Convert style numbers to AI-readable descriptions
@@ -3704,6 +3761,61 @@ Auto-Analysis:
       };
       const styleDescription = styleDescriptions[selectedStyle] || styleDescriptions['auto'];
       
+      // 🖼️ BACKGROUND MAPPING - Convert bg values to AI-readable descriptions
+      const bgDescriptions = {
+        'auto': 'Auto (AI chooses best background for product)',
+        // Indoor
+        'living_room': 'Modern minimalist living room with soft sunlight, cozy atmosphere',
+        'bedroom': 'Cozy bedroom corner with warm lighting, comfortable vibe',
+        'kitchen': 'Luxury marble kitchen counter, clean and bright cooking area',
+        'bathroom': 'Modern luxury bathroom counter with mirror, bright lighting, clean marble texture, spa atmosphere',
+        'dining_room': 'Warm dining table setting with delicious food background, cozy family atmosphere',
+        'closet': 'Luxury walk-in closet with clothes racks, soft lighting, fashion boutique vibe',
+        'studio': 'Clean white professional photo studio background, soft lighting, product photography style',
+        'gym': 'Modern fitness gym background with equipment, active atmosphere',
+        'classroom': 'Inside a modern bright classroom with desks, chairs and whiteboard, educational atmosphere',
+        'meeting_room': 'Modern professional meeting room conference table, glass walls, business atmosphere',
+        'home_office': 'Cozy home office setup, wooden desk with computer monitor, warm lighting, productive workspace vibe',
+        // Sacred
+        'buddha_room': 'Traditional Thai Buddha room in a house, golden Buddha statues, incense smoke, warm lighting, spiritual atmosphere',
+        'buddha_altar': 'Ornate Thai Buddha altar shelf (hing phra), golden Buddha images, flowers and candles, incense sticks',
+        'temple': 'Majestic Thai Buddhist temple interior (Wat), golden Buddha statues, ornate decorations, sacred atmosphere',
+        'shrine': 'Beautiful Thai Hindu shrine or spirit house, colorful decorations, sacred offerings, incense smoke',
+        'heaven': 'Ethereal heavenly clouds, golden divine light rays, celestial paradise, magical floating clouds, god-like atmosphere',
+        // Urban
+        'cafe': 'Trendy cafe with glass windows and city view, aesthetic coffee shop vibe',
+        'office': 'Modern workspace office environment, professional business look',
+        'luxury_hotel': 'Luxury hotel lobby or lounge, expensive furniture, golden warm lighting, premium atmosphere',
+        'supermarket': 'Aisles of a modern supermarket or convenience store, bright lighting, shelves with products',
+        'city': 'Urban street style with blurred city lights, bokeh effect, modern bangkok vibe',
+        'street': 'Bustling modern city street in Bangkok, blurred cars and buildings, urban vibe',
+        'subway': 'Modern BTS Skytrain or subway station in Bangkok, clean urban transport background',
+        'restaurant': 'Luxury fine dining restaurant or trendy bistro, warm lighting, elegant table setting',
+        'airport': 'Modern international airport terminal (Suvarnabhumi style), bright lighting, glass windows with airplanes',
+        'in_car': 'Inside a modern luxury car, sitting on the leather passenger seat, sunlight coming through window',
+        'on_bike': 'Sitting on a stylish motorcycle (scooter) on a city street, outdoor daylight, urban background',
+        // Nature
+        'garden': 'Bright outdoor garden with greenery and flowers, fresh nature vibe',
+        'beach': 'Tropical beach resort atmosphere with blue sky and white sand, vacation vibe',
+        'mountain': 'Majestic mountains in northern Thailand, misty morning, scenic nature view',
+        'waterfall': 'Beautiful tropical waterfall in Thailand, surrounding rainforest, fresh water',
+        'yacht': 'Sitting on the deck of a luxury private yacht in the ocean, blue sky and sea background',
+        'battlefield': 'Epic cinematic battlefield, smoke and dust in the air, dramatic lighting, explosions',
+        // Local Thai
+        'rice_field': 'Lush green rice paddy field in Thailand, bright blue sky, jasmine rice farm, rural countryside',
+        'thai_house': 'Traditional Thai wooden house style, vintage countryside home, warm nostalgic vibe',
+        'isan_house': 'Authentic Northeastern Thai rural house (Isan style), simple wooden house raised on stilts',
+        'orchard': 'Lush green Thai fruit orchard (Durian or Mango garden), sunlight filtering through leaves',
+        'wooden_boat': 'Sitting on a traditional Thai wooden boat floating on a canal (Khlong), rustic texture',
+        'market': 'Bustling Thai local fresh market (Talat Sod), colorful fruit and vegetable stalls',
+        'night_market': 'Vibrant Thai night market walking street (Talat Nad), colorful street food stalls, warm string lights',
+        'win_moto': 'POV sitting on a Thai motorcycle taxi (Win Motosai), driver in orange vest, Bangkok traffic',
+        'tuk_tuk': 'Sitting inside a colorful Thai Tuk Tuk driving at night, neon lights, chinatown street',
+        'convenience_store': 'Standing in front of a modern bright convenience store at night in Thailand',
+        'old_coffee': 'Traditional old Thai coffee shop (Kopi), vintage wooden tables, zinc walls, nostalgic mood',
+      };
+      const bgDescription = bgDescriptions[selectedBg] || bgDescriptions['auto'] || selectedBg;
+      
       // 🔥 SPECIAL CASE: noText + noCharacter = Product-Only Shot
       if (noText && noCharacter) {
         // Check if style allows hands
@@ -3719,12 +3831,12 @@ Task: Create a commercial product image.
 - The product is SACRED - preserve it 100%
 
 📸 STYLE: ${styleDescription}
-🖼️ BACKGROUND: ${selectedBg}${imageEffectInstruction}
+🖼️ BACKGROUND: ${bgDescription}${imageEffectInstruction}
 
 ⚠️ RULES:
 - NO TEXT (no letters, watermarks, logos, price tags)
 - ${isHandsAllowed ? 'HANDS REQUIRED for this style (show realistic hands holding/using product, but NO face/full body)' : 'NO PEOPLE (no hands, no body parts, product only)'}
-- Apply the "${selectedBg}" background/setting
+- Apply the background: ${bgDescription}
 - The image MUST follow the STYLE instruction above`;
       } else {
         // Normal case with text and/or character
@@ -3745,7 +3857,7 @@ ${noTextRule}
 
 ${productDesc}
 Style: ${styleDescription}
-Background: ${selectedBg}${imageEffectInstruction}
+Background: ${bgDescription}${imageEffectInstruction}
 ${noText ? '' : textInstruction}
 ${characterInstruction}`;
       }
@@ -5854,7 +5966,7 @@ async function sacredImgGeneratePrompt(imageDataUrl) {
         const caption = document.getElementById('sacred-commercial-caption')?.value || '';
         const priceFull = document.getElementById('sacred-price-full')?.value || '';
         const pricePromo = document.getElementById('sacred-price-promo')?.value || '';
-        const commercialEffect = document.getElementById('sacred-commercial-effect')?.value || 'divine_glow';
+        const commercialEffect = document.getElementById('sacred-commercial-effect')?.value || 'auto';
         const noText = document.getElementById('sacred-commercial-no-text')?.checked || false;
         const frameOnly = document.getElementById('sacred-frame-only')?.checked || false;
         
@@ -5866,6 +5978,42 @@ async function sacredImgGeneratePrompt(imageDataUrl) {
         const selectedStyle = document.getElementById('sacred-commercial-style-select')?.value || 'auto';
         const selectedBg = document.getElementById('sacred-commercial-bg-select')?.value || 'auto';
         
+        // 🎨 SACRED EFFECT MAPPING - English descriptions for AI
+        const sacredEffectDescriptions = {
+          'auto': 'Auto (AI chooses best sacred effect for this sacred item)',
+          'divine_glow': 'Divine Glow - ethereal golden light emanating from the sacred item, heavenly luminescence, spiritual radiance',
+          'golden_light': 'Golden Light - warm golden sunlight rays, sacred temple lighting, blessed atmosphere',
+          'golden_aura': 'Golden Aura - shimmering golden halo around the sacred item, divine energy field, holy presence',
+          'holy_rays': 'Holy Rays - god rays descending from above, celestial light beams, enlightened atmosphere',
+          'lotus_petals': 'Lotus Petals - floating pink lotus flower petals around the sacred item, Buddhist symbolic, peaceful serenity',
+          'rose_petals': 'Rose Petals - floating red rose petals, romantic spiritual beauty, blessed fragrance',
+          'jasmine_flowers': 'Jasmine Flowers - white jasmine flowers garland, Thai temple offering style, pure blessing',
+          'bodhi_leaves': 'Bodhi Leaves - green bodhi tree leaves floating, Buddhist enlightenment symbol, wisdom aura',
+          'sacred_smoke': 'Sacred Smoke - incense smoke wisps curling upward, temple atmosphere, meditative mood, aromatic blessing',
+          'mystical_fog': 'Mystical Fog - ethereal mist surrounding the item, mysterious sacred atmosphere, ancient power',
+          'premium_dark': 'Premium Dark - black velvet background, dramatic spotlight on item, luxury high-end presentation',
+          'luxury_gold': 'Luxury Gold - rich gold and black color scheme, premium branding style, royal elegance',
+          'floating_sparkles': 'Floating Sparkles - magical glittering particles around the item, fairy dust, enchanted blessing',
+          'sacred_mandala': 'Sacred Mandala - circular mandala pattern in background, spiritual geometry, cosmic energy',
+          'heavenly_clouds': 'Heavenly Clouds - fluffy white clouds, celestial paradise setting, divine realm atmosphere',
+        };
+        const effectDescription = sacredEffectDescriptions[commercialEffect] || sacredEffectDescriptions['auto'];
+        
+        // 👤 MODEL HANDLING - Check for model image
+        const modelImg = document.getElementById('sacred-commercial-model-img');
+        const hasModelImage = modelImg && modelImg.src && modelImg.src !== '';
+        let modelInstruction = '';
+        
+        if (hasModelImage) {
+          modelInstruction = `
+👤 MODEL & FACE LOCK (CRITICAL):
+- Use the provided model/person reference image
+- PRESERVE their FACE EXACTLY as in reference - same features, skin tone, expression
+- IGNORE any text/watermarks in the model image - focus ONLY on their face
+- Model should be holding or displaying the sacred item respectfully
+`;
+        }
+        
         const styleData = window.getPriceTagStyle ? window.getPriceTagStyle(priceTagStyle) : {};
         const colorData = window.getPriceTagColor ? window.getPriceTagColor(priceTagColor) : {};
         // Use global CAPTION_POSITIONS if available, else fallback
@@ -5874,19 +6022,32 @@ async function sacredImgGeneratePrompt(imageDataUrl) {
                         : { name: captionPosition, prompt: 'placed below price tag' };
         
         if (noText) {
-             // No text mode - effects only, no text or price tags
-             userMessage = `สร้าง prompt ภาพวัตถุมงคลจากภาพนี้
-เอฟเฟกต์: ${commercialEffect}
-⚠️ สำคัญ: ไม่ต้องใส่ข้อความใด ๆ ลงบนภาพ เน้นเฉพาะเอฟเฟกต์และบรรยากาศศักดิ์สิทธิ์
-- ห้ามใส่ text, ข้อความ, ราคา, ป้าย, watermark ใดๆ ทั้งสิ้น
-- เน้นแสง ออร่า และเอฟเฟกต์ศักดิ์สิทธิ์เท่านั้น`;
+             // No text mode with model support
+             const modelDesc = hasModelImage 
+               ? `- Include a Thai model/person (using the uploaded face reference) holding or wearing the sacred item respectfully\n${modelInstruction}`
+               : `- Include a Thai model/person holding or wearing the sacred item (if suitable for the item type)`;
+               
+             userMessage = `Create a sacred item commercial image prompt:
+
+🔒 PRODUCT LOCK: Keep the sacred item EXACTLY as in reference image - same appearance.
+
+🎨 Sacred Effect: ${effectDescription}
+${modelDesc}
+
+⛔ NO TEXT MODE:
+- Do NOT include ANY text, letters, numbers, price tags, captions, watermarks
+- Pure visual image with ONLY: sacred item + effect + model (if applicable)
+- Focus on beautiful sacred atmosphere and lighting
+
+🎯 Output: A clean sacred item photo with ${effectDescription} effect, no text overlay.
+NEGATIVE PROMPT: text, letters, words, watermark, price tag, caption, logo`;
         } else if (frameOnly) {
              userMessage = `สร้าง prompt ภาพโฆษณาวัตถุมงคลจากภาพนี้
 สินค้า: "${productName || 'วัตถุมงคล'}"
 คำสั่งสำคัญ: สร้างเฉพาะกรอบป้ายราคาที่สวยงามและว่างเปล่า (Empty Price Tag Frame) ตามสไตล์ที่เลือก
 รูปแบบป้าย: ${styleData?.prompt || 'circular golden price tag'}
 โทนสีป้าย: ${colorData?.prompt || 'shiny gold color'}
-เอฟเฟกต์: ${commercialEffect}
+เอฟเฟกต์: ${effectDescription}
 ตำแหน่งป้าย: จัดวางอย่างสวยงาม
 ⚠️ ข้อความ: ห้ามใส่ข้อความใดๆ ลงในป้าย (Empty Frame)`;
         } else if (isSmartAuto) {
@@ -6766,6 +6927,39 @@ function sacredImgSetupEventListeners() {
                 if (input) input.value = card.dataset.value;
             });
         });
+        
+        // 👤 Model Upload Handling for Sacred Commercial
+        const modelUploadArea = document.getElementById('sacred-commercial-model-upload');
+        const modelInput = document.getElementById('sacred-commercial-model-input');
+        const modelPreview = document.getElementById('sacred-commercial-model-preview');
+        const modelImg = document.getElementById('sacred-commercial-model-img');
+        const modelRemoveBtn = document.getElementById('sacred-commercial-model-remove');
+        
+        if (modelUploadArea && modelInput) {
+            modelUploadArea.addEventListener('click', () => modelInput.click());
+            
+            modelInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        if (modelImg) modelImg.src = ev.target.result;
+                        if (modelPreview) modelPreview.style.display = 'flex';
+                        if (modelUploadArea) modelUploadArea.innerHTML = '<span style="color:#22c55e;">✅ อัพโหลดแล้ว</span>';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+        
+        if (modelRemoveBtn) {
+            modelRemoveBtn.addEventListener('click', () => {
+                if (modelImg) modelImg.src = '';
+                if (modelPreview) modelPreview.style.display = 'none';
+                if (modelInput) modelInput.value = '';
+                if (modelUploadArea) modelUploadArea.innerHTML = '<span style="color:#818cf8;">📷 คลิกเพื่ออัพโหลดรูปนางแบบ</span>';
+            });
+        }
     };
     
     setupSacredCommercialTabs();
