@@ -3655,19 +3655,51 @@ Auto-Analysis:
       const selectedStyle = bananaStyleSelect?.value || 'studio';
       const selectedBg = bananaBgSelect?.value || 'white';
       
-      // NEW: Read Image Effect
+      // Read Image Effect
       const imageEffect = document.getElementById('banana-image-effect')?.value || 'none';
-      const imageEffectInstruction = imageEffect !== 'none' 
+      const imageEffectInstruction = (imageEffect !== 'none' && imageEffect !== 'auto')
         ? `\n🎨 Image Effect: ${imageEffect}` 
         : '';
       
-      userMessage = `Role: Advertising Image Generator.
+      // 🔥 SPECIAL CASE: noText + noCharacter = Product-Only Pure Visual Shot
+      if (noText && noCharacter) {
+        userMessage = `🎯 TASK: Create a PURE PRODUCT PHOTOGRAPHY prompt
+
+📦 PRODUCT:
+${productDesc}
+
+🎨 VISUAL SETTINGS (MUST APPLY ALL):
+- Photography Style: ${selectedStyle}
+- Background/Scene: ${selectedBg}
+- Image Effect: ${imageEffect !== 'none' ? imageEffect : 'professional product photography'}
+- Presentation: ${presentationData.prompt || 'product showcase'}
+
+⚠️⚠️⚠️ CRITICAL RULES ⚠️⚠️⚠️:
+1. NO TEXT - No letters, words, typography, watermarks, logos, price tags, labels, captions, or any written content
+2. NO PEOPLE - No humans, models, hands, body parts, or any human elements
+3. PRODUCT HERO - The product must be the sole focus, beautifully presented
+4. APPLY ALL VISUAL SETTINGS - Must use the specified style, background, and effects
+
+📸 OUTPUT REQUIREMENTS:
+- Create a high-end commercial product photography prompt
+- Apply the "${selectedBg}" background/scene setting
+- Apply the "${selectedStyle}" photography style
+- ${imageEffect !== 'none' && imageEffect !== 'auto' ? `Apply "${imageEffect}" visual effect` : 'Use cinematic lighting and professional composition'}
+- 8K resolution, professional studio quality
+- Clean, modern, premium aesthetic
+- Perfect for e-commerce and advertising use
+
+NEGATIVE PROMPT MUST INCLUDE: text, typography, letters, words, watermark, logo, price tag, label, human, person, hand, fingers, body parts`;
+      } else {
+        // Normal case with text and/or character
+        userMessage = `Role: Advertising Image Generator.
 Task: Create an image based on these constraints.
 ${productDesc}
 Style: ${selectedStyle}
 Background: ${selectedBg}${imageEffectInstruction}
 ${textInstruction}
 ${characterInstruction}`;
+      }
     }
     
     const base64Data = imageData.dataUrl.split(',')[1];
@@ -4955,26 +4987,29 @@ Negative Prompt: "person, human, model, woman, man, hands, fingers, face, body, 
                             for(let attempt=0; attempt<20; attempt++) {
                                 await sleep(200); // รอเมนูเด้ง
                                 
-                                // 🎯 ค้นหาด้วย role="menuitem" ตามที่ Spy บอก
-                                const menuItems = document.querySelectorAll('[role="menuitem"]');
+                                // 🎯 ค้นหาด้วย role="menuitem" หรือ role="option"
+                                const menuItems = document.querySelectorAll('[role="menuitem"], [role="option"]');
                                 
                                 for(const item of menuItems) {
-                                    // อ่านข้อความในเมนู (เช่น "download Download 1K")
                                     const t = (item.textContent || '').toLowerCase().trim();
                                     
                                     // เช็คว่ามองเห็นไหม
                                     if(item.offsetParent === null) continue;
+                                    
+                                    // ⚠️ ข้าม option ที่มี "upgrade" (ต้องเสียเงิน)
+                                    if(t.includes('upgrade')) continue;
 
-                                    // ✅ ลำดับการเลือก: 4K > 2K > 1K > original (ชอบขนาดใหญ่สุด)
-                                    if(t.includes('4k')) {
+                                    // ✅ ลองหา 2K ก่อน (ถ้าไม่มี upgrade)
+                                    if(t.includes('2k')) {
                                         targetMenu = item;
+                                        console.log("เจอตัวเลือก 2K:", t);
                                         break; 
                                     }
-                                    if(t.includes('2k') && !targetMenu) {
+                                    // ❌ ถ้าไม่เจอ 2K ก็เอา 1K หรือ original
+                                    if(t.includes('1k') || t.includes('original')) {
                                         targetMenu = item;
-                                    }
-                                    if((t.includes('1k') || t.includes('original')) && !targetMenu) {
-                                        targetMenu = item;
+                                        console.log("เจอตัวเลือก 1K/Original:", t);
+                                        // ไม่ break เพื่อให้วนหา 2K ต่อ
                                     }
                                 }
                                 
@@ -6078,12 +6113,14 @@ async function sacredImgRunAutomation() {
                                         for (const item of menuItems) {
                                             const t = (item.textContent || '').toLowerCase().trim();
                                             if (item.offsetParent === null) continue;
+                                            // ⚠️ ข้าม option ที่มี "upgrade" (ต้องเสียเงิน)
+                                            if (t.includes('upgrade')) continue;
                                             // ลำดับการเลือก: 4K > 2K > 1K > original
-                                            if (t.includes('4k')) {
+                                            if (t.includes('4k') && !t.includes('upgrade')) {
                                                 targetMenu = item;
                                                 break;
                                             }
-                                            if (t.includes('2k') && !targetMenu) {
+                                            if (t.includes('2k') && !t.includes('upgrade') && !targetMenu) {
                                                 targetMenu = item;
                                             }
                                             if ((t.includes('1k') || t.includes('original')) && !targetMenu) {
@@ -6527,18 +6564,21 @@ async function sacredImgDownloadImage(index) {
                 await sleep(1500);
                 
                 // หาเมนู resolution - ลำดับการเลือก: 4K > 2K > 1K > original
-                const menus = document.querySelectorAll('[role="menuitem"]');
+                const menus = document.querySelectorAll('[role="menuitem"], [role="option"]');
                 let targetMenu = null;
                 
                 for(const item of menus) {
                     if(item.offsetParent === null) continue;
                     const t = (item.textContent || '').toLowerCase();
                     
-                    if(t.includes('4k')) {
+                    // ⚠️ ข้าม option ที่มี "upgrade" (ต้องเสียเงิน)
+                    if(t.includes('upgrade')) continue;
+                    
+                    if(t.includes('4k') && !t.includes('upgrade')) {
                         targetMenu = item;
                         break;
                     }
-                    if(t.includes('2k') && !targetMenu) {
+                    if(t.includes('2k') && !t.includes('upgrade') && !targetMenu) {
                         targetMenu = item;
                     }
                     if((t.includes('1k') || t.includes('original')) && !targetMenu) {
