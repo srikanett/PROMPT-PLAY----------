@@ -289,6 +289,40 @@
         </select>
       </div>
 
+      <!-- NEW: เอฟเฟกต์ภาพ (Image Effect) -->
+      <div class="input-group" id="banana-image-effect-container">
+        <div class="input-row"><label>🎨 เอฟเฟกต์ภาพ (Image Effect)</label></div>
+        <select id="banana-image-effect">
+          <option value="none">❌ ไม่ใส่เอฟเฟกต์</option>
+          <option value="auto">🎲 สุ่มอัตโนมัติ (AI เลือกให้)</option>
+          <!-- แสงและเงา -->
+          <option value="golden_hour">🌅 Golden Hour (แสงทอง)</option>
+          <option value="soft_light">☀️ Soft Light (แสงนวล)</option>
+          <option value="dramatic_light">🌓 Dramatic Light (แสงดราม่า)</option>
+          <option value="rim_light">💫 Rim Light (แสงขอบ)</option>
+          <option value="studio_lighting">📸 Studio Lighting (แสงสตูดิโอ)</option>
+          <!-- บรรยากาศและอารมณ์ -->
+          <option value="dreamy_blur">🌸 Dreamy Blur (ฝันหวาน)</option>
+          <option value="cinematic">🎬 Cinematic (หนัง)</option>
+          <option value="bokeh">✨ Bokeh (หลังเบลอ)</option>
+          <option value="luxury_premium">💎 Luxury Premium (หรูหรา)</option>
+          <option value="minimal_clean">⬜ Minimal Clean (มินิมอล)</option>
+          <!-- สีสัน -->
+          <option value="warm_tone">🔥 Warm Tone (โทนอบอุ่น)</option>
+          <option value="cool_tone">❄️ Cool Tone (โทนเย็น)</option>
+          <option value="vibrant_pop">🌈 Vibrant Pop (สีสดจัด)</option>
+          <option value="pastel_soft">🎀 Pastel Soft (พาสเทลอ่อน)</option>
+          <option value="moody_dark">🖤 Moody Dark (มืดมู้ดดี้)</option>
+          <!-- พิเศษ -->
+          <option value="sparkle_glitter">✨ Sparkle Glitter (ประกายวิบวับ)</option>
+          <option value="smoke_fog">🌫️ Smoke & Fog (ควันหมอก)</option>
+          <option value="water_splash">💧 Water Splash (น้ำกระเซ็น)</option>
+          <option value="confetti">🎊 Confetti (กระดาษสี)</option>
+          <option value="floating_elements">🍃 Floating Elements (ลอยละล่อง)</option>
+        </select>
+      </div>
+
+
       <div id="manual-config-container">
 
            <div class="input-group">
@@ -372,6 +406,11 @@
                           <div class="char-card config-option" data-type="bg" data-value="luxury_hotel" data-label="🏨 โรงแรมหรู"><span class="char-icon">🏨</span> โรงแรมหรู</div>
 						  <div class="char-card config-option" data-type="bg" data-value="meeting_room" data-label="💼 ห้องประชุม"><span class="char-icon">💼</span> ห้องประชุม</div>
 						  <div class="char-card config-option" data-type="bg" data-value="home_office" data-label="🖥️ ห้องทำงาน"><span class="char-icon">🖥️</span> โต๊ะคอม/ทำงาน</div>
+					  <div class="char-card config-option" data-type="bg" data-value="buddha_room" data-label="🙏 ห้องพระ"><span class="char-icon">🙏</span> ห้องพระ</div>
+					  <div class="char-card config-option" data-type="bg" data-value="buddha_altar" data-label="🪷 หิ้งพระ"><span class="char-icon">🪷</span> หิ้งพระ</div>
+					  <div class="char-card config-option" data-type="bg" data-value="temple" data-label="🛕 วัด"><span class="char-icon">🛕</span> วัด</div>
+					  <div class="char-card config-option" data-type="bg" data-value="shrine" data-label="⛩️ เทวสถาน"><span class="char-icon">⛩️</span> เทวสถาน</div>
+					  <div class="char-card config-option" data-type="bg" data-value="heaven" data-label="✨ สวรรค์"><span class="char-icon">✨</span> สวรรค์</div>
                       </div>
                     <div id="bg-group-urban" class="char-grid" style="display:none; grid-template-columns:1fr 1fr;">
 						<div class="char-card config-option" data-type="bg" data-value="cafe" data-label="☕ คาเฟ่"><span class="char-icon">☕</span> คาเฟ่</div>
@@ -891,6 +930,68 @@
         <div class="input-group">
           <div class="input-row"><label>📝 ข้อความโฆษณา (Caption)</label></div>
           <textarea id="sacred-commercial-caption" placeholder="เช่น: เมตตาประทานความสำเร็จ..." style="height:60px; padding:10px; border-radius:8px; border:1px solid #3f3f46; background:#27272a; color:#fff;"></textarea>
+        </div>
+        
+        <!-- สไตล์ภาพ (Style) - เหมือน Image Module -->
+        <div class="input-group">
+          <div class="input-row"><label>🎨 สไตล์ภาพ (Style)</label></div>
+          <input type="hidden" id="sacred-commercial-style-select" value="auto">
+          <div class="char-tab-container" id="sacred-commercial-style-tabs" style="margin-top:5px;">
+            <div class="char-tabs">
+              <button class="char-tab-btn active config-tab-btn" data-type="sacred-style" data-group="auto">✨ สุ่ม</button>
+              <button class="char-tab-btn config-tab-btn" data-type="sacred-style" data-group="studio">📸 สตูดิโอ</button>
+              <button class="char-tab-btn config-tab-btn" data-type="sacred-style" data-group="sacred">🙏 ศักดิ์สิทธิ์</button>
+            </div>
+            <div class="char-content-area">
+              <div id="sacred-style-group-auto" class="char-group" style="display:block;">
+                <div class="char-card active config-option" data-type="sacred-style" data-value="auto" data-label="🎲 สุ่มสไตล์"><span class="char-icon">🎲</span> สุ่มสไตล์อัตโนมัติ</div>
+              </div>
+              <div id="sacred-style-group-studio" class="char-grid" style="display:none; grid-template-columns:1fr 1fr;">
+                <div class="char-card config-option" data-type="sacred-style" data-value="studio_white" data-label="⬜ สตูดิโอขาว"><span class="char-icon">⬜</span> สตูดิโอขาว</div>
+                <div class="char-card config-option" data-type="sacred-style" data-value="studio_dark" data-label="⬛ สตูดิโอดำ"><span class="char-icon">⬛</span> สตูดิโอดำ</div>
+                <div class="char-card config-option" data-type="sacred-style" data-value="studio_gradient" data-label="🎨 ไล่สี"><span class="char-icon">🎨</span> สตูดิโอไล่สี</div>
+                <div class="char-card config-option" data-type="sacred-style" data-value="product_hero" data-label="🌟 Hero Shot"><span class="char-icon">🌟</span> Hero Shot</div>
+              </div>
+              <div id="sacred-style-group-sacred" class="char-grid" style="display:none; grid-template-columns:1fr 1fr;">
+                <div class="char-card config-option" data-type="sacred-style" data-value="divine_glow" data-label="✨ แสงศักดิ์สิทธิ์"><span class="char-icon">✨</span> แสงศักดิ์สิทธิ์</div>
+                <div class="char-card config-option" data-type="sacred-style" data-value="temple_mood" data-label="🛕 บรรยากาศวัด"><span class="char-icon">🛕</span> บรรยากาศวัด</div>
+                <div class="char-card config-option" data-type="sacred-style" data-value="golden_aura" data-label="🌟 รัศมีทอง"><span class="char-icon">🌟</span> รัศมีทอง</div>
+                <div class="char-card config-option" data-type="sacred-style" data-value="mystical_fog" data-label="💨 หมอกลึกลับ"><span class="char-icon">💨</span> หมอกลึกลับ</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ฉากหลัง (Background) - เหมือน Image Module -->
+        <div class="input-group">
+          <div class="input-row"><label>🖼️ ฉากหลัง (Background)</label></div>
+          <input type="hidden" id="sacred-commercial-bg-select" value="auto">
+          <div class="char-tab-container" id="sacred-commercial-bg-tabs" style="margin-top:5px;">
+            <div class="char-tabs">
+              <button class="char-tab-btn active config-tab-btn" data-type="sacred-bg" data-group="auto">🎲 สุ่ม</button>
+              <button class="char-tab-btn config-tab-btn" data-type="sacred-bg" data-group="sacred">🙏 ศักดิ์สิทธิ์</button>
+              <button class="char-tab-btn config-tab-btn" data-type="sacred-bg" data-group="studio">📸 สตูดิโอ</button>
+            </div>
+            <div class="char-content-area">
+              <div id="sacred-bg-group-auto" class="char-group" style="display:block;">
+                <div class="char-card active config-option" data-type="sacred-bg" data-value="auto" data-label="🎲 สุ่มฉากหลัง"><span class="char-icon">🎲</span> สุ่มฉากหลังอัตโนมัติ</div>
+              </div>
+              <div id="sacred-bg-group-sacred" class="char-grid" style="display:none; grid-template-columns:1fr 1fr;">
+                <div class="char-card config-option" data-type="sacred-bg" data-value="buddha_room" data-label="🙏 ห้องพระ"><span class="char-icon">🙏</span> ห้องพระ</div>
+                <div class="char-card config-option" data-type="sacred-bg" data-value="buddha_altar" data-label="🪷 หิ้งพระ"><span class="char-icon">🪷</span> หิ้งพระ</div>
+                <div class="char-card config-option" data-type="sacred-bg" data-value="temple" data-label="🛕 วัด"><span class="char-icon">🛕</span> วัด</div>
+                <div class="char-card config-option" data-type="sacred-bg" data-value="shrine" data-label="⛩️ เทวสถาน"><span class="char-icon">⛩️</span> เทวสถาน</div>
+                <div class="char-card config-option" data-type="sacred-bg" data-value="heaven" data-label="✨ สวรรค์"><span class="char-icon">✨</span> สวรรค์</div>
+                <div class="char-card config-option" data-type="sacred-bg" data-value="lotus_pond" data-label="🌸 สระบัว"><span class="char-icon">🌸</span> สระบัว</div>
+              </div>
+              <div id="sacred-bg-group-studio" class="char-grid" style="display:none; grid-template-columns:1fr 1fr;">
+                <div class="char-card config-option" data-type="sacred-bg" data-value="white_studio" data-label="⬜ พื้นขาว"><span class="char-icon">⬜</span> พื้นขาว</div>
+                <div class="char-card config-option" data-type="sacred-bg" data-value="black_studio" data-label="⬛ พื้นดำ"><span class="char-icon">⬛</span> พื้นดำ</div>
+                <div class="char-card config-option" data-type="sacred-bg" data-value="gold_gradient" data-label="✨ ไล่สีทอง"><span class="char-icon">✨</span> ไล่สีทอง</div>
+                <div class="char-card config-option" data-type="sacred-bg" data-value="velvet_red" data-label="🔴 กำมะหยี่แดง"><span class="char-icon">🔴</span> กำมะหยี่แดง</div>
+              </div>
+            </div>
+          </div>
         </div>
         
         <div class="input-group">

@@ -3634,11 +3634,17 @@ OUTPUT Requirement:
     }
 
     if (isSmartAuto) {
+        // Read Image Effect even in Smart Auto
+        const imageEffect = document.getElementById('banana-image-effect')?.value || 'none';
+        const imageEffectHint = imageEffect !== 'none' && imageEffect !== 'auto'
+            ? `\nUser wants this specific effect: ${imageEffect}` 
+            : '';
+            
         userMessage = `Role: Professional Advertising Creative Director.
 Task: Create a high-converting commercial image prompt based on the uploaded reference.
 ${productDesc}
 ${textInstruction}
-${characterInstruction}
+${characterInstruction}${imageEffectHint}
 
 Auto-Analysis:
 - Analyze the product's vibe (Luxury, Fun, Minimal, Eco, etc.) and choose a matching Background and Lighting.
@@ -3649,11 +3655,17 @@ Auto-Analysis:
       const selectedStyle = bananaStyleSelect?.value || 'studio';
       const selectedBg = bananaBgSelect?.value || 'white';
       
+      // NEW: Read Image Effect
+      const imageEffect = document.getElementById('banana-image-effect')?.value || 'none';
+      const imageEffectInstruction = imageEffect !== 'none' 
+        ? `\n🎨 Image Effect: ${imageEffect}` 
+        : '';
+      
       userMessage = `Role: Advertising Image Generator.
 Task: Create an image based on these constraints.
 ${productDesc}
 Style: ${selectedStyle}
-Background: ${selectedBg}
+Background: ${selectedBg}${imageEffectInstruction}
 ${textInstruction}
 ${characterInstruction}`;
     }
@@ -5759,6 +5771,10 @@ async function sacredImgGeneratePrompt(imageDataUrl) {
         const priceTagColor = document.getElementById('sacred-price-tag-color')?.value || 'gold_shine';
         const captionPosition = document.getElementById('sacred-caption-position')?.value || 'under_price';
         
+        // NEW: Read Style and Background selections
+        const selectedStyle = document.getElementById('sacred-commercial-style-select')?.value || 'auto';
+        const selectedBg = document.getElementById('sacred-commercial-bg-select')?.value || 'auto';
+        
         const styleData = window.getPriceTagStyle ? window.getPriceTagStyle(priceTagStyle) : {};
         const colorData = window.getPriceTagColor ? window.getPriceTagColor(priceTagColor) : {};
         // Use global CAPTION_POSITIONS if available, else fallback
@@ -5808,7 +5824,9 @@ async function sacredImgGeneratePrompt(imageDataUrl) {
 - ราคา: "${priceText}"
 ${captionInstruction}
 
-🎨 สไตล์:
+🎨 สไตล์และฉากหลัง:
+- สไตล์ภาพ: ${selectedStyle}
+- ฉากหลัง: ${selectedBg}
 - รูปแบบป้ายราคา: ${styleData?.prompt || 'circular golden price tag'}
 - โทนสีป้าย: ${colorData?.prompt || 'shiny gold color'}
 - เอฟเฟกต์: ${commercialEffect}
@@ -6053,16 +6071,23 @@ async function sacredImgRunAutomation() {
                                     heavyClick(downloadTrigger);
                                     await sleep(800);
                                     
-                                    // หาเมนู 1K
+                                    // หาเมนู resolution - ลำดับ: 4K > 2K > 1K > original
                                     let targetMenu = null;
                                     for (let w = 0; w < 10; w++) {
                                         const menuItems = document.querySelectorAll('[role="menuitem"], [role="option"]');
                                         for (const item of menuItems) {
                                             const t = (item.textContent || '').toLowerCase().trim();
                                             if (item.offsetParent === null) continue;
-                                            if (t.includes('1k') || t.includes('original')) {
+                                            // ลำดับการเลือก: 4K > 2K > 1K > original
+                                            if (t.includes('4k')) {
                                                 targetMenu = item;
                                                 break;
+                                            }
+                                            if (t.includes('2k') && !targetMenu) {
+                                                targetMenu = item;
+                                            }
+                                            if ((t.includes('1k') || t.includes('original')) && !targetMenu) {
+                                                targetMenu = item;
                                             }
                                         }
                                         if (targetMenu) break;
@@ -6599,6 +6624,55 @@ function sacredImgSetupEventListeners() {
             }
         });
     }
+    
+    // Sacred Commercial Style/Background Tab Switching
+    const setupSacredCommercialTabs = () => {
+        // Style tabs
+        document.querySelectorAll('#sacred-commercial-style-tabs .char-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const group = btn.dataset.group;
+                document.querySelectorAll('#sacred-commercial-style-tabs .char-tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                document.querySelectorAll('#sacred-commercial-style-tabs [id^="sacred-style-group-"]').forEach(g => g.style.display = 'none');
+                const target = document.getElementById(`sacred-style-group-${group}`);
+                if (target) target.style.display = group === 'auto' ? 'block' : 'grid';
+            });
+        });
+        
+        // Style option cards
+        document.querySelectorAll('#sacred-commercial-style-tabs .config-option[data-type="sacred-style"]').forEach(card => {
+            card.addEventListener('click', () => {
+                document.querySelectorAll('#sacred-commercial-style-tabs .config-option[data-type="sacred-style"]').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                const input = document.getElementById('sacred-commercial-style-select');
+                if (input) input.value = card.dataset.value;
+            });
+        });
+        
+        // Background tabs
+        document.querySelectorAll('#sacred-commercial-bg-tabs .char-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const group = btn.dataset.group;
+                document.querySelectorAll('#sacred-commercial-bg-tabs .char-tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                document.querySelectorAll('#sacred-commercial-bg-tabs [id^="sacred-bg-group-"]').forEach(g => g.style.display = 'none');
+                const target = document.getElementById(`sacred-bg-group-${group}`);
+                if (target) target.style.display = group === 'auto' ? 'block' : 'grid';
+            });
+        });
+        
+        // Background option cards
+        document.querySelectorAll('#sacred-commercial-bg-tabs .config-option[data-type="sacred-bg"]').forEach(card => {
+            card.addEventListener('click', () => {
+                document.querySelectorAll('#sacred-commercial-bg-tabs .config-option[data-type="sacred-bg"]').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                const input = document.getElementById('sacred-commercial-bg-select');
+                if (input) input.value = card.dataset.value;
+            });
+        });
+    };
+    
+    setupSacredCommercialTabs();
 }
 
 // ============================================
