@@ -5692,6 +5692,7 @@ async function sacredImgGeneratePrompt(imageDataUrl) {
         const priceFull = document.getElementById('sacred-price-full')?.value || '';
         const pricePromo = document.getElementById('sacred-price-promo')?.value || '';
         const commercialEffect = document.getElementById('sacred-commercial-effect')?.value || 'divine_glow';
+        const noText = document.getElementById('sacred-commercial-no-text')?.checked || false;
         const frameOnly = document.getElementById('sacred-frame-only')?.checked || false;
         
         const priceTagStyle = document.getElementById('sacred-price-tag-style')?.value || 'circle_gold';
@@ -5705,12 +5706,19 @@ async function sacredImgGeneratePrompt(imageDataUrl) {
                         ? window.CAPTION_POSITIONS[captionPosition] 
                         : { name: captionPosition, prompt: 'placed below price tag' };
         
-        if (frameOnly) {
+        if (noText) {
+             // No text mode - effects only, no text or price tags
+             userMessage = `สร้าง prompt ภาพวัตถุมงคลจากภาพนี้
+เอฟเฟกต์: ${commercialEffect}
+⚠️ สำคัญ: ไม่ต้องใส่ข้อความใด ๆ ลงบนภาพ เน้นเฉพาะเอฟเฟกต์และบรรยากาศศักดิ์สิทธิ์
+- ห้ามใส่ text, ข้อความ, ราคา, ป้าย, watermark ใดๆ ทั้งสิ้น
+- เน้นแสง ออร่า และเอฟเฟกต์ศักดิ์สิทธิ์เท่านั้น`;
+        } else if (frameOnly) {
              userMessage = `สร้าง prompt ภาพโฆษณาวัตถุมงคลจากภาพนี้
 สินค้า: "${productName || 'วัตถุมงคล'}"
 คำสั่งสำคัญ: สร้างเฉพาะกรอบป้ายราคาที่สวยงามและว่างเปล่า (Empty Price Tag Frame) ตามสไตล์ที่เลือก
-รูปแบบป้าย: ${styleData.prompt || 'circular golden price tag'}
-โทนสีป้าย: ${colorData.prompt || 'shiny gold color'}
+รูปแบบป้าย: ${styleData?.prompt || 'circular golden price tag'}
+โทนสีป้าย: ${colorData?.prompt || 'shiny gold color'}
 เอฟเฟกต์: ${commercialEffect}
 ตำแหน่งป้าย: จัดวางอย่างสวยงาม
 ⚠️ ข้อความ: ห้ามใส่ข้อความใดๆ ลงในป้าย (Empty Frame)`;
@@ -5727,18 +5735,29 @@ async function sacredImgGeneratePrompt(imageDataUrl) {
              const priceText = pricePromo 
                  ? `บูชา ${pricePromo} บาท จาก ${priceFull} บาท` 
                  : `บูชา ${priceFull || '999'} บาท`;
+             
+             // Build caption instruction only if user provided it
+             const captionInstruction = caption 
+                 ? `- ข้อความโฆษณา: "${caption}"` 
+                 : `- ข้อความโฆษณา: ไม่ต้องใส่ (ผู้ใช้ไม่ได้ระบุ)`;
                  
              userMessage = `สร้าง prompt ภาพโฆษณาวัตถุมงคลจากภาพนี้
-สินค้า: "${productName || 'วัตถุมงคล'}"
-ข้อความในป้ายราคา: "${productName} ${priceText}"
-ข้อความโฆษณา (Caption): "${caption}" (ตำแหน่ง: ${posData.name} - ${posData.prompt})
-รูปแบบป้ายราคา: ${styleData.prompt || 'circular golden price tag'}
-โทนสีป้าย: ${colorData.prompt || 'shiny gold color'}
-เอฟเฟกต์: ${commercialEffect}
-⚠️ กฎเหล็ก:
-1. ข้อความในป้ายราคาต้องมีแค่ "${productName}" และ "${priceText}"
-2. ข้อความโฆษณา "${caption}" ต้องอยู่นอกป้ายราคา (${posData.name})
-3. พื้นหลังข้อความโฆษณาต้องเป็น Gradient สวยงาม`;
+
+📌 ข้อมูลที่ต้องใส่ในภาพ (ภาษาไทยเท่านั้น!):
+- ชื่อสินค้า: "${productName || 'วัตถุมงคล'}"
+- ราคา: "${priceText}"
+${captionInstruction}
+
+🎨 สไตล์:
+- รูปแบบป้ายราคา: ${styleData?.prompt || 'circular golden price tag'}
+- โทนสีป้าย: ${colorData?.prompt || 'shiny gold color'}
+- เอฟเฟกต์: ${commercialEffect}
+
+⚠️⚠️⚠️ กฎเหล็กสำคัญที่สุด:
+1. ข้อความทุกตัวในภาพต้องเป็นภาษาไทย 100% ห้ามมีภาษาอังกฤษ!
+2. ใน Prompt ให้ระบุข้อความไทยตรงๆ เช่น: Thai text: "${productName}" และ Thai text: "${priceText}"
+3. ห้ามแปลชื่อสินค้าหรือราคาเป็นภาษาอังกฤษเด็ดขาด!
+4. ${caption ? `ข้อความโฆษณา "${caption}" ต้องอยู่นอกป้ายราคา` : 'ไม่ต้องใส่ข้อความโฆษณาใดๆ เพราะผู้ใช้ไม่ได้ระบุ ห้ามคิดเองเด็ดขาด!'}`;
         }
     }
     
