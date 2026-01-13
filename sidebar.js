@@ -3575,9 +3575,14 @@ OUTPUT Requirement:
 - Display Price: "${priceText}"
 - Display Details: "${detailText}"
 - Tag Style: ${priceStyleData.prompt}
-- Ensure the text is clearly visible, stylish, and suitable for commercial advertisement.
-- Use appropriate currency symbol.
-- Integrated naturally but prominently.`;
+
+⚠️ TEXT PLACEMENT RULES (CRITICAL):
+- Text must appear ONLY ONCE - do NOT duplicate or repeat text
+- Text must be placed at TOP or BOTTOM edge of image, NOT in center
+- Text must NOT cover or block the PRODUCT - product must be fully visible
+- Text should be in a corner (top-left, top-right, bottom-left, bottom-right) or along edge
+- Product and model must remain the focus - text is supplementary
+- Negative Prompt: duplicate text, repeated text, text covering product`;
             }
         }
     }
@@ -3617,11 +3622,26 @@ OUTPUT Requirement:
         // Note: In automation, we might upload a specific model file. Here we just instruct the prompt.
         
         characterInstruction = `
-\n👤 MODEL & FACE LOCK INSTRUCTION:
-- If a person/model is visible in the reference image, YOU MUST KEEP THEIR FACE EXACTLY AS IS.
-- FACE LOCK: 100%. Identity preservation is CRITICAL.
-- Do not alter facial features.
-- If generating a new character, ensure they are photorealistic and high quality.
+👤 MODEL & FACE LOCK INSTRUCTION (CRITICAL):
+
+🔒 FACE LOCK - 100% PRESERVATION:
+- If a person/model is visible in the reference image, PRESERVE THEIR FACE EXACTLY AS IS.
+- FACE LOCK is SACRED. Identity preservation is the TOP PRIORITY.
+- Same facial features, same skin tone, same expression, same age.
+- Do NOT alter, beautify, or modify the face in any way.
+
+⚠️ IGNORE TEXT IN MODEL IMAGE:
+- If you see ANY text, watermarks, logos, or overlays in the model/reference image:
+  → COMPLETELY IGNORE THEM
+  → DO NOT include that text in the generated image
+  → DO NOT analyze or reference that text
+- Focus ONLY on the person's FACE and BODY
+- The model image is for FACE REFERENCE ONLY
+
+📷 CHARACTER OUTPUT:
+- The generated character must match the reference face 100%
+- Apply the user's selected Style, Background, and Effect settings to the scene
+- The model wears the selected outfit and is placed in the selected background
 `;
     }
     
@@ -3661,43 +3681,72 @@ Auto-Analysis:
         ? `\n🎨 Image Effect: ${imageEffect}` 
         : '';
       
-      // 🔥 SPECIAL CASE: noText + noCharacter = Product-Only Pure Visual Shot
+      // 🎯 STYLE MAPPING - Convert style numbers to AI-readable descriptions
+      const styleDescriptions = {
+        'auto': 'Auto (AI chooses best style for product)',
+        '1': 'ของลอย (Product floating magically with particles/effects)',
+        '2': 'ใช้งานจริง (Product in real-life usage context)',
+        '3': 'โปรโมท (High-impact promotional hero shot)',
+        '4': 'หัวโต (Fun caricature/cartoon style)',
+        '5': 'ถือสินค้า (HAND HOLDING PRODUCT - Show realistic hand(s) holding the product, close-up, no face)',
+        '6': 'ไลฟ์สด (Live streaming style)',
+        '7': 'CGI ยักษ์ (Giant oversized CGI product in scene)',
+        '8': 'นายแบบ (Model showcasing product, hands/partial body OK, no face)',
+        '9': 'อินฟลูฯ (Influencer style, hands OK, no face)',
+        '10': 'เนื้อสัมผัส (Extreme close-up texture/detail shot)',
+        '11': 'แกะกล่อง (Unboxing reveal style)',
+        '12': 'หน้ากระจก (Mirror selfie style, hands OK, no face)',
+        '13': 'แฟชั่น (Fashion OOTD style, partial body OK, no face)',
+        '14': 'บิวตี้ (Beauty swatch/application, hands/skin OK, no face)',
+        '15': 'รองเท้า (On-feet shoe shot, feet/legs OK)',
+        '16': 'ของใหญ่ (Large furniture/home item in room)',
+        '17': 'เครื่องมือ (Tools in action/usage, hands OK)',
+      };
+      const styleDescription = styleDescriptions[selectedStyle] || styleDescriptions['auto'];
+      
+      // 🔥 SPECIAL CASE: noText + noCharacter = Product-Only Shot
       if (noText && noCharacter) {
-        userMessage = `🎯 TASK: Create a PURE PRODUCT PHOTOGRAPHY prompt
+        // Check if style allows hands
+        const handsAllowedStyles = ['5', '8', '9', '12', '13', '14', '15', '17'];
+        const isHandsAllowed = handsAllowedStyles.includes(selectedStyle);
+        
+        userMessage = `Role: Advertising Image Generator.
+Task: Create a commercial product image.
 
-📦 PRODUCT:
-${productDesc}
+🔒 PRODUCT LOCK (CRITICAL):
+- The product in the reference image MUST remain EXACTLY as it is - same shape, color, texture, design
+- DO NOT change, deform, or modify the product in any way
+- The product is SACRED - preserve it 100%
 
-🎨 VISUAL SETTINGS (MUST APPLY ALL):
-- Photography Style: ${selectedStyle}
-- Background/Scene: ${selectedBg}
-- Image Effect: ${imageEffect !== 'none' ? imageEffect : 'professional product photography'}
-- Presentation: ${presentationData.prompt || 'product showcase'}
+📸 STYLE: ${styleDescription}
+🖼️ BACKGROUND: ${selectedBg}${imageEffectInstruction}
 
-⚠️⚠️⚠️ CRITICAL RULES ⚠️⚠️⚠️:
-1. NO TEXT - No letters, words, typography, watermarks, logos, price tags, labels, captions, or any written content
-2. NO PEOPLE - No humans, models, hands, body parts, or any human elements
-3. PRODUCT HERO - The product must be the sole focus, beautifully presented
-4. APPLY ALL VISUAL SETTINGS - Must use the specified style, background, and effects
-
-📸 OUTPUT REQUIREMENTS:
-- Create a high-end commercial product photography prompt
-- Apply the "${selectedBg}" background/scene setting
-- Apply the "${selectedStyle}" photography style
-- ${imageEffect !== 'none' && imageEffect !== 'auto' ? `Apply "${imageEffect}" visual effect` : 'Use cinematic lighting and professional composition'}
-- 8K resolution, professional studio quality
-- Clean, modern, premium aesthetic
-- Perfect for e-commerce and advertising use
-
-NEGATIVE PROMPT MUST INCLUDE: text, typography, letters, words, watermark, logo, price tag, label, human, person, hand, fingers, body parts`;
+⚠️ RULES:
+- NO TEXT (no letters, watermarks, logos, price tags)
+- ${isHandsAllowed ? 'HANDS REQUIRED for this style (show realistic hands holding/using product, but NO face/full body)' : 'NO PEOPLE (no hands, no body parts, product only)'}
+- Apply the "${selectedBg}" background/setting
+- The image MUST follow the STYLE instruction above`;
       } else {
         // Normal case with text and/or character
+        // Check if NO TEXT mode is enabled
+        const noTextRule = noText ? `
+⛔⛔⛔ CRITICAL: ABSOLUTELY NO TEXT IN IMAGE ⛔⛔⛔
+- This image MUST contain ZERO text, letters, words, or typography
+- NO watermark, NO logo, NO price tag, NO label, NO caption
+- Create a PURE VISUAL image with only product + model
+- NEGATIVE PROMPT MUST INCLUDE: text, letters, words, watermark, logo, typography, price tag, caption, label
+
+` : '';
+
         userMessage = `Role: Advertising Image Generator.
 Task: Create an image based on these constraints.
+${noTextRule}
+🔒 PRODUCT LOCK: Keep the product exactly as shown in reference - same shape, color, design.
+
 ${productDesc}
-Style: ${selectedStyle}
+Style: ${styleDescription}
 Background: ${selectedBg}${imageEffectInstruction}
-${textInstruction}
+${noText ? '' : textInstruction}
 ${characterInstruction}`;
       }
     }
@@ -4150,6 +4199,13 @@ Negative Prompt: "person, human, model, woman, man, hands, fingers, face, body, 
 				  'classroom': "inside a modern bright classroom with desks, chairs and whiteboard, educational atmosphere, soft daylight",
 				  'meeting_room': "modern professional meeting room conference table, glass walls, business atmosphere, blurred office background",
                   'home_office': "cozy home office setup, wooden desk with computer monitor and gadgets, warm lighting, productive workspace vibe",
+                  
+                  // --- 🙏 ศักดิ์สิทธิ์ (Sacred/Spiritual) ---
+                  'buddha_room': "traditional Thai Buddha room in a house, golden Buddha statues, incense smoke, warm lighting, spiritual atmosphere, sacred home shrine",
+                  'buddha_altar': "ornate Thai Buddha altar shelf (hing phra), golden Buddha images, flowers and candles, incense sticks, sacred home worship space",
+                  'temple': "majestic Thai Buddhist temple interior (Wat), golden Buddha statues, ornate decorations, monks, sacred religious atmosphere",
+                  'shrine': "beautiful Thai Hindu shrine or spirit house, colorful decorations, sacred offerings, incense smoke, spiritual atmosphere",
+                  'heaven': "ethereal heavenly clouds, golden divine light rays, celestial paradise, magical floating clouds, god-like atmosphere, sacred and holy vibe",
 
                   // --- 🏙️ เมือง & ไลฟ์สไตล์ (Urban & Lifestyle) ---
                   'cafe': "trendy cafe with glass windows and city view, aesthetic coffee shop vibe",

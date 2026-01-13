@@ -431,10 +431,10 @@ const DEITY_MOODS = {
 };
 
 // ============================================
-// 4. PRICE TAG STYLES - รูปแบบป้ายราคา
+// 4. SACRED PRICE TAG STYLES - รูปแบบป้ายราคาสายมู
 // ============================================
 
-const PRICE_TAG_STYLES = {
+const SACRED_PRICE_TAG_STYLES = {
     'circle_gold': {
         name: '⭕ วงกลมทอง',
         prompt: 'circular golden price tag, ornate border, Thai numerals, elegant design, metallic shine'
@@ -910,8 +910,8 @@ function getAllDeityMoods() {
     }));
 }
 
-function getPriceTagStyle(styleId) {
-    return PRICE_TAG_STYLES[styleId] || PRICE_TAG_STYLES['circle_gold'];
+function getSacredPriceTagStyle(styleId) {
+    return SACRED_PRICE_TAG_STYLES[styleId] || SACRED_PRICE_TAG_STYLES['circle_gold'];
 }
 
 function getPriceTagColor(colorId) {
@@ -926,8 +926,8 @@ function getSpeechMode(modeId) {
     return SPEECH_MODES[modeId] || SPEECH_MODES['speaking'];
 }
 
-function getAllPriceTagStyles() {
-    return Object.entries(PRICE_TAG_STYLES).map(([id, data]) => ({
+function getAllSacredPriceTagStyles() {
+    return Object.entries(SACRED_PRICE_TAG_STYLES).map(([id, data]) => ({
         id,
         ...data
     }));
@@ -960,6 +960,7 @@ if (typeof window !== 'undefined') {
     window.SACRED_EFFECTS = SACRED_EFFECTS;
     window.DEITY_MOODS = DEITY_MOODS;
     window.PRICE_TAG_STYLES = PRICE_TAG_STYLES;
+    window.SACRED_PRICE_TAG_STYLES = SACRED_PRICE_TAG_STYLES;
     window.PRICE_TAG_COLORS = PRICE_TAG_COLORS;
     window.VOICE_TONES = VOICE_TONES;
     window.SPEECH_MODES = SPEECH_MODES;
@@ -977,19 +978,37 @@ if (typeof window !== 'undefined') {
 ภาพที่สร้างต้องดูเหมือนผ่านการ Retouch โดยมืออาชีพระดับโลก
 
 **กฎเหล็ก (CRITICAL RULES):**
-🚫 NO TEXT MODE: ถ้าผู้ใช้ระบุ "ไม่ใส่ข้อความ" = ภาพต้องสะอาด 100% ห้ามมีข้อความ ตัวอักษร ตัวเลข ราคา watermark logo ใดๆ
-🚫 NO CHARACTER MODE: ถ้าผู้ใช้ระบุ "ไม่ใช้ตัวละคร" = ห้ามมีคน มือ ใบหน้า ร่างกายมนุษย์ใดๆ สินค้าต้องเป็นพระเอกเพียงอย่างเดียว
-👤 FACE LOCK: ล็อกหน้านางแบบ 100% ตามภาพต้นฉบับ ห้ามเปลี่ยนอายุ หน้าตา ลักษณะเฉพาะ
+🔒 PRODUCT LOCK (สำคัญที่สุด!): 
+- สินค้าในภาพต้นฉบับ ห้ามเปลี่ยนแปลง! รักษารูปทรง สี ลายเดิมไว้ 100%
+- The product MUST remain EXACTLY as it is in the reference image
+- DO NOT modify, deform, or change the product's appearance
+
+⛔ NO TEXT MODE (เด็ดขาด!): 
+- ถ้าผู้ใช้ระบุ "ไม่ใส่ข้อความ" = ภาพต้องสะอาด 100% 
+- ห้ามมีตัวอักษร ตัวเลข คำใดๆ watermark logo ป้ายราคา label caption ใดๆ ทั้งสิ้น!
+- CRITICAL: When user says NO TEXT, you MUST generate output with NEGATIVE PROMPT that includes: text, letters, words, watermark, logo, typography, price tag
+- ถ้า AI ยังใส่ข้อความ = ล้มเหลว!
+
+🚫 NO CHARACTER MODE: 
+- ถ้าผู้ใช้เลือก "ไม่ใช้ตัวละคร" แต่เลือก Style ที่ต้องใช้มือ (เช่น "ถือสินค้า") = แสดงมือได้ แต่ห้ามมีหน้า
+- Style ที่อนุญาตมือ: ถือสินค้า(5), นายแบบ(8), อินฟลูฯ(9), หน้ากระจก(12), แฟชั่น(13), บิวตี้(14), รองเท้า(15), เครื่องมือ(17)
+- Style อื่นๆ = ห้ามมีคน มือ ร่างกายใดๆ
+
+👤 FACE LOCK (สำคัญมาก!): 
+- ล็อกใบหน้านางแบบ 100% ตามภาพต้นฉบับ ห้ามเปลี่ยนอายุ หน้าตา ลักษณะเฉพาะ
+- ถ้าภาพนางแบบมีข้อความ/watermark/logo → ละเว้นข้อความ โฟกัสเฉพาะใบหน้าเท่านั้น!
+- ห้ามนำข้อความจากภาพนางแบบมาใส่ในภาพที่สร้าง
+
 🇹🇭 THAI CHARACTER: ตัวละครต้องเป็นคนไทย/เอเชีย ผมสีดำ ตาสีเข้ม
 
-📷 **PRODUCT-ONLY PHOTOGRAPHY (สำคัญมาก!):**
-เมื่อได้รับคำสั่งให้สร้างภาพสินค้าอย่างเดียว คุณต้อง:
-1. วางสินค้าในฉากหลัง (Background) ที่ผู้ใช้เลือกอย่างสวยงาม
-2. ใช้สไตล์การถ่ายภาพ (Style) ตามที่ผู้ใช้ระบุ
-3. ใส่เอฟเฟกต์ภาพ (Image Effect) ตามที่ผู้ใช้ต้องการ
-4. สร้าง prompt ที่ทำให้ AI สร้างภาพสินค้าในบรรยากาศที่เลือกได้จริง ไม่ใช่แค่ตัดพื้นหลัง
+📍 TEXT PLACEMENT (สำคัญ!):
+- ข้อความต้องปรากฏ เพียงครั้งเดียว ห้ามซ้ำ!
+- ห้ามข้อความทับ/บังสินค้า - สินค้าต้องเห็นชัด 100%
+- วางข้อความที่ขอบภาพ (บน/ล่าง/มุม) ไม่ใช่กลางภาพ
+- Text appears ONCE only - NO duplicates
+- Text must NOT cover/block the product
 
-**OUTPUT:** ส่งออก prompt ภาพเดียว พร้อมใช้งานทันที ภาพต้องมีความสมบูรณ์ตาม Settings ที่ผู้ใช้เลือกทุกประการ`;
+**OUTPUT:** ส่งออก prompt ภาพเดียว ที่รักษาสินค้า+ใบหน้าต้นฉบับไว้ 100% พร้อมใส่ Style + Background + Effect ที่ผู้ใช้เลือก`;
     window.VIDEO_SYSTEM_PROMPT = `คุณคือ Thai Commercial Video Prompt Designer ระดับโลก
 ผู้เชี่ยวชาญสร้าง prompt วิดีโอโฆษณา TikTok/Reels คุณภาพสูง
 
@@ -1010,6 +1029,7 @@ if (typeof window !== 'undefined') {
     window.getSacredEffect = getSacredEffect;
     window.getDeityMood = getDeityMood;
     window.getPriceTagStyle = getPriceTagStyle;
+    window.getSacredPriceTagStyle = getSacredPriceTagStyle;
     window.getPriceTagColor = getPriceTagColor;
     window.getVoiceTone = getVoiceTone;
     window.getSpeechMode = getSpeechMode;
@@ -1020,6 +1040,7 @@ if (typeof window !== 'undefined') {
     window.getAllSacredEffects = getAllSacredEffects;
     window.getAllDeityMoods = getAllDeityMoods;
     window.getAllPriceTagStyles = getAllPriceTagStyles;
+    window.getAllSacredPriceTagStyles = getAllSacredPriceTagStyles;
     window.getAllPriceTagColors = getAllPriceTagColors;
     window.getAllVoiceTones = getAllVoiceTones;
     window.getAllSpeechModes = getAllSpeechModes;
